@@ -74,7 +74,7 @@ void VSSPlayer::loop(){
         }
     }
     else{
-        _mutexRole.lock();
+       _mutexRole.lock();
        if(_role != NULL){
            if(_role->isInitialized() == false){
                _role->initialize(_playerTeam, _playerTeam->opTeam(), _playerTeam->loc());
@@ -126,9 +126,9 @@ void VSSPlayer::idle(){
 }
 
 void VSSPlayer::setSpeed(double vx, double omega){
-    printf("%d x %d x %lf x %lf\n", int(teamId()), int(playerId()), vx, omega);
-    if(teamId() == 0)
+    if(_ctr != NULL){ // avoid to send packet for the other team
         _ctr->setSpeed((int)teamId(), (int)playerId(), vx, omega, 0.0);
+    }
 }
 
 double VSSPlayer::getRotateAngle(Position targetPosition){
