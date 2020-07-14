@@ -1,0 +1,329 @@
+/***
+ * Maracatronics Robotics
+ * Federal University of Pernambuco (UFPE) at Recife
+ * http://www.maracatronics.com/
+ *
+ * This file is part of Armorial project.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ***/
+
+#include "locations.h"
+#include <src/utils/utils.h>
+#include <src/entity/player/vssplayer.h>
+
+Locations::Locations(VSSTeam *team) {
+    _team = team;
+}
+
+WorldMap* Locations::wm() const {
+    return _team->wm();
+}
+
+FieldSide Locations::ourSide() const {
+    return _team->teamSide();
+}
+
+FieldSide Locations::theirSide() const {
+    return ourSide().isRight() ? Sides::LEFT : Sides::RIGHT;
+}
+
+Position Locations::ourFieldTopCorner() const {
+    return ourSide().isRight() ? wm()->fieldTopRightCorner() : wm()->fieldTopLeftCorner();
+}
+
+Position Locations::ourFieldBottomCorner() const {
+    return ourSide().isRight() ? wm()->fieldBottomRightCorner() : wm()->fieldBottomLeftCorner();
+}
+
+Position Locations::ourGoal() const {
+    return Position(true, (ourSide().isRight()?wm()->rightGoal():wm()->leftGoal()).leftPost().x(), 0.0, 0.0);
+}
+
+Position Locations::ourGoalRightPost() const {
+    return (ourSide().isRight()?wm()->rightGoal():wm()->leftGoal()).rightPost();
+}
+
+Position Locations::ourGoalRightMidPost() const {
+    return Position(true, ourGoalRightPost().x(), ourGoalRightPost().y()/2, 0.0);
+}
+
+Position Locations::ourGoalLeftPost() const {
+    return (ourSide().isRight()?wm()->rightGoal():wm()->leftGoal()).leftPost();
+}
+
+Position Locations::ourGoalLeftMidPost() const {
+    return Position(true, ourGoalLeftPost().x(), ourGoalLeftPost().y()/2, 0.0);
+}
+
+Position Locations::ourPenaltyMark() const {
+    return ourSide().isRight() ? wm()->rightPenaltyMark() : wm()->leftPenaltyMark();
+}
+
+Position Locations::theirFieldTopCorner() const {
+    return ourSide().isRight() ? wm()->fieldTopLeftCorner() : wm()->fieldTopRightCorner();
+}
+
+Position Locations::theirFieldBottomCorner() const {
+    return ourSide().isRight() ? wm()->fieldBottomLeftCorner() : wm()->fieldBottomLeftCorner();
+}
+
+Position Locations::theirGoal() const {
+    return Position(true, (ourSide().isRight()?wm()->leftGoal():wm()->rightGoal()).leftPost().x(), 0.0, 0.0);
+}
+
+Position Locations::theirGoalRightPost() const {
+    return (ourSide().isRight()?wm()->leftGoal():wm()->rightGoal()).rightPost();
+}
+
+Position Locations::theirGoalRightMidPost() const {
+    return Position(true, theirGoalRightPost().x(), theirGoalRightPost().y()/2, 0.0);
+}
+
+Position Locations::theirGoalLeftPost() const {
+    return (ourSide().isRight()?wm()->leftGoal():wm()->rightGoal()).leftPost();
+}
+
+Position Locations::theirGoalLeftMidPost() const {
+    return Position(true, theirGoalLeftPost().x(), theirGoalLeftPost().y()/2, 0.0);
+}
+
+Position Locations::theirPenaltyMark() const {
+    return ourSide().isRight() ? wm()->leftPenaltyMark() : wm()->leftPenaltyMark();
+}
+
+float Locations::fieldMinX() const {
+    return -fabs(ourFieldTopCorner().x());
+}
+
+float Locations::fieldMaxX() const {
+    return fabs(ourFieldTopCorner().x());
+}
+
+float Locations::fieldMinY() const {
+    return -fabs(ourFieldTopCorner().y());
+}
+
+float Locations::fieldMaxY() const {
+    return fabs(ourFieldTopCorner().y());
+}
+
+float Locations::fieldLength() const {
+    return 2*fieldMaxX();
+}
+
+float Locations::fieldWidth() const {
+    return 2*fieldMaxY();
+}
+
+float Locations::fieldCenterRadius() const {
+    return wm()->fieldCenterRadius();
+}
+
+float Locations::fieldDefenseRadius() const {
+    return fieldDefenseWidth();
+}
+
+float Locations::fieldDefenseStretch() const {
+    return fieldDefenseLength()-2*fieldDefenseRoundedRadius();
+}
+
+float Locations::fieldGoalDepth() const {
+    return wm()->rightGoal().getDepth();
+}
+
+float Locations::fieldDefenseLength() const {
+    return wm()->rightGoal().getAreaLength();
+}
+
+float Locations::fieldDefenseWidth() const {
+    return wm()->rightGoal().getAreaWidth();
+}
+
+float Locations::fieldDefenseRoundedRadius() const {
+    return wm()->rightGoal().getAreaRoundedRadius();
+}
+
+Position Locations::fieldCenter() const {
+    return wm()->fieldCenter();
+}
+
+Position Locations::fieldRightTopCorner() const {
+    return Position(true, this->fieldMaxX(), this->fieldMaxY(), 0.0);
+}
+
+Position Locations::fieldRightBottomCorner() const {
+    return Position(true, this->fieldMaxX(), this->fieldMinY(), 0.0);
+}
+
+Position Locations::fieldLeftTopCorner() const {
+    return Position(true, this->fieldMinX(), this->fieldMaxY(), 0.0);
+}
+
+Position Locations::fieldLeftBottomCorner() const {
+    return Position(true, this->fieldMinX(), this->fieldMinY(), 0.0);
+}
+
+Position Locations::ball() const {
+    return wm()->ballPosition(0);
+}
+
+Velocity Locations::ballVelocity() const {
+    return wm()->ballVelocity(0);
+}
+
+float Locations::distBallOurGoal() const {
+    return WR::Utils::distance(ourGoal(), ball());
+}
+
+float Locations::distBallOurRightPost() const {
+    return WR::Utils::distance(ourGoalRightPost(), ball());
+}
+
+float Locations::distBallOurRightMidPost() const {
+    return WR::Utils::distance(ourGoalRightMidPost(), ball());
+}
+
+float Locations::distBallOurLeftPost() const {
+    return WR::Utils::distance(ourGoalLeftPost(), ball());
+}
+
+float Locations::distBallOurLeftMidPost() const {
+    return WR::Utils::distance(ourGoalLeftMidPost(), ball());
+}
+
+float Locations::distBallTheirGoal() const {
+    return WR::Utils::distance(theirGoal(), ball());
+}
+
+float Locations::distBallTheirRightPost() const {
+    return WR::Utils::distance(theirGoalRightPost(), ball());
+}
+
+float Locations::distBallTheirRightMidPost() const {
+    return WR::Utils::distance(theirGoalRightMidPost(), ball());
+}
+
+float Locations::distBallTheirLeftPost() const {
+    return WR::Utils::distance(theirGoalLeftPost(), ball());
+}
+
+float Locations::distBallTheirLeftMidPost() const {
+    return WR::Utils::distance(theirGoalLeftMidPost(), ball());
+}
+
+bool Locations::isInsideOurField(const Position &pos) {
+    return ((ourSide().isRight() && pos.x()>=0) || (ourSide().isLeft() && pos.x()<=0));
+}
+
+bool Locations::isInsideTheirField(const Position &pos) {
+    return (isInsideOurField(pos)==false);
+}
+
+bool Locations::isInsideOurArea(const Position &pos, float factor) {
+    double y_offset = ourSide().isLeft() ? 0.5 : -0.5;
+    Position test(true, ourGoalLeftPost().x(), ourGoalLeftPost().y() - y_offset, 0.0);
+
+    double x_offset;
+    x_offset = ourSide().isLeft() ? 1.0 : -1.0;
+    Position ourGoalRightDeslocatedPost(true, ourGoalRightPost().x() + x_offset, ourGoalRightPost().y() + y_offset, 0.0);
+
+    return _isInsideArea(pos, factor, test, ourGoalRightDeslocatedPost);
+}
+
+bool Locations::isInsideTheirArea(const Position &pos, float factor) {
+    double y_offset = theirSide().isLeft() ? 0.5 : -0.5;
+    Position test(true, theirGoalLeftPost().x(), theirGoalLeftPost().y() - y_offset, 0.0);
+
+    double x_offset;
+    x_offset = theirSide().isLeft() ? 1.0 : -1.0;
+    Position theirGoalRightDeslocatedPost(true, theirGoalRightPost().x() + x_offset, theirGoalRightPost().y() + y_offset, 0.0);
+
+    return _isInsideArea(pos, factor, test, theirGoalRightDeslocatedPost);
+}
+
+bool Locations::isOutsideField(const Position &pos, float factor) {
+    return _isOutsideField(pos, factor*fieldMaxX(), factor*fieldMaxY());
+}
+
+bool Locations::isOutsideField(const Position &pos, const float dx, const float dy) {
+    return _isOutsideField(pos, fieldMaxX()+dx, fieldMaxY()+dy);
+}
+
+bool Locations::isInsideField(const Position &pos, float factor) {
+    return (!isOutsideField(pos, factor));
+}
+
+bool Locations::isInsideField(const Position &pos, float dx, float dy) {
+    return (!isOutsideField(pos, dx, dy));
+}
+
+bool Locations::_isInsideArea(const Position &pos, float factor, const Position &goalLeftPost, const Position &goalRightDeslocatedPost) {
+    // rectangle
+    return( (pos.x() <= std::max(goalLeftPost.x() * factor, goalRightDeslocatedPost.x() * factor)) && (pos.x() >= std::min(goalLeftPost.x() * factor, goalRightDeslocatedPost.x() * factor)) &&
+                (pos.y() <= std::max(goalLeftPost.y() * factor, goalRightDeslocatedPost.y() * factor)) && (pos.y() >= std::min(goalLeftPost.y() * factor, goalRightDeslocatedPost.y() * factor)) );
+
+    return false;
+}
+
+bool Locations::_isOutsideField(const Position &pos, const float maxX, const float maxY) {
+    if(fabs(pos.x()) > maxX)
+        return true;
+    if(fabs(pos.y()) > maxY)
+        return true;
+    return false;
+}
+
+// Check is a given position is near to an adversary player
+bool Locations::isNearOpponent(const Position &pos, float distance) {
+    // Makes a list containing pointer to opponent players
+    QList<VSSPlayer*> advPlayers = _team->opTeam()->avPlayers().values();
+    // Interates over all of them
+    for(int i = 0; i < advPlayers.size(); i++) {
+        VSSPlayer *advPlayer = advPlayers.at(i);
+        // Checks if one of them is closer or at the given distance
+        if(WR::Utils::distance(pos, advPlayer->position()) <= distance){
+            return true;
+        }
+    }
+     return false;
+}
+
+Position Locations::ourAreaMargin(const Position &reference, float distance) {
+    const Position midL = ourGoalLeftMidPost();
+    const Position midR = ourGoalRightMidPost();
+    Position projected = WR::Utils::projectPointAtSegment(midR, midL, reference);
+    if(reference.x() > fieldMinX() && reference.x() < fieldMaxX())
+        return WR::Utils::threePoints(projected, reference, fieldDefenseRadius()+distance, 0.0);
+    else {
+        float newX = (reference.x() < fieldMinX()? fieldMinX() : fieldMaxX());
+        Position newReference(true, newX, reference.y(), 0.0);
+        return WR::Utils::threePoints(projected, newReference, fieldDefenseRadius()+distance, 0.0);
+    }
+}
+
+Position Locations::theirAreaMargin(const Position &reference, float distance) {
+    const Position midL = theirGoalLeftMidPost();
+    const Position midR = theirGoalRightMidPost();
+    Position projected = WR::Utils::projectPointAtSegment(midR, midL, reference);
+    return WR::Utils::threePoints(projected, reference, fieldDefenseRadius()+distance, 0.0);
+}
+
+QHash<quint8, VSSPlayer*> Locations::getOpPlayers(){
+    return _team->opTeam()->avPlayers();
+}
+
+QHash<quint8, VSSPlayer*> Locations::getMRCPlayers(){
+    return _team->avPlayers();
+}

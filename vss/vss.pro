@@ -1,0 +1,121 @@
+TEMPLATE = app
+DESTDIR  = ../bin
+TARGET   = Maracatronics-VSS
+VERSION  = 0.0.1
+
+# Temporary dirs
+OBJECTS_DIR = tmp/obj
+MOC_DIR = tmp/moc
+UI_DIR = tmp/moc
+RCC_DIR = tmp/rc
+
+CONFIG += c++14 console
+CONFIG -= app_bundle
+QT += core \
+        gui \
+        widgets \
+        network \
+        opengl
+
+# The following define makes your compiler emit warnings if you use
+# any Qt feature that has been marked deprecated (the exact warnings
+# depend on your compiler). Please consult the documentation of the
+# deprecated API in order to know how to port your code away from it.
+DEFINES += QT_DEPRECATED_WARNINGS
+LIBS *= -lprotobuf -lGLU -pthread -lGEARSystem -lomniORB4 -lomnithread -lQt5Core -lpthread
+
+
+# You can also make your code fail to compile if it uses deprecated APIs.
+# In order to do so, uncomment the following line.
+# You can also select to disable deprecated APIs only up to a certain version of Qt.
+#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+SOURCES += \
+        main.cpp \
+        src/const/constants.cpp \
+        src/entity/controlmodule/coach/coach.cpp \
+        src/entity/controlmodule/coach/coachutils.cpp \
+        src/entity/controlmodule/coach/playersdistribution.cpp \
+        src/entity/controlmodule/controlmodule.cpp \
+        src/entity/controlmodule/playbook/basics/playbook_halt.cpp \
+        src/entity/controlmodule/playbook/playbook.cpp \
+        src/entity/controlmodule/strategy/basics/strategy_halt.cpp \
+        src/entity/controlmodule/strategy/essentials/mrcstrategy.cpp \
+        src/entity/controlmodule/strategy/essentials/vssstrategy.cpp \
+        src/entity/controlmodule/strategy/strategy.cpp \
+        src/entity/controlmodule/strategy/strategystate.cpp \
+        src/entity/controlmodule/vssteam.cpp \
+        src/entity/entity.cpp \
+        src/entity/locations.cpp \
+        src/entity/player/behaviour/basics/behaviour_donothing.cpp \
+        src/entity/player/behaviour/behaviour.cpp \
+        src/entity/player/playeraccess.cpp \
+        src/entity/player/playerbus.cpp \
+        src/entity/player/role/basics/role_halt.cpp \
+        src/entity/player/role/role.cpp \
+        src/entity/player/skill/basics/skill_donothing.cpp \
+        src/entity/player/skill/skill.cpp \
+        src/entity/player/vssplayer.cpp \
+        src/entity/world/world.cpp \
+        src/entity/world/worldmapupdater.cpp \
+        src/exithandler.cpp \
+        src/instancechecker.cpp \
+        src/utils/fields/field.cpp \
+        src/utils/fields/field_vss.cpp \
+        src/utils/fieldside/fieldside.cpp \
+        src/utils/knn/knn.cpp \
+        src/utils/timer/timer.cpp \
+        src/utils/utils.cpp \
+        src/vss.cpp
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
+
+HEADERS += \
+    src/const/constants.h \
+    src/entity/controlmodule/coach/basecoach.h \
+    src/entity/controlmodule/coach/coach.h \
+    src/entity/controlmodule/coach/coachutils.h \
+    src/entity/controlmodule/coach/playersdistribution.h \
+    src/entity/controlmodule/controlmodule.h \
+    src/entity/controlmodule/playbook/basics/playbook_halt.h \
+    src/entity/controlmodule/playbook/playbook.h \
+    src/entity/controlmodule/playbook/vssplaybooks.h \
+    src/entity/controlmodule/strategy/basics/strategy_halt.h \
+    src/entity/controlmodule/strategy/essentials/mrcstrategy.h \
+    src/entity/controlmodule/strategy/essentials/vssstrategy.h \
+    src/entity/controlmodule/strategy/strategy.h \
+    src/entity/controlmodule/strategy/strategystate.h \
+    src/entity/controlmodule/strategy/vssstrategies.h \
+    src/entity/controlmodule/vssteam.h \
+    src/entity/entity.h \
+    src/entity/locations.h \
+    src/entity/player/baseplayer.h \
+    src/entity/player/behaviour/basics/behaviour_donothing.h \
+    src/entity/player/behaviour/behaviour.h \
+    src/entity/player/behaviour/vssbehaviours.h \
+    src/entity/player/playeraccess.h \
+    src/entity/player/playerbus.h \
+    src/entity/player/role/basics/role_halt.h \
+    src/entity/player/role/role.h \
+    src/entity/player/role/vssroles.h \
+    src/entity/player/skill/basics/skill_donothing.h \
+    src/entity/player/skill/skill.h \
+    src/entity/player/skill/vssskills.h \
+    src/entity/player/vssplayer.h \
+    src/entity/world/world.h \
+    src/entity/world/worldmapupdater.h \
+    src/exithandler.h \
+    src/instancechecker.h \
+    src/utils/color/color.h \
+    src/utils/fields/field.h \
+    src/utils/fields/field_vss.h \
+    src/utils/fields/fields.h \
+    src/utils/fieldside/fieldside.h \
+    src/utils/fieldside/side.h \
+    src/utils/knn/knn.h \
+    src/utils/timer/timer.h \
+    src/utils/utils.h \
+    src/vss.h
