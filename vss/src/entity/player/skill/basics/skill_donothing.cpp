@@ -32,5 +32,5 @@ Skill_DoNothing::Skill_DoNothing() {
 
 void Skill_DoNothing::run() {
     //player()->idle();
-    player()->rotateTo(loc()->ball());
+    player()->goTo(loc()->ball());
 }

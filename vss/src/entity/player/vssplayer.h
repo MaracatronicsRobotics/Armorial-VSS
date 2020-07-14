@@ -69,6 +69,7 @@ public:
     void idle();
     void setSpeed(double vx, double omega);
     double getRotateAngle(Position targetPosition);
+    double getRotateSpeed(double angleRobotToTarget);
     double getVxToTarget(Position targetPosition);
     void rotateTo(Position targetPosition);
     void goTo(Position targetPosition);

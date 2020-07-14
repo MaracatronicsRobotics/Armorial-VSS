@@ -175,16 +175,73 @@ double VSSPlayer::getVxToTarget(Position targetPosition){
     return distanceMod;
 }
 
+double VSSPlayer::getRotateSpeed(double angleRobotToTarget){
+    double minValue = 4.0;
+    double maxValue = 6.0;
+    double speed = 0.0;
+
+    if(fabs(angleRobotToTarget) >= GEARSystem::Angle::toRadians(3.0)){
+        if(fabs(angleRobotToTarget) < M_PI / 4.0){
+            if(angleRobotToTarget < 0.0)
+                speed = 1.0;
+            else
+                speed = -1.0;
+        }
+        else if(fabs(angleRobotToTarget) < M_PI / 2.0){
+            if(angleRobotToTarget < 0.0){
+                speed = minValue;
+            }else{
+                speed = -minValue;
+            }
+        }
+        else{
+            if(angleRobotToTarget < 0.0){
+                speed = maxValue;
+            }else{
+                speed = -maxValue;
+            }
+        }
+    }else{
+        speed = 0;
+    }
+
+    return speed;
+}
+
 void VSSPlayer::rotateTo(Position targetPosition){
     double angleRobotToTarget = getRotateAngle(targetPosition);
-    setSpeed(0.0, angleRobotToTarget);
+    double speed = getRotateSpeed(angleRobotToTarget);
+
+    setSpeed(0.0, speed);
 }
 
 void VSSPlayer::goTo(Position targetPosition){
     double rotateAngle = getRotateAngle(targetPosition);
+    double rotateSpeed = getRotateSpeed(rotateAngle);
     double vx = getVxToTarget(targetPosition);
+    double dist = WR::Utils::distance(position(), targetPosition);
 
-    setSpeed(-vx, rotateAngle);
+    if(dist <= 0.5f){ // se estiver a menos de 50cm do alvo
+        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
+            setSpeed(0.0, rotateSpeed); // zera a linear e espera girar
+        }else{
+            setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
+        }
+    }
+    else if(dist > 0.5f && dist <= 1.0f){ // se estiver entre 50cm a 1m do alvo
+        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(45)){ // se a diferença for maior que 45 deg
+            setSpeed(0.3 * vx, rotateSpeed); // linear * 0.3 e gira
+        }else{
+            setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
+        }
+    }
+    else if(dist > 1.0f){ // se estiver a mais de 1m do alvo
+        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(75)){ // se a diferença for maior que 75 deg
+            setSpeed(0.5 * vx, rotateSpeed); // linear * 0.5 e gira
+        }else{
+            setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
+        }
+    }
 }
 
 /* Player info methods */
