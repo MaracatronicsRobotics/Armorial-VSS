@@ -122,6 +122,69 @@ void VSSPlayer::setRole(Role* b) {
 
 void VSSPlayer::idle(){
     /// TODO
+    setSpeed(0.0, 0.0);
+}
+
+void VSSPlayer::setSpeed(double vx, double omega){
+    printf("%d x %d x %lf x %lf\n", int(teamId()), int(playerId()), vx, omega);
+    if(teamId() == 0)
+        _ctr->setSpeed((int)teamId(), (int)playerId(), vx, omega, 0.0);
+}
+
+double VSSPlayer::getRotateAngle(Position targetPosition){
+    double robot_x, robot_y, angleOriginToRobot = angle().value();
+    robot_x = position().x();
+    robot_y = position().y();
+
+    // Define a velocidade angular do robô para visualizar a bola
+    double vectorRobotToTargetX = (targetPosition.x() - robot_x);
+    double vectorRobotToTargetY = (targetPosition.y() - robot_y);
+    double modVectorRobotToTarget = sqrt(pow(vectorRobotToTargetX, 2) + pow(vectorRobotToTargetY, 2));
+
+    vectorRobotToTargetX = vectorRobotToTargetX / modVectorRobotToTarget;
+
+    double angleOriginToTarget;   //Ângulo que a bola faz com o eixo x em relação ao robô
+    double angleRobotToTarget;       //Ângulo que a visão do robô faz com a posição da bola em relação ao robô
+
+    if(vectorRobotToTargetY < 0){ //terceiro e quadrante
+        angleOriginToTarget = 2*M_PI - acos(vectorRobotToTargetX); //angulo que a bola faz com o eixo x em relação ao robo
+    }else{ //primeiro e segundo quadrante
+        angleOriginToTarget = acos(vectorRobotToTargetX); //angulo que a bola faz com o eixo x em relação ao robo
+    }
+
+    angleRobotToTarget = angleOriginToRobot - angleOriginToTarget;
+    if(angleRobotToTarget > M_PI) angleRobotToTarget -= 2.0 * M_PI;
+    if(angleRobotToTarget < -M_PI) angleRobotToTarget += 2.0 * M_PI;
+
+    return angleRobotToTarget;
+}
+
+double VSSPlayer::getVxToTarget(Position targetPosition){
+    // Salvando posicao do robo pra os calculos
+    double robot_x = position().x(), robot_y = position().y();
+
+    // Define a velocidade do robô para chegar na bola
+    long double dx = (targetPosition.x() - robot_x);
+    long double dy = (targetPosition.y() - robot_y);
+
+    // Pegando modulo do vetor distancia
+    float distanceMod = sqrt(pow(dx, 2.0) + pow(dy, 2.0));
+
+    WR::Utils::limitValue(&distanceMod, 0.0, 1.0);
+
+    return distanceMod;
+}
+
+void VSSPlayer::rotateTo(Position targetPosition){
+    double angleRobotToTarget = getRotateAngle(targetPosition);
+    setSpeed(0.0, angleRobotToTarget);
+}
+
+void VSSPlayer::goTo(Position targetPosition){
+    double rotateAngle = getRotateAngle(targetPosition);
+    double vx = getVxToTarget(targetPosition);
+
+    setSpeed(-vx, rotateAngle);
 }
 
 /* Player info methods */

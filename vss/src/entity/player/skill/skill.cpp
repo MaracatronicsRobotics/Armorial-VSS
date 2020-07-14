@@ -20,7 +20,6 @@
  ***/
 
 #include "skill.h"
-#include <src/entity/locations.h>
 
 Skill::Skill() {
     _player = NULL;

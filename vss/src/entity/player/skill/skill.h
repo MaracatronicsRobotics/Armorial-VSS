@@ -23,6 +23,7 @@
 #define SKILL_H
 
 #include <src/entity/player/baseplayer.h>
+#include <src/entity/locations.h>
 
 class Skill
 {

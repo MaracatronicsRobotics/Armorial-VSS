@@ -67,6 +67,11 @@ public:
 
     // Control functions
     void idle();
+    void setSpeed(double vx, double omega);
+    double getRotateAngle(Position targetPosition);
+    double getVxToTarget(Position targetPosition);
+    void rotateTo(Position targetPosition);
+    void goTo(Position targetPosition);
 
 private:
     // Inherited methods from Entity
