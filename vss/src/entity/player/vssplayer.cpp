@@ -217,26 +217,41 @@ void VSSPlayer::rotateTo(Position targetPosition){
 
 void VSSPlayer::goTo(Position targetPosition){
     double rotateAngle = getRotateAngle(targetPosition);
+
+    // Verificando se o lado de trás pra movimentação é a melhor escolha
+    bool swapSpeed = false;
+    if(rotateAngle > M_PI / 2.0){
+        rotateAngle -= M_PI;
+        swapSpeed = true;
+    }
+    else if(rotateAngle < -M_PI / 2.0){
+        rotateAngle += M_PI;
+        swapSpeed = true;
+    }
+
     double rotateSpeed = getRotateSpeed(rotateAngle);
     double vx = getVxToTarget(targetPosition);
     double dist = WR::Utils::distance(position(), targetPosition);
 
-    if(dist <= 0.5f){ // se estiver a menos de 50cm do alvo
+    // Se escolheu o lado de trás, inverte o vx
+    if(swapSpeed) vx *= (-1);
+
+    if(dist <= 0.1f){ // se estiver a 10cm ou menos do alvo
         if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
             setSpeed(0.0, rotateSpeed); // zera a linear e espera girar
         }else{
             setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
-    else if(dist > 0.5f && dist <= 1.0f){ // se estiver entre 50cm a 1m do alvo
-        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(45)){ // se a diferença for maior que 45 deg
+    else if(dist > 0.1f && dist <= 0.5f){ // se estiver entre 10cm a 50cm do alvo
+        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
             setSpeed(0.3 * vx, rotateSpeed); // linear * 0.3 e gira
         }else{
             setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
-    else if(dist > 1.0f){ // se estiver a mais de 1m do alvo
-        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(75)){ // se a diferença for maior que 75 deg
+    else if(dist > 0.5f){ // se estiver a mais de 50cm do alvo
+        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
             setSpeed(0.5 * vx, rotateSpeed); // linear * 0.5 e gira
         }else{
             setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
