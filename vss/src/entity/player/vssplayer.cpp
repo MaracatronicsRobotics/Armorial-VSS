@@ -30,7 +30,7 @@
 
 QString VSSPlayer::name(){
     QString teamColor = playerTeam()->teamColor() == Colors::BLUE ? "Blue" : "Yellow";
-    return "Player " + QString::number((int)_playerId) + " : Team " + teamColor;
+    return "Player " + QString::number(int(_playerId)) + " : Team " + teamColor;
 }
 
 VSSPlayer::VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole) : Entity(ENT_PLAYER)
@@ -45,7 +45,7 @@ VSSPlayer::VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role
     _playerAccessBus = new PlayerAccess(false, this, playerTeam->loc());
 
     // Setting errors
-    _lError = 0.015;
+    _lError = 0.015f;
     _aError = Angle::toRadians(4.0);
 
     // Idle control
@@ -62,7 +62,7 @@ VSSPlayer::~VSSPlayer(){
 /* Entity inherited methods */
 void VSSPlayer::initialization(){
     QString teamColor = _playerTeam->teamColor() == Colors::BLUE ? "BLUE" : "YELLOW";
-    printf("[TEAM %s PLAYER %d] Thread started.\n", teamColor.toStdString().c_str(), (int) _playerId);
+    printf("[TEAM %s PLAYER %d] Thread started.\n", teamColor.toStdString().c_str(), _playerId);
 }
 
 void VSSPlayer::loop(){
@@ -88,14 +88,14 @@ void VSSPlayer::loop(){
            _defaultRole->setPlayer(this, _playerAccessSelf);
            _defaultRole->runRole();
        }else{
-           std::cout << "[ERROR] No role found for player #" << (int)playerId() << "!" << std::endl;
+           std::cout << "[ERROR] No role found for player #" << int(playerId()) << "!" << std::endl;
        }
        _mutexRole.unlock();
     }
 }
 
 void VSSPlayer::finalization(){
-    printf("[TEAM %d PLAYER %d] Thread stopped.\n", (int) _playerTeam->teamId(), (int) _playerId);
+    printf("[TEAM %d PLAYER %d] Thread stopped.\n", _playerTeam->teamId(), _playerId);
 }
 
 /* Player control methods */
@@ -125,134 +125,107 @@ void VSSPlayer::idle(){
     setSpeed(0.0, 0.0);
 }
 
-void VSSPlayer::setSpeed(double vx, double omega){
+void VSSPlayer::setSpeed(float vx, float omega){
     if(_ctr != NULL){ // avoid to send packet for the other team
-        _ctr->setSpeed((int)teamId(), (int)playerId(), vx, omega, 0.0);
+        _ctr->setSpeed(teamId(), playerId(), vx, omega, 0.0);
     }
 }
 
-double VSSPlayer::getRotateAngle(Position targetPosition){
-    double robot_x, robot_y, angleOriginToRobot = angle().value();
+float VSSPlayer::getRotateAngle(Position targetPosition){
+    float robot_x, robot_y, angleOriginToRobot = angle().value();
     robot_x = position().x();
     robot_y = position().y();
 
     // Define a velocidade angular do robô para visualizar a bola
-    double vectorRobotToTargetX = (targetPosition.x() - robot_x);
-    double vectorRobotToTargetY = (targetPosition.y() - robot_y);
-    double modVectorRobotToTarget = sqrt(pow(vectorRobotToTargetX, 2) + pow(vectorRobotToTargetY, 2));
+    float vectorRobotToTargetX = (targetPosition.x() - robot_x);
+    float vectorRobotToTargetY = (targetPosition.y() - robot_y);
+    float modVectorRobotToTarget = sqrtf(powf(vectorRobotToTargetX, 2) + powf(vectorRobotToTargetY, 2));
 
     vectorRobotToTargetX = vectorRobotToTargetX / modVectorRobotToTarget;
 
-    double angleOriginToTarget;   //Ângulo que a bola faz com o eixo x em relação ao robô
-    double angleRobotToTarget;       //Ângulo que a visão do robô faz com a posição da bola em relação ao robô
+    float angleOriginToTarget;   //Ângulo do robô entre o alvo e o eixo x do campo
+    float angleRobotToTarget;       //Ângulo do robô entre o alvo e o eixo x do robô
 
-    if(vectorRobotToTargetY < 0){ //terceiro e quadrante
-        angleOriginToTarget = 2*M_PI - acos(vectorRobotToTargetX); //angulo que a bola faz com o eixo x em relação ao robo
+    if(vectorRobotToTargetY < 0){ //terceiro e quarto quadrante
+        angleOriginToTarget = float(2*M_PI) - acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
     }else{ //primeiro e segundo quadrante
-        angleOriginToTarget = acos(vectorRobotToTargetX); //angulo que a bola faz com o eixo x em relação ao robo
+        angleOriginToTarget = acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
     }
 
-    angleRobotToTarget = angleOriginToRobot - angleOriginToTarget;
-    if(angleRobotToTarget > M_PI) angleRobotToTarget -= 2.0 * M_PI;
-    if(angleRobotToTarget < -M_PI) angleRobotToTarget += 2.0 * M_PI;
+    angleRobotToTarget = angleOriginToTarget - angleOriginToRobot;
+    if(angleRobotToTarget > float(M_PI)) angleRobotToTarget -= 2.0f * float(M_PI);
+    if(angleRobotToTarget < float(-M_PI)) angleRobotToTarget += 2.0f * float(M_PI);
 
     return angleRobotToTarget;
 }
 
-double VSSPlayer::getVxToTarget(Position targetPosition){
+float VSSPlayer::getVxToTarget(Position targetPosition){
     // Salvando posicao do robo pra os calculos
-    double robot_x = position().x(), robot_y = position().y();
+    float robot_x = position().x(), robot_y = position().y();
 
     // Define a velocidade do robô para chegar na bola
-    long double dx = (targetPosition.x() - robot_x);
-    long double dy = (targetPosition.y() - robot_y);
+    float dx = (targetPosition.x() - robot_x);
+    float dy = (targetPosition.y() - robot_y);
 
     // Pegando modulo do vetor distancia
-    float distanceMod = sqrt(pow(dx, 2.0) + pow(dy, 2.0));
+    float distanceMod = sqrtf(powf(dx, 2.0) + powf(dy, 2.0));
 
     WR::Utils::limitValue(&distanceMod, 0.0, 1.0);
 
     return distanceMod;
 }
 
-double VSSPlayer::getRotateSpeed(double angleRobotToTarget){
-    double minValue = 4.0;
-    double maxValue = 6.0;
-    double speed = 0.0;
-
-    if(fabs(angleRobotToTarget) >= GEARSystem::Angle::toRadians(3.0)){
-        if(fabs(angleRobotToTarget) < M_PI / 4.0){
-            if(angleRobotToTarget < 0.0)
-                speed = 1.0;
-            else
-                speed = -1.0;
-        }
-        else if(fabs(angleRobotToTarget) < M_PI / 2.0){
-            if(angleRobotToTarget < 0.0){
-                speed = minValue;
-            }else{
-                speed = -minValue;
-            }
-        }
-        else{
-            if(angleRobotToTarget < 0.0){
-                speed = maxValue;
-            }else{
-                speed = -maxValue;
-            }
-        }
-    }else{
-        speed = 0;
-    }
+float VSSPlayer::getRotateSpeed(float angleRobotToTarget){
+    float speed = 5.0f * angleRobotToTarget;
 
     return speed;
 }
 
 void VSSPlayer::rotateTo(Position targetPosition){
-    double angleRobotToTarget = getRotateAngle(targetPosition);
-    double speed = getRotateSpeed(angleRobotToTarget);
+    float angleRobotToTarget = getRotateAngle(targetPosition);
+    float speed = getRotateSpeed(angleRobotToTarget);
 
     setSpeed(0.0, speed);
 }
 
 void VSSPlayer::goTo(Position targetPosition){
-    double rotateAngle = getRotateAngle(targetPosition);
+    float rotateAngle = getRotateAngle(targetPosition);
 
     // Verificando se o lado de trás pra movimentação é a melhor escolha
     bool swapSpeed = false;
-    if(rotateAngle > M_PI / 2.0){
-        rotateAngle -= M_PI;
+    if(rotateAngle > float(M_PI) / 2.0f){
+        rotateAngle -= float(M_PI);
         swapSpeed = true;
     }
-    else if(rotateAngle < -M_PI / 2.0){
-        rotateAngle += M_PI;
+    else if(rotateAngle < float(-M_PI) / 2.0f){
+        rotateAngle += float(M_PI);
         swapSpeed = true;
     }
 
-    double rotateSpeed = getRotateSpeed(rotateAngle);
-    double vx = getVxToTarget(targetPosition);
-    double dist = WR::Utils::distance(position(), targetPosition);
+    float rotateSpeed = getRotateSpeed(rotateAngle);
+    float vx = getVxToTarget(targetPosition);
+    float dist = WR::Utils::distance(position(), targetPosition);
 
     // Se escolheu o lado de trás, inverte o vx
     if(swapSpeed) vx *= (-1);
 
     if(dist <= 0.1f){ // se estiver a 10cm ou menos do alvo
-        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
+        if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
             setSpeed(0.0, rotateSpeed); // zera a linear e espera girar
         }else{
             setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
     else if(dist > 0.1f && dist <= 0.5f){ // se estiver entre 10cm a 50cm do alvo
-        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
-            setSpeed(0.3 * vx, rotateSpeed); // linear * 0.3 e gira
+        if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
+            setSpeed(0.3f * vx, rotateSpeed); // linear * 0.3 e gira
         }else{
             setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
     else if(dist > 0.5f){ // se estiver a mais de 50cm do alvo
-        if(fabs(rotateAngle) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
-            setSpeed(0.5 * vx, rotateSpeed); // linear * 0.5 e gira
+        if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
+            setSpeed(0.5f * vx, rotateSpeed); // linear * 0.5 e gira
         }else{
             setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
         }
@@ -308,7 +281,7 @@ bool VSSPlayer::isLookingTo(const Position &pos, float error) const{
     Angle angle1(true, WR::Utils::getAngle(position(), pos));
 
     // Calc diff
-    float dif = fabs(WR::Utils::angleDiff(angle(), angle1));
+    float dif = abs(WR::Utils::angleDiff(angle(), angle1));
     return (dif <= error);
 }
 

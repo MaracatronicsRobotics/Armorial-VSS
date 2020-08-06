@@ -67,10 +67,10 @@ public:
 
     // Control functions
     void idle();
-    void setSpeed(double vx, double omega);
-    double getRotateAngle(Position targetPosition);
-    double getRotateSpeed(double angleRobotToTarget);
-    double getVxToTarget(Position targetPosition);
+    void setSpeed(float vx, float omega);
+    float getRotateAngle(Position targetPosition);
+    float getRotateSpeed(float angleRobotToTarget);
+    float getVxToTarget(Position targetPosition);
     void rotateTo(Position targetPosition);
     void goTo(Position targetPosition);
 
@@ -83,8 +83,8 @@ private:
     // Player info
     quint8 _playerId;
     VSSTeam *_playerTeam;
-    double _lError;
-    double _aError;
+    float _lError;
+    float _aError;
     int _idleCount;
 
     // Player data

@@ -27,10 +27,10 @@ QString Skill_DoNothing::name() {
 }
 
 Skill_DoNothing::Skill_DoNothing() {
-
 }
 
 void Skill_DoNothing::run() {
     //player()->idle();
-    player()->goTo(loc()->ball());
+    //player()->goTo(loc()->ball());
+    player()->getRotateAngle(loc()->ball());
 }
