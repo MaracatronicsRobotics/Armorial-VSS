@@ -6,5 +6,6 @@
 
 // Every skill
 #include <src/entity/player/skill/basics/skill_donothing.h>
+#include <src/entity/player/skill/basics/skill_rotateto.h>
 
 #endif // VSSSKILLS_H
