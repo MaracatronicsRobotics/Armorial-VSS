@@ -23,6 +23,7 @@
 #define VSSPLAYER_H
 
 #include <src/entity/entity.h>
+#include <src/utils/utils.h>
 #include <src/entity/player/baseplayer.h>
 
 class VSSPlayer : public Entity
@@ -72,7 +73,7 @@ public:
     float getRotateSpeed(float angleRobotToTarget);
     float getVxToTarget(Position targetPosition);
     void rotateTo(Position targetPosition);
-    void goTo(Position targetPosition);
+    void goTo(Position targetPosition, float velocityFactor = 1.0f);
 
 private:
     // Inherited methods from Entity

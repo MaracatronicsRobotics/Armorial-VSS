@@ -24,6 +24,7 @@
 
 #include <src/entity/player/baseplayer.h>
 #include <src/entity/locations.h>
+#include <src/entity/player/playerbus.h>
 
 class Skill
 {
@@ -42,6 +43,7 @@ public:
 protected:
     VSSPlayer *player() { return _player; }
     Locations *loc() { return _loc; }
+    //VSSConstants *getConstants();
 
 private:
     virtual void run() = 0;
@@ -51,6 +53,7 @@ private:
 
     // Game info
     Locations *_loc;
+    //VSSConstants *_vssConstants;
 
     // Skill initialized
     bool _initialized;

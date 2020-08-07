@@ -19,22 +19,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef BEHAVIOUR_DONOTHING_H
-#define BEHAVIOUR_DONOTHING_H
+#ifndef SKILL_INTERCEPTBALL_H
+#define SKILL_INTERCEPTBALL_H
 
-#include <src/entity/player/behaviour/behaviour.h>
-#include <src/entity/player/skill/vssskills.h>
+#include <src/entity/player/skill/skill.h>
 
-class Behaviour_DoNothing : public Behaviour {
+class Skill_InterceptBall : public Skill {
 private:
-    void configure();
     void run();
-    int _state;
 
-    Skill_InterceptBall *_sk_interceptBall;
 public:
-    Behaviour_DoNothing();
+    Skill_InterceptBall();
     QString name();
 };
 
-#endif // BEHAVIOUR_DONOTHING_H
+#endif // SKILL_INTERCEPTBALL_H

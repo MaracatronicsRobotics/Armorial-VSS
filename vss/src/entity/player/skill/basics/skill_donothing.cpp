@@ -31,6 +31,6 @@ Skill_DoNothing::Skill_DoNothing() {
 
 void Skill_DoNothing::run() {
     //player()->idle();
-    //player()->goTo(loc()->ball());
-    player()->getRotateAngle(loc()->ball());
+    //player()->goTo(player()->position());
+    //std::cout << player()->getRotateAngle(player()->position()) << std::endl;
 }

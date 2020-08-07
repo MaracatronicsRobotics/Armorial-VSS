@@ -29,9 +29,8 @@ Behaviour_DoNothing::Behaviour_DoNothing() {
 }
 
 void Behaviour_DoNothing::configure() {
-    usesSkill(_skill_doNothing = new Skill_DoNothing());
+    usesSkill(_sk_interceptBall = new Skill_InterceptBall());
 };
 
 void Behaviour_DoNothing::run() {
-
 }

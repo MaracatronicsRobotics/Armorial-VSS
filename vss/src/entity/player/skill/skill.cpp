@@ -33,6 +33,7 @@ Skill::~Skill(){
 
 void Skill::initialize(Locations *loc){
     _loc = loc;
+    //_vssConstants = vssConstants;
     _initialized = true;
 }
 
@@ -44,3 +45,9 @@ void Skill::runSkill(){
     // Skill implemented by child of this class
     run();
 }
+
+/*VSSConstants *Skill::getConstants() {
+    if(_vssConstants==NULL)
+        std::cout << VSSConstants::red << "[ERROR] " << VSSConstants::reset << name().toStdString() << ", requesting getConstants(), _mrcconstants not initialized!\n";
+    return _vssConstants;
+}*/

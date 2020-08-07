@@ -21,7 +21,6 @@
 
 #include "vssplayer.h"
 #include <GEARSystem/gearsystem.hh>
-#include <src/utils/utils.h>
 #include <src/entity/locations.h>
 #include <src/entity/player/playeraccess.h>
 #include <src/entity/controlmodule/vssteam.h>
@@ -141,6 +140,8 @@ float VSSPlayer::getRotateAngle(Position targetPosition){
     float vectorRobotToTargetY = (targetPosition.y() - robot_y);
     float modVectorRobotToTarget = sqrtf(powf(vectorRobotToTargetX, 2) + powf(vectorRobotToTargetY, 2));
 
+    if (modVectorRobotToTarget == 0.0f) return 0.0f;
+
     vectorRobotToTargetX = vectorRobotToTargetX / modVectorRobotToTarget;
 
     float angleOriginToTarget;   //Ângulo do robô entre o alvo e o eixo x do campo
@@ -188,7 +189,7 @@ void VSSPlayer::rotateTo(Position targetPosition){
     setSpeed(0.0, speed);
 }
 
-void VSSPlayer::goTo(Position targetPosition){
+void VSSPlayer::goTo(Position targetPosition, float velocityFactor){
     float rotateAngle = getRotateAngle(targetPosition);
 
     // Verificando se o lado de trás pra movimentação é a melhor escolha
@@ -213,21 +214,21 @@ void VSSPlayer::goTo(Position targetPosition){
         if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
             setSpeed(0.0, rotateSpeed); // zera a linear e espera girar
         }else{
-            setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
+            setSpeed(velocityFactor * vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
     else if(dist > 0.1f && dist <= 0.5f){ // se estiver entre 10cm a 50cm do alvo
         if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
-            setSpeed(0.3f * vx, rotateSpeed); // linear * 0.3 e gira
+            setSpeed(velocityFactor * 0.3f * vx, rotateSpeed); // linear * 0.3 e gira
         }else{
-            setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
+            setSpeed(velocityFactor * vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
     else if(dist > 0.5f){ // se estiver a mais de 50cm do alvo
         if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
-            setSpeed(0.5f * vx, rotateSpeed); // linear * 0.5 e gira
+            setSpeed(velocityFactor * 0.5f * vx, rotateSpeed); // linear * 0.5 e gira
         }else{
-            setSpeed(vx, rotateSpeed); // caso esteja de boa, gogo
+            setSpeed(velocityFactor * vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
 }

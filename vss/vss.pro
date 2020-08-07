@@ -54,6 +54,7 @@ SOURCES += \
         src/entity/player/role/basics/role_halt.cpp \
         src/entity/player/role/role.cpp \
         src/entity/player/skill/basics/skill_donothing.cpp \
+        src/entity/player/skill/basics/skill_interceptball.cpp \
         src/entity/player/skill/skill.cpp \
         src/entity/player/vssplayer.cpp \
         src/entity/world/world.cpp \
@@ -102,6 +103,7 @@ HEADERS += \
     src/entity/player/role/role.h \
     src/entity/player/role/vssroles.h \
     src/entity/player/skill/basics/skill_donothing.h \
+    src/entity/player/skill/basics/skill_interceptball.h \
     src/entity/player/skill/skill.h \
     src/entity/player/skill/vssskills.h \
     src/entity/player/vssplayer.h \
