@@ -56,6 +56,7 @@ SOURCES += \
         src/entity/player/skill/basics/skill_donothing.cpp \
         src/entity/player/skill/basics/skill_goto.cpp \
         src/entity/player/skill/basics/skill_interceptball.cpp \
+        src/entity/player/skill/basics/skill_rotateto.cpp \
         src/entity/player/skill/skill.cpp \
         src/entity/player/vssplayer.cpp \
         src/entity/world/world.cpp \
@@ -106,6 +107,7 @@ HEADERS += \
     src/entity/player/skill/basics/skill_donothing.h \
     src/entity/player/skill/basics/skill_goto.h \
     src/entity/player/skill/basics/skill_interceptball.h \
+    src/entity/player/skill/basics/skill_rotateto.h \
     src/entity/player/skill/skill.h \
     src/entity/player/skill/vssskills.h \
     src/entity/player/vssplayer.h \
