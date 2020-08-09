@@ -10,6 +10,5 @@ QString Skill_GoTo::name(){
 }
 
 void Skill_GoTo::run(){
-    setGoToPos(loc()->ball());
     player()->goTo(_goToPos);
 }

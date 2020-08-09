@@ -8,17 +8,13 @@ class Skill_PushBall : public Skill{
 private:
     void run();
 
-    //state machine
-    enum{
-        STATE_MOVETOPOS,
-        STATE_ROTATE,
-        STATE_PUSH
-    };
-    int _state;
+    float _speed;
+    float _omega;
 public:
     Skill_PushBall();
     QString name();
 
+    void setSpeedAndOmega(float speed, float omega);
 };
 
 #endif // SKILL_PUSHBALL_H

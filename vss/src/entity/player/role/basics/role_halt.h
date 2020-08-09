@@ -30,10 +30,12 @@ class Role_Halt : public Role
 private:
     // Behaviours
     Behaviour_DoNothing *_bh_dn;
+    Behaviour_PushBall *_bh_pb;
 
     // Behaviours ids!
     enum{
-        BHV_DONOTHING
+        BHV_DONOTHING,
+        BHV_PUSHBALL
     };
 
     // Inherited functions
