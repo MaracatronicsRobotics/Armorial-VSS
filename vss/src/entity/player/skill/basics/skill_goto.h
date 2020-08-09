@@ -4,8 +4,9 @@
 #include <src/entity/player/skill/skill.h>
 
 class Skill_GoTo : public Skill {
-public:
+private:
     void run();
+public:
     Position _goToPos;
 
     QString name();

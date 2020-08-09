@@ -30,7 +30,7 @@ Behaviour_DoNothing::Behaviour_DoNothing() {
 
 void Behaviour_DoNothing::configure() {
     //usesSkill(_sk_interceptBall = new Skill_InterceptBall());
-    usesSkill(_sk_goTo = new Skill_GoTo());
+    usesSkill(_sk_pushBall = new Skill_PushBall());
 };
 
 void Behaviour_DoNothing::run() {

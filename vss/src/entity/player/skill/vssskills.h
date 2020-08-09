@@ -9,5 +9,6 @@
 #include <src/entity/player/skill/basics/skill_interceptball.h>
 #include <src/entity/player/skill/basics/skill_goto.h>
 #include <src/entity/player/skill/basics/skill_rotateto.h>
+#include <src/entity/player/skill/basics/skill_pushball.h>
 
 #endif // VSSSKILLS_H
