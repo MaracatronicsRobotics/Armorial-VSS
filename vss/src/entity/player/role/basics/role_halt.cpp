@@ -30,6 +30,7 @@ Role_Halt::Role_Halt() {
 }
 
 void Role_Halt::initializeBehaviours(){
+    usesBehaviour(BHV_PUSHBALL, _bh_pb = new Behaviour_PushBall());
     usesBehaviour(BHV_DONOTHING, _bh_dn = new Behaviour_DoNothing());
 }
 
@@ -38,5 +39,6 @@ void Role_Halt::configure(){
 }
 
 void Role_Halt::run(){
-    setBehaviour(BHV_DONOTHING);
+    //setBehaviour(BHV_DONOTHING);
+    setBehaviour(BHV_PUSHBALL);
 }
