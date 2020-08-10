@@ -97,7 +97,7 @@ void VSS::setupTeams(quint8 opTeamId, Colors::Color opTeamColor, FieldSide opTea
 
     // Set our team info
     _ourTeam->setTeamColor(_teamColor);
-    _opTeam->setTeamSide(_teamSide);
+    _ourTeam->setTeamSide(_teamSide);
 
     // Set op team info
     _opTeam->setTeamColor(opTeamColor);
