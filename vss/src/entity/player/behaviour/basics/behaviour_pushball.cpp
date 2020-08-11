@@ -23,8 +23,8 @@ void Behaviour_PushBall::configure(){
 
 void Behaviour_PushBall::run(){
     const Position ball = loc()->ball();
-    const Position ourGoal = loc()->ourGoal();
-    const Position behindBall = WR::Utils::threePoints(ball, ourGoal, 0.2f, GEARSystem::Angle::pi);
+    const Position theirGoal = loc()->theirGoal();
+    const Position behindBall = WR::Utils::threePoints(ball, theirGoal, 0.2f, GEARSystem::Angle::pi);
 
     //setting skill goto
     _sk_goTo->setGoToPos(behindBall);
