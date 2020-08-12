@@ -33,6 +33,7 @@ private:
 
     Skill_InterceptBall *_sk_interceptBall;
     Skill_PushBall *_sk_pushBall;
+    Skill_spin *_sk_spin;
 public:
     Behaviour_DoNothing();
     QString name();

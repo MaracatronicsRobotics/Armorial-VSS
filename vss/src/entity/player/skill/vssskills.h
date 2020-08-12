@@ -10,5 +10,6 @@
 #include <src/entity/player/skill/basics/skill_goto.h>
 #include <src/entity/player/skill/basics/skill_rotateto.h>
 #include <src/entity/player/skill/basics/skill_pushball.h>
+#include <src/entity/player/skill/basics/skill_spin.h>
 
 #endif // VSSSKILLS_H

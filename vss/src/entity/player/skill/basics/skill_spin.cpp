@@ -1,17 +1,19 @@
 #include "skill_spin.h"
-#include <src/entity/player/skill/vssskills.h>
-#include <src/entity/player/vssplayer.h>
 
-
+#define SPIN_SPEED 50.0f
 
 QString Skill_spin::name() {
     return "Skill_Spin";
 }
-Skill_spin::Skill_spin()
-{
-    speed_spin = 2.0;
+
+Skill_spin::Skill_spin() {
+    _isClockWise = true;
 }
 
 void Skill_spin::run() {
-     player()->setSpeed(0.0 , speed_spin);
+    if (_isClockWise) {
+        player()->setSpeed(0.0 , -SPIN_SPEED);
+    } else {
+        player()->setSpeed(0.0 , SPIN_SPEED);
+    }
 }
