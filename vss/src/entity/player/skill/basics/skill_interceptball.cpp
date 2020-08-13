@@ -22,7 +22,7 @@
 #include "skill_interceptball.h"
 
 QString Skill_InterceptBall::name() {
-    return "Skill_interceptBall";
+    return "Skill_InterceptBall";
 }
 
 Skill_InterceptBall::Skill_InterceptBall() {

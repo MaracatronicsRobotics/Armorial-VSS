@@ -20,7 +20,6 @@
  ***/
 
 #include "skill_donothing.h"
-#include <src/entity/player/skill/vssskills.h>
 
 QString Skill_DoNothing::name() {
     return "Skill_DoNothing";

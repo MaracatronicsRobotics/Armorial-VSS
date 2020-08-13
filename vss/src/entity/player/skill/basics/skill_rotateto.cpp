@@ -20,7 +20,6 @@
  ***/
 
 #include "skill_rotateto.h"
-#include <src/entity/player/skill/vssskills.h>
 
 QString Skill_RotateTo::name() {
     return "Skill_RotateTo";
