@@ -23,15 +23,15 @@
 
 #define SPIN_SPEED 50.0f
 
-QString Skill_spin::name() {
+QString Skill_Spin::name() {
     return "Skill_Spin";
 }
 
-Skill_spin::Skill_spin() {
+Skill_Spin::Skill_Spin() {
     _isClockWise = true;
 }
 
-void Skill_spin::run() {
+void Skill_Spin::run() {
     if (_isClockWise) {
         player()->setSpeed(0.0 , -SPIN_SPEED);
     } else {
