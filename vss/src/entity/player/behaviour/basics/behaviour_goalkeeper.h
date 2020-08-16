@@ -19,21 +19,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#include "behaviour_donothing.h"
+#ifndef BEHAVIOUR_GOALKEEPER_H
+#define BEHAVIOUR_GOALKEEPER_H
 
-QString Behaviour_DoNothing::name() {
-    return "Behaviour_DoNothing";
-}
+#include <src/entity/player/behaviour/behaviour.h>
+#include <src/entity/player/skill/vssskills.h>
 
-Behaviour_DoNothing::Behaviour_DoNothing() {
-}
+class Behaviour_Goalkeeper : public Behaviour {
+private:
+    void configure();
+    void run();
 
-void Behaviour_DoNothing::configure() {
-    //usesSkill(_sk_interceptBall = new Skill_InterceptBall());
-    usesSkill(_sk_pushBall = new Skill_PushBall());
+    // Skills
+    Skill_GoTo *_sk_goto;
+    Skill_InterceptBall *_sk_intercept;
+    Skill_Spin *_sk_spin;
+
+    // Transitions
+    enum {
+        STATE_GOTO,
+        STATE_INTERCEPT,
+        STATE_SPIN
+    };
+
+    // Auxiliary Functions
+    bool setSpinDirection();
+
+public:
+    Behaviour_Goalkeeper();
+    QString name();
 };
 
-void Behaviour_DoNothing::run() {
-    std::cout << "OurGoal: " << loc()->ourGoalRightPost().y() << std::endl;
-    std::cout << "TheirGoal: " << loc()->theirGoalRightPost().y() << std::endl;
-}
+#endif // BEHAVIOUR_GOALKEEPER_H
