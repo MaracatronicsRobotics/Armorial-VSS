@@ -29,11 +29,13 @@ private:
     void run();
 public:
     Position _goToPos;
+    float _goToVelocityFactor;
 
     QString name();
     Skill_GoTo();
 
     void setGoToPos(Position pos) { _goToPos = pos; }
+    void setGoToVelocityFactor(float vel) { _goToVelocityFactor = vel; }
 };
 
 #endif // SKILL_GOTO_H

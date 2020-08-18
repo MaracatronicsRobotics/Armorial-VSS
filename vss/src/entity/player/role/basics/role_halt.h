@@ -32,12 +32,14 @@ private:
     Behaviour_DoNothing *_bh_dn;
     Behaviour_PushBall *_bh_pb;
     Behaviour_Goalkeeper *_bh_gk;
+    Behaviour_Assistant *_bh_as;
 
     // Behaviours ids!
     enum{
         BHV_DONOTHING,
         BHV_PUSHBALL,
-        BHV_GK
+        BHV_GK,
+        BHV_ASSISTANT
     };
 
     // Inherited functions

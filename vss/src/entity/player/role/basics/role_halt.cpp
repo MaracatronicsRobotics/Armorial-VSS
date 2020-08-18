@@ -33,6 +33,7 @@ void Role_Halt::initializeBehaviours(){
     usesBehaviour(BHV_DONOTHING, _bh_dn = new Behaviour_DoNothing());
     usesBehaviour(BHV_PUSHBALL, _bh_pb = new Behaviour_PushBall());
     usesBehaviour(BHV_GK, _bh_gk = new Behaviour_Goalkeeper());
+    usesBehaviour(BHV_ASSISTANT, _bh_as = new Behaviour_Assistant());
 }
 
 void Role_Halt::configure(){
@@ -40,4 +41,7 @@ void Role_Halt::configure(){
 
 void Role_Halt::run(){
     setBehaviour(BHV_GK);
+    //setBehaviour(BHV_ASSISTANT);
+    //setBehaviour(BHV_DONOTHING);
+    //setBehaviour(BHV_PUSHBALL);
 }
