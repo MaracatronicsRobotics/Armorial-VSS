@@ -31,12 +31,16 @@ private:
     // Parameters
     Position _firstLimitationPoint;
     Position _secondLimitationPoint;
+    Position _objectivePos; // Position where the player should be
+    float _velocityNeeded;
 
 public:
     Skill_InterceptBall();
     QString name();
 
     void setInterceptSegment(Position firstPoint, Position secondPoint) { _firstLimitationPoint = firstPoint; _secondLimitationPoint = secondPoint; }
+    void setDesiredVelocity(float velocityNeeded) { _velocityNeeded = velocityNeeded; }
+    Position getIntercetPosition() { return _objectivePos; }
 };
 
 #endif // SKILL_INTERCEPTBALL_H
