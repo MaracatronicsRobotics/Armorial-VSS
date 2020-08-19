@@ -130,7 +130,7 @@ void VSS::setupOpPlayers(quint8 opTeamId){
         VSSPlayer *player = new VSSPlayer(playerList.at(i), _opTeam, NULL, new Role_Halt());
 
         // Enable player
-        player->enable(true);
+        player->enable(false);
 
         // Add to team
         _opTeam->addPlayer(player);

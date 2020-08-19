@@ -42,6 +42,9 @@ private:
         STATE_SPIN
     };
 
+    // Parameters
+    int _state;
+
     // Auxiliary Functions
     bool setSpinDirection();
 

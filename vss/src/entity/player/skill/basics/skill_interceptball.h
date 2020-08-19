@@ -28,9 +28,15 @@ class Skill_InterceptBall : public Skill {
 private:
     void run();
 
+    // Parameters
+    Position _firstLimitationPoint;
+    Position _secondLimitationPoint;
+
 public:
     Skill_InterceptBall();
     QString name();
+
+    void setInterceptSegment(Position firstPoint, Position secondPoint) { _firstLimitationPoint = firstPoint; _secondLimitationPoint = secondPoint; }
 };
 
 #endif // SKILL_INTERCEPTBALL_H

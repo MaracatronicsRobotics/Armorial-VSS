@@ -32,7 +32,7 @@ private:
     int _state;
 
     Skill_InterceptBall *_sk_interceptBall;
-    Skill_PushBall *_sk_pushBall;
+    Skill_DoNothing *_sk_doNothing;
 public:
     Behaviour_DoNothing();
     QString name();

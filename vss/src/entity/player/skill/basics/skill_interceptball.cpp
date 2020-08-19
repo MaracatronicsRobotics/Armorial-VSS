@@ -26,10 +26,11 @@ QString Skill_InterceptBall::name() {
 }
 
 Skill_InterceptBall::Skill_InterceptBall() {
+    _firstLimitationPoint = Position(false, 0.0, 0.0, 0.0);
+    _secondLimitationPoint = Position(false, 0.0, 0.0, 0.0);
 }
 
 void Skill_InterceptBall::run() {
-    Position posBall = loc()->ball();
     Position unitaryBallVelocity = Position(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
     Position objectivePos; // Position where the player should be
     // Check ball speed (maybe a error)
@@ -37,14 +38,19 @@ void Skill_InterceptBall::run() {
         objectivePos = loc()->ball(); // keep actual position
     else{
         // Now ball velocity line (pos + uni_velocity vector)
-        Position ballVelocityLine = Position(true, posBall.x()+unitaryBallVelocity.x(), posBall.y()+unitaryBallVelocity.y(), 0.0);
+        Position ballVelocityLine = Position(true, loc()->ball().x()+unitaryBallVelocity.x(), loc()->ball().y()+unitaryBallVelocity.y(), 0.0);
 
         // Call utils to get projection
-        objectivePos = WR::Utils::projectPointAtLine(posBall, ballVelocityLine, player()->position()); //Intercepta em 90 graus
+        objectivePos = WR::Utils::projectPointAtLine(loc()->ball(), ballVelocityLine, player()->position()); //Intercepta em 90 graus
+
+        if (_firstLimitationPoint.isUnknown()) _firstLimitationPoint = loc()->ball();
+        if (_secondLimitationPoint.isUnknown()) _secondLimitationPoint = objectivePos;
+
+        objectivePos = WR::Utils::projectPointAtSegment(_firstLimitationPoint, _secondLimitationPoint, objectivePos);
     }
 
     // Vx/Dx = Vy/Dy (V = velocidade/ D = distância)
-    float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(objectivePos)) / (WR::Utils::distance(posBall, objectivePos));
+    float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(objectivePos)) / (WR::Utils::distance(loc()->ball(), objectivePos));
 
     player()->goTo(objectivePos, velocityNeeded);
 }

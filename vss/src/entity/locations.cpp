@@ -232,22 +232,24 @@ bool Locations::isInsideTheirField(const Position &pos) {
 }
 
 bool Locations::isInsideOurArea(const Position &pos, float factor) {
-    double y_offset = ourSide().isLeft() ? 0.5 : -0.5;
+    float y_offset = ourSide().isLeft() ? (0.15f * factor) : (-0.15f * factor);
     Position test(true, ourGoalLeftPost().x(), ourGoalLeftPost().y() - y_offset, 0.0);
+    //std::cout << "test_x: " << test.x() << "; test_y: " << test.y() << std::endl;
 
-    double x_offset;
-    x_offset = ourSide().isLeft() ? 1.0 : -1.0;
+    float x_offset;
+    x_offset = ourSide().isLeft() ? (0.15f * factor) : (-0.15f * factor);
     Position ourGoalRightDeslocatedPost(true, ourGoalRightPost().x() + x_offset, ourGoalRightPost().y() + y_offset, 0.0);
+    //std::cout << "deslocated_x: " << ourGoalRightDeslocatedPost.x() << "; deslocated_y: " << ourGoalRightDeslocatedPost.y() << std::endl;
 
     return _isInsideArea(pos, factor, test, ourGoalRightDeslocatedPost);
 }
 
 bool Locations::isInsideTheirArea(const Position &pos, float factor) {
-    double y_offset = theirSide().isLeft() ? 0.5 : -0.5;
+    float y_offset = theirSide().isLeft() ? (0.15f * factor) : (-0.15f * factor);
     Position test(true, theirGoalLeftPost().x(), theirGoalLeftPost().y() - y_offset, 0.0);
 
-    double x_offset;
-    x_offset = theirSide().isLeft() ? 1.0 : -1.0;
+    float x_offset;
+    x_offset = theirSide().isLeft() ? (0.15f * factor) : (-0.15f * factor);
     Position theirGoalRightDeslocatedPost(true, theirGoalRightPost().x() + x_offset, theirGoalRightPost().y() + y_offset, 0.0);
 
     return _isInsideArea(pos, factor, test, theirGoalRightDeslocatedPost);
@@ -271,10 +273,8 @@ bool Locations::isInsideField(const Position &pos, float dx, float dy) {
 
 bool Locations::_isInsideArea(const Position &pos, float factor, const Position &goalLeftPost, const Position &goalRightDeslocatedPost) {
     // rectangle
-    return( (pos.x() <= std::max(goalLeftPost.x() * factor, goalRightDeslocatedPost.x() * factor)) && (pos.x() >= std::min(goalLeftPost.x() * factor, goalRightDeslocatedPost.x() * factor)) &&
-                (pos.y() <= std::max(goalLeftPost.y() * factor, goalRightDeslocatedPost.y() * factor)) && (pos.y() >= std::min(goalLeftPost.y() * factor, goalRightDeslocatedPost.y() * factor)) );
-
-    return false;
+    return( (pos.x() <= std::max(goalLeftPost.x(), goalRightDeslocatedPost.x())) && (pos.x() >= std::min(goalLeftPost.x(), goalRightDeslocatedPost.x())) &&
+                (pos.y() <= std::max(goalLeftPost.y(), goalRightDeslocatedPost.y())) && (pos.y() >= std::min(goalLeftPost.y(), goalRightDeslocatedPost.y())) );
 }
 
 bool Locations::_isOutsideField(const Position &pos, const float maxX, const float maxY) {

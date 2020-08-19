@@ -26,6 +26,9 @@ QString Behaviour_Goalkeeper::name() {
 }
 
 Behaviour_Goalkeeper::Behaviour_Goalkeeper() {
+    _sk_goto = nullptr;
+    _sk_intercept = nullptr;
+    _sk_spin = nullptr;
 }
 
 void Behaviour_Goalkeeper::configure() {
@@ -48,10 +51,12 @@ void Behaviour_Goalkeeper::configure() {
     // Skill Spin active
     addTransition(STATE_SPIN, _sk_goto, _sk_spin);
     addTransition(STATE_SPIN, _sk_intercept, _sk_spin);
+
+    _state = STATE_GOTO;
 }
 
 void Behaviour_Goalkeeper::run() {
-    if (!loc()->isInsideOurArea(player()->position())) {
+    /*if (!loc()->isInsideOurArea(player()->position())) {
         // Positioning at goalcenter. A better positioning is recommended.
         const Position initialPosition = WR::Utils::threePoints(loc()->ourGoal(), player()->position(), 0.2f, 0.0f);
         _sk_goto->setGoToPos(initialPosition);
@@ -64,6 +69,60 @@ void Behaviour_Goalkeeper::run() {
         } else {
             enableTransition(STATE_INTERCEPT);
         }
+    }*/
+    const Position initialPosition = WR::Utils::threePoints(loc()->ourGoal(), loc()->fieldCenter(), 0.055f, 0.0f);
+    Position firstInterceptPoint(true, initialPosition.x(), -0.35f, 0.0f);
+    Position secondInterceptPoint(true, initialPosition.x(), 0.35f, 0.0f);
+
+    // GoTo setup
+    _sk_goto->setGoToPos(initialPosition);
+
+    // InterceptBall setup
+    _sk_intercept->setInterceptSegment(firstInterceptPoint, secondInterceptPoint);
+
+    switch(_state) {
+    case STATE_GOTO: {
+        if (abs(player()->position().x() - initialPosition.x()) < 0.1f) {
+            if (loc()->isInsideOurArea(loc()->ball())) {
+                bool spinDirection = setSpinDirection();
+                _sk_spin->setClockWise(spinDirection);
+                enableTransition(STATE_SPIN);
+                _state = STATE_SPIN;
+            } else {
+                enableTransition(STATE_INTERCEPT);
+                _state = STATE_INTERCEPT;
+            }
+        }
+        std::cout << "Currently using Behaviour GoTo\n";
+        break; }
+
+    case STATE_INTERCEPT: {
+        if (!(loc()->isInsideOurArea(player()->position()))) {
+            enableTransition(STATE_GOTO);
+            _state = STATE_GOTO;
+        }
+        //std::cout << "FON";
+        else if (loc()->isInsideOurArea(loc()->ball())) {
+            bool spinDirection = setSpinDirection();
+            _sk_spin->setClockWise(spinDirection);
+            enableTransition(STATE_SPIN);
+            _state = STATE_SPIN;
+        }
+        std::cout << "Currently using Behaviour InterceptBall\n";
+        break; }
+
+    case STATE_SPIN: {
+        if (!(loc()->isInsideOurArea(player()->position()))) {
+            enableTransition(STATE_GOTO);
+            _state = STATE_GOTO;
+        }
+        //std::cout << "FONZÃO";
+        else if (!loc()->isInsideOurArea(loc()->ball())) {
+            enableTransition(STATE_INTERCEPT);
+            _state = STATE_INTERCEPT;
+        }
+        std::cout << "Currently using Behaviour Spin\n";
+        break; }
     }
 }
 
