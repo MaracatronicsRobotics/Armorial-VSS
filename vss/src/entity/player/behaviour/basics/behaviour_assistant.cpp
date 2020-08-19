@@ -13,6 +13,16 @@ Behaviour_Assistant::Behaviour_Assistant() {
 }
 
 void Behaviour_Assistant::configure() {
+    //initializing variables
+    loopsInSameRegionWithBall = 0;
+    loopsInSameRegionWithOpp = 0;
+    lastPlayerPosition.setPosition(50.0, 0.0, 0.0);
+    lastPlayerPosition.setInvalid();
+    ballPos = lastPlayerPosition;
+    playerPos = lastPlayerPosition;
+    prevOppId = 100;
+
+    //skills
     usesSkill(_sk_goTo = new Skill_GoTo());
     usesSkill(_sk_spin = new Skill_Spin());
     usesSkill(_sk_rotateTo = new Skill_RotateTo());
@@ -43,9 +53,17 @@ void Behaviour_Assistant::configure() {
     addTransition(STATE_PUSH, _sk_rotateTo, _sk_pushBall);
 };
 
-void Behaviour_Assistant::run() {
+void Behaviour_Assistant::run(){
+
+    //CHECKING IF SPIN STATE IS NEEDED
+    checkIfShouldSpin();
 
     switch(_state) {
+    case STATE_STARTSPINNING:{
+        _sk_spin->setClockWise(setSpinDirection());
+        enableTransition(STATE_SPIN);
+        break;
+    }
 
     case STATE_STAYBACK:{
         //setting skill rotateTo
@@ -81,6 +99,7 @@ void Behaviour_Assistant::run() {
             }
         }else{
             _state = STATE_GOTOBALL;
+            enableTransition(STATE_GOTO);
         }
         break;
     }
@@ -128,6 +147,7 @@ void Behaviour_Assistant::run() {
 
                     if(isBehindBall(projectedPos)){
                         behindBall = projectedPos;
+                        //projecting point further than calculated position
                         behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), 0.02, GEARSystem::Angle::pi);
                     }
                 }
@@ -139,8 +159,8 @@ void Behaviour_Assistant::run() {
                 _sk_goTo->setGoToPos(behindBall);
 
                 //setting skill goTo velocity factor
-                if(2 < 1.5*velocityNeeded){
-                    _sk_goTo->setGoToVelocityFactor(1.5*velocityNeeded);
+                if(2 < 1.2*velocityNeeded){
+                    _sk_goTo->setGoToVelocityFactor(1.2*velocityNeeded);
                 }else{
                     _sk_goTo->setGoToVelocityFactor(2.0);
                 }
@@ -153,13 +173,13 @@ void Behaviour_Assistant::run() {
 
                 //transitions
                 if(player()->isLookingTo(loc()->ball(), 1.5)){
-                    //std::cout << "PUSH" << std::endl;
+                    std::cout << "PUSH" << std::endl;
                     enableTransition(STATE_PUSH);
                 }else if(player()->isNearbyPosition(behindBall, 0.03f)){
-                    //std::cout << "ROTATE " << player()->isLookingTo(loc()->ball()) << std::endl;
+                    std::cout << "ROTATE " << player()->isLookingTo(loc()->ball()) << std::endl;
                     enableTransition(STATE_ROTATE);
                 }else{
-                    //std::cout << "GO BEHIND BALL" << std::endl;
+                    std::cout << "GO BEHIND BALL" << std::endl;
                     enableTransition(STATE_GOTO);
                 }
             }
@@ -178,4 +198,88 @@ bool Behaviour_Assistant::isBehindBall(Position posObjective){
     float diff = WR::Utils::angleDiff(anglePlayer, angleDest);
 
     return (diff>GEARSystem::Angle::pi/2.0f);
+}
+
+bool Behaviour_Assistant::setSpinDirection(){
+    // true if clockwise, false otherwise
+    if (loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())
+        return true;
+    else
+        return false;
+}
+
+bool Behaviour_Assistant::checkIfShouldSpin(){
+    //update actual player and ball positions (if they're valid)
+    if(player()->position().isValid()) playerPos = player()->position();
+    if(loc()->ball().isValid()) ballPos = loc()->ball();
+
+    Position oppPos(true, 1000, 0, 0);
+    quint8 oppId = 99;
+    float minorDist = 10000.0;
+    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+        if(PlayerBus::theirPlayerAvailable(x) && PlayerBus::theirPlayer(x)->position().isValid()){
+            if(PlayerBus::theirPlayer(x)->distanceTo(playerPos) < minorDist){
+                oppId = PlayerBus::theirPlayer(x)->playerId();
+                oppPos = PlayerBus::theirPlayer(x)->position();
+                minorDist = PlayerBus::theirPlayer(x)->distanceTo(playerPos);
+            }
+        }
+    }
+
+    //std::cout << WR::Utils::distance(playerPos, oppPos) << "   "<< oppId <<  std::endl;
+
+
+    bool isNearBall, isNearOpp, returnBool = false;
+
+    //if last loop's position is valid and player is near both ball position and last position: increment variable
+    isNearBall = (lastPlayerPosition.isValid() && (WR::Utils::distance(playerPos, lastPlayerPosition) <= 0.02f) && (WR::Utils::distance(playerPos, ballPos) <= 0.07f));
+    //if last loop's position is valid and player is near both opp position and last position: increment variable
+    isNearOpp = (lastPlayerPosition.isValid() && (WR::Utils::distance(playerPos, lastPlayerPosition) <= 0.02f) && (WR::Utils::distance(playerPos, oppPos) <= 0.1f));
+
+    if(isNearBall || isNearOpp){
+        if(isNearBall){
+            loopsInSameRegionWithBall++;
+            //std::cout << loopsInSameRegionWithBall << std::endl;
+            if(loopsInSameRegionWithBall >= 300){
+                std::cout << "SPINNING BALL" << std::endl;
+                _state = STATE_STARTSPINNING;
+                returnBool = true;
+            }else if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+                _state = STATE_STAYBACK;
+                returnBool = false;
+            }else{
+                _state = STATE_GOTOBALL;
+                returnBool = false;
+            }
+        }else{
+            loopsInSameRegionWithBall = 0;
+        }
+
+        if(isNearOpp){
+            //loopsInSameRegionWithOpp++;
+            if(loopsInSameRegionWithOpp >= 300){
+                //std::cout << "SPINNING OPP" << std::endl;
+                _state = STATE_STARTSPINNING;
+                returnBool = true;
+            }else if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+                _state = STATE_STAYBACK;
+                returnBool = false;
+            }else{
+                _state = STATE_GOTOBALL;
+                returnBool = false;
+            }
+        }else{
+            loopsInSameRegionWithOpp = 0;
+        }
+    }else{
+        lastPlayerPosition = playerPos;
+        if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+            _state = STATE_STAYBACK;
+            returnBool = false;
+        }else{
+            _state = STATE_GOTOBALL;
+            returnBool = false;
+        }
+    }
+    return returnBool;
 }

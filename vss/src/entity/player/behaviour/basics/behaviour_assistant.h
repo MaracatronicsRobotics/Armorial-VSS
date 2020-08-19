@@ -15,7 +15,7 @@ private:
     enum{
         STATE_STAYBACK,
         STATE_GOTOBALL,
-        STATE_PUSHBALL
+        STATE_STARTSPINNING
     };
 
     //States
@@ -32,11 +32,17 @@ private:
     Skill_RotateTo *_sk_rotateTo;
     Skill_PushBall *_sk_pushBall;
 
+    int loopsInSameRegionWithBall, loopsInSameRegionWithOpp; //initialize with 0
+    Position lastPlayerPosition, ballPos, playerPos;
+    quint8 prevOppId;
+
 public:
     Behaviour_Assistant();
     QString name();
 
     bool isBehindBall(Position posObjective);
+    bool setSpinDirection();
+    bool checkIfShouldSpin();
 };
 
 #endif // BEHAVIOUR_ASSISTANT_H
