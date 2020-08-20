@@ -19,36 +19,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef ROLE_HALT_H
-#define ROLE_HALT_H
+#include "role_goalkeeper.h"
 
-#include <src/entity/player/behaviour/vssbehaviours.h>
-#include <src/entity/player/role/role.h>
+QString Role_Goalkeeper::name(){
+    return "Role_Goalkeeper";
+}
 
-class Role_Halt : public Role {
-private:
-    // Behaviours
-    Behaviour_DoNothing *_bh_dn;
-    Behaviour_PushBall *_bh_pb;
-    Behaviour_Goalkeeper *_bh_gk;
-    Behaviour_Assistant *_bh_as;
+Role_Goalkeeper::Role_Goalkeeper() {
+    _bh_gk = nullptr;
+}
 
-    // Behaviours ids!
-    enum{
-        BHV_DONOTHING,
-        BHV_PUSHBALL,
-        BHV_GK,
-        BHV_ASSISTANT
-    };
+void Role_Goalkeeper::initializeBehaviours(){
+    usesBehaviour(BHV_GK, _bh_gk = new Behaviour_Goalkeeper());
+}
 
-    // Inherited functions
-    void configure();
-    void run();
+void Role_Goalkeeper::configure(){
 
-public:
-    Role_Halt();
-    void initializeBehaviours();
-    QString name();
-};
+}
 
-#endif // ROLE_HALT_H
+void Role_Goalkeeper::run(){
+    setBehaviour(BHV_GK);
+}

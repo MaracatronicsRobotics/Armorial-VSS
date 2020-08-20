@@ -54,6 +54,7 @@ SOURCES += \
         src/entity/player/behaviour/behaviour.cpp \
         src/entity/player/playeraccess.cpp \
         src/entity/player/playerbus.cpp \
+        src/entity/player/role/basics/role_goalkeeper.cpp \
         src/entity/player/role/basics/role_halt.cpp \
         src/entity/player/role/role.cpp \
         src/entity/player/skill/basics/skill_donothing.cpp \
@@ -109,6 +110,7 @@ HEADERS += \
     src/entity/player/behaviour/vssbehaviours.h \
     src/entity/player/playeraccess.h \
     src/entity/player/playerbus.h \
+    src/entity/player/role/basics/role_goalkeeper.h \
     src/entity/player/role/basics/role_halt.h \
     src/entity/player/role/role.h \
     src/entity/player/role/vssroles.h \
