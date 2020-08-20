@@ -34,7 +34,6 @@ private:
 
     int loopsInSameRegionWithBall, loopsInSameRegionWithOpp; //initialize with 0
     Position lastPlayerPosition, ballPos, playerPos;
-    quint8 prevOppId;
 
 public:
     Behaviour_Assistant();

@@ -20,7 +20,6 @@ void Behaviour_Assistant::configure() {
     lastPlayerPosition.setInvalid();
     ballPos = lastPlayerPosition;
     playerPos = lastPlayerPosition;
-    prevOppId = 100;
 
     //skills
     usesSkill(_sk_goTo = new Skill_GoTo());
@@ -66,9 +65,6 @@ void Behaviour_Assistant::run(){
     }
 
     case STATE_STAYBACK:{
-        //setting skill rotateTo
-        _sk_rotateTo->setDesiredPosition(loc()->ball());
-
         //setting skill goTo
         Position desiredPosition(false, 0, 0, 0);
 
@@ -87,11 +83,18 @@ void Behaviour_Assistant::run(){
                 Position lowerPoint(true, loc()->fieldMinX() + (loc()->fieldLength()/4), loc()->fieldMinY(), 0);
                 desiredPosition = (WR::Utils::projectPointAtSegment(upperPoint, lowerPoint, loc()->ball()));
             }
-            //If this player is at the desiredPosition: rotateTo(ballPosition)
+
+            //setting skill rotateTo
+            _sk_rotateTo->setDesiredPosition(loc()->ball());
+
+            //setting skill goTo position
             _sk_goTo->setGoToPos(desiredPosition);
+            //setting skill goTo velocity factor
             //default value to increase robot vellocity (needs adjustment)
             _sk_goTo->setGoToVelocityFactor(2.0);
 
+            //transitions
+            //if this player is at the desiredPosition: rotateTo(ballPosition)
             if(player()->isNearbyPosition(desiredPosition, 0.03f)){
                 enableTransition(STATE_ROTATE);
             }else{
@@ -105,7 +108,7 @@ void Behaviour_Assistant::run(){
     }
 
     case STATE_GOTOBALL:{
-
+        //if ball is in their field or if our team has ball poss but it isn't with this player
         if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
             _state = STATE_STAYBACK;
             break;
@@ -117,7 +120,7 @@ void Behaviour_Assistant::run(){
 
                 _aimPosition.setUnknown();
 
-                // Discover their player that have poss
+                //discover their player that have poss
                 for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
                     if(PlayerBus::theirPlayerAvailable(x)){
                         if(PlayerBus::theirPlayer(x)->hasBallPossession()){
@@ -127,21 +130,21 @@ void Behaviour_Assistant::run(){
                     }
                 }
 
-                // If they don't have poss, aim position is now their goal
+                //if they don't have poss, aim position is now their goal
                 if(_aimPosition.isUnknown()) _aimPosition = loc()->theirGoal();
 
-                // Calc behind ball
+                //calc behind ball
                 Position behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.03f, GEARSystem::Angle::pi);
 
                 if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
-                    // Calc unitary vector of velocity
+                    //calc unitary vector of velocity
                     const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
 
-                    // Calc velocity factor
+                    //calc velocity factor
                     float factor = BALLPREVISION_VELOCITY_FACTOR*loc()->ballVelocity().abs();
                     WR::Utils::limitValue(&factor, 0.0f, BALLPREVISION_FACTOR_LIMIT);
 
-                    // Calc projected position
+                    //calc projected position
                     const Position delta(true, factor*velUni.x(), factor*velUni.y(), 0.0);
                     Position projectedPos(true, behindBall.x()+delta.x(), behindBall.y()+delta.y(), 0.0);
 
@@ -152,15 +155,14 @@ void Behaviour_Assistant::run(){
                     }
                 }
 
-                // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
-                float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
-
                 //setting skill goTo position
                 _sk_goTo->setGoToPos(behindBall);
 
-                //setting skill goTo velocity factor
-                if(2 < 1.2*velocityNeeded){
-                    _sk_goTo->setGoToVelocityFactor(1.2*velocityNeeded);
+                //setting skill goTo velocity factor                
+                // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
+                float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
+                if(2 < 1.0*velocityNeeded){
+                    _sk_goTo->setGoToVelocityFactor(1.0*velocityNeeded);
                 }else{
                     _sk_goTo->setGoToVelocityFactor(2.0);
                 }
@@ -173,13 +175,13 @@ void Behaviour_Assistant::run(){
 
                 //transitions
                 if(player()->isLookingTo(loc()->ball(), 1.5)){
-                    std::cout << "PUSH" << std::endl;
+                    //std::cout << "PUSH" << std::endl;
                     enableTransition(STATE_PUSH);
                 }else if(player()->isNearbyPosition(behindBall, 0.03f)){
-                    std::cout << "ROTATE " << player()->isLookingTo(loc()->ball()) << std::endl;
+                    //std::cout << "ROTATE " << player()->isLookingTo(loc()->ball()) << std::endl;
                     enableTransition(STATE_ROTATE);
                 }else{
-                    std::cout << "GO BEHIND BALL" << std::endl;
+                    //std::cout << "GO BEHIND BALL" << std::endl;
                     enableTransition(STATE_GOTO);
                 }
             }
@@ -201,7 +203,7 @@ bool Behaviour_Assistant::isBehindBall(Position posObjective){
 }
 
 bool Behaviour_Assistant::setSpinDirection(){
-    // true if clockwise, false otherwise
+    //true if clockwise, false otherwise
     if (loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())
         return true;
     else
@@ -213,35 +215,32 @@ bool Behaviour_Assistant::checkIfShouldSpin(){
     if(player()->position().isValid()) playerPos = player()->position();
     if(loc()->ball().isValid()) ballPos = loc()->ball();
 
-    Position oppPos(true, 1000, 0, 0);
-    quint8 oppId = 99;
+    //find nearest opponent
+    Position oppPos(false, 1000, 0, 0);
     float minorDist = 10000.0;
     for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
         if(PlayerBus::theirPlayerAvailable(x) && PlayerBus::theirPlayer(x)->position().isValid()){
             if(PlayerBus::theirPlayer(x)->distanceTo(playerPos) < minorDist){
-                oppId = PlayerBus::theirPlayer(x)->playerId();
                 oppPos = PlayerBus::theirPlayer(x)->position();
                 minorDist = PlayerBus::theirPlayer(x)->distanceTo(playerPos);
             }
         }
     }
 
-    //std::cout << WR::Utils::distance(playerPos, oppPos) << "   "<< oppId <<  std::endl;
-
-
     bool isNearBall, isNearOpp, returnBool = false;
 
     //if last loop's position is valid and player is near both ball position and last position: increment variable
-    isNearBall = (lastPlayerPosition.isValid() && (WR::Utils::distance(playerPos, lastPlayerPosition) <= 0.02f) && (WR::Utils::distance(playerPos, ballPos) <= 0.07f));
-    //if last loop's position is valid and player is near both opp position and last position: increment variable
-    isNearOpp = (lastPlayerPosition.isValid() && (WR::Utils::distance(playerPos, lastPlayerPosition) <= 0.02f) && (WR::Utils::distance(playerPos, oppPos) <= 0.1f));
+    isNearBall = (lastPlayerPosition.isValid() && (WR::Utils::distance(playerPos, lastPlayerPosition) <= 0.01f) && (WR::Utils::distance(playerPos, ballPos) <= 0.07f));
+    //if last loop's position is valid and player is very close to the closest opponent: increment variable
+    isNearOpp = (lastPlayerPosition.isValid() && oppPos.isValid() && (WR::Utils::distance(playerPos, oppPos) <= 0.1f));
 
+    //setting _state variable according to isNearBall and isNearOpp
     if(isNearBall || isNearOpp){
         if(isNearBall){
             loopsInSameRegionWithBall++;
-            //std::cout << loopsInSameRegionWithBall << std::endl;
+            //if isNearBall is true along multiple cycles
             if(loopsInSameRegionWithBall >= 300){
-                std::cout << "SPINNING BALL" << std::endl;
+                //std::cout << "SPINNING BALL" << std::endl;
                 _state = STATE_STARTSPINNING;
                 returnBool = true;
             }else if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
@@ -256,17 +255,21 @@ bool Behaviour_Assistant::checkIfShouldSpin(){
         }
 
         if(isNearOpp){
-            //loopsInSameRegionWithOpp++;
-            if(loopsInSameRegionWithOpp >= 300){
-                //std::cout << "SPINNING OPP" << std::endl;
-                _state = STATE_STARTSPINNING;
-                returnBool = true;
-            }else if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
-                _state = STATE_STAYBACK;
-                returnBool = false;
-            }else{
-                _state = STATE_GOTOBALL;
-                returnBool = false;
+            loopsInSameRegionWithOpp++;
+            //in case isNearBall = true and isNearOpp = true so they won't overwrite _state variable
+            if(!isNearBall){
+                //if isNearBall is true along multiple cycles
+                if(loopsInSameRegionWithOpp >= 300){
+                    //std::cout << "SPINNING OPP" << std::endl;
+                    _state = STATE_STARTSPINNING;
+                    returnBool = true;
+                }else if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+                    _state = STATE_STAYBACK;
+                    returnBool = false;
+                }else{
+                    _state = STATE_GOTOBALL;
+                    returnBool = false;
+                }
             }
         }else{
             loopsInSameRegionWithOpp = 0;
