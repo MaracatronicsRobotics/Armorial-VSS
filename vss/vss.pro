@@ -48,6 +48,7 @@ SOURCES += \
         src/entity/entity.cpp \
         src/entity/locations.cpp \
         src/entity/player/behaviour/basics/behaviour_assistant.cpp \
+        src/entity/player/behaviour/basics/behaviour_barrier.cpp \
         src/entity/player/behaviour/basics/behaviour_donothing.cpp \
         src/entity/player/behaviour/basics/behaviour_goalkeeper.cpp \
         src/entity/player/behaviour/basics/behaviour_pushball.cpp \
@@ -103,6 +104,7 @@ HEADERS += \
     src/entity/locations.h \
     src/entity/player/baseplayer.h \
     src/entity/player/behaviour/basics/behaviour_assistant.h \
+    src/entity/player/behaviour/basics/behaviour_barrier.h \
     src/entity/player/behaviour/basics/behaviour_donothing.h \
     src/entity/player/behaviour/basics/behaviour_goalkeeper.h \
     src/entity/player/behaviour/basics/behaviour_pushball.h \
