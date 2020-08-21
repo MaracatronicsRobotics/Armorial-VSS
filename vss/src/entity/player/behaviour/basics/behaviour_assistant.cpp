@@ -68,8 +68,8 @@ void Behaviour_Assistant::run(){
         //setting skill goTo
         Position desiredPosition(false, 0, 0, 0);
 
-        //if ball is in their field or if our team has ball poss but it isn't with this player
-        if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+        //if ball is in their field
+        if(loc()->isInsideTheirField(loc()->ball())){
             if(loc()->ourSide().isRight()){
                 /*project ball position on the line that divides
                  * our field in the middle (x = 0.375 or x = -0.375)*/
@@ -108,13 +108,30 @@ void Behaviour_Assistant::run(){
     }
 
     case STATE_GOTOBALL:{
-        //if ball is in their field or if our team has ball poss but it isn't with this player
-        if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+        //if ball is in their field
+        if(loc()->isInsideTheirField(loc()->ball())){
             _state = STATE_STAYBACK;
             break;
         }else{
             if(loc()->isInsideOurField(loc()->ball())){
                 Position _aimPosition;
+
+                bool closestToBall = false;
+                //checking if our player is closest to ball
+                quint8 allyId = closestAllyToBall();
+                //if allyId is a valid id
+                if(PlayerBus::ourPlayerAvailable(allyId)){
+                    //if there's an ally closer to the ball: keep some distance from ball
+                    if(PlayerBus::ourPlayer(allyId)->distBall() < player()->distBall()){
+                        closestToBall = false;
+                    }else{
+                        closestToBall = true;
+                    }
+                }else{
+                    closestToBall = true;
+                }
+
+
                 //setting skill rotateTo
                 _sk_rotateTo->setDesiredPosition(loc()->ball());
 
@@ -134,7 +151,13 @@ void Behaviour_Assistant::run(){
                 if(_aimPosition.isUnknown()) _aimPosition = loc()->theirGoal();
 
                 //calc behind ball
-                Position behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.03f, GEARSystem::Angle::pi);
+                Position behindBall;
+                //if there's an ally closer to the ball: keep some distance from ball
+                if(!closestToBall){
+                    behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.22f, GEARSystem::Angle::pi);
+                }else{
+                    behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.02f, GEARSystem::Angle::pi);
+                }
 
                 if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
                     //calc unitary vector of velocity
@@ -151,7 +174,12 @@ void Behaviour_Assistant::run(){
                     if(isBehindBall(projectedPos)){
                         behindBall = projectedPos;
                         //projecting point further than calculated position
-                        behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), 0.02, GEARSystem::Angle::pi);
+                        //if there's an ally closer to the ball: keep some distance from ball
+                        if(!closestToBall){
+                            behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), 0.22, GEARSystem::Angle::pi);
+                        }else{
+                            behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), 0.02, GEARSystem::Angle::pi);
+                        }
                     }
                 }
 
@@ -174,7 +202,7 @@ void Behaviour_Assistant::run(){
                 _sk_rotateTo->setDesiredPosition(loc()->ball());
 
                 //transitions
-                if(player()->isLookingTo(loc()->ball(), 1.5)){
+                if(player()->isLookingTo(loc()->ball(), 1.5) && closestToBall){
                     //std::cout << "PUSH" << std::endl;
                     enableTransition(STATE_PUSH);
                 }else if(player()->isNearbyPosition(behindBall, 0.03f)){
@@ -190,6 +218,21 @@ void Behaviour_Assistant::run(){
     }
 
     }
+}
+
+quint8 Behaviour_Assistant::closestAllyToBall(){
+    float minorDistToBall = 1000;
+    quint8 id = 100;
+    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+        if(PlayerBus::ourPlayerAvailable(x) && PlayerBus::ourPlayer(x)->position().isValid() &&
+            PlayerBus::ourPlayer(x)->playerId() != player()->playerId()){
+            if(PlayerBus::ourPlayer(x)->distBall() < minorDistToBall){
+                id = PlayerBus::ourPlayer(x)->playerId();
+                minorDistToBall = PlayerBus::ourPlayer(x)->distBall();
+            }
+        }
+    }
+    return id;
 }
 
 bool Behaviour_Assistant::isBehindBall(Position posObjective){
@@ -243,7 +286,7 @@ bool Behaviour_Assistant::checkIfShouldSpin(){
                 //std::cout << "SPINNING BALL" << std::endl;
                 _state = STATE_STARTSPINNING;
                 returnBool = true;
-            }else if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+            }else if(loc()->isInsideTheirField(loc()->ball())){
                 _state = STATE_STAYBACK;
                 returnBool = false;
             }else{
@@ -263,7 +306,7 @@ bool Behaviour_Assistant::checkIfShouldSpin(){
                     //std::cout << "SPINNING OPP" << std::endl;
                     _state = STATE_STARTSPINNING;
                     returnBool = true;
-                }else if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+                }else if(loc()->isInsideTheirField(loc()->ball())){
                     _state = STATE_STAYBACK;
                     returnBool = false;
                 }else{
@@ -276,7 +319,7 @@ bool Behaviour_Assistant::checkIfShouldSpin(){
         }
     }else{
         lastPlayerPosition = playerPos;
-        if(loc()->isInsideTheirField(loc()->ball()) || (player()->team()->hasBallPossession() && !player()->hasBallPossession())){
+        if(loc()->isInsideTheirField(loc()->ball())){
             _state = STATE_STAYBACK;
             returnBool = false;
         }else{

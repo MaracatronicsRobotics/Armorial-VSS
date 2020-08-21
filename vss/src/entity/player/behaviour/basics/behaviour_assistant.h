@@ -42,6 +42,7 @@ public:
     bool isBehindBall(Position posObjective);
     bool setSpinDirection();
     bool checkIfShouldSpin();
+    quint8 closestAllyToBall();
 };
 
 #endif // BEHAVIOUR_ASSISTANT_H
