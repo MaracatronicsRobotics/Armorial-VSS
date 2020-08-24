@@ -43,6 +43,9 @@
 // Roles
 #include <src/entity/player/role/vssroles.h>
 
+// GUI
+#include <src/gui/vssgui.h>
+
 class VSS
 {
 public:
@@ -71,6 +74,7 @@ private:
     Controller *_ctr;
     World *_world;
     Coach *_coach;
+    VSSGui *_gui;
 
     // Teams
     void setupTeams(quint8 opTeamId, Colors::Color opTeamColor, FieldSide opTeamSide);

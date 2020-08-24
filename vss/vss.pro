@@ -69,6 +69,11 @@ SOURCES += \
         src/entity/world/world.cpp \
         src/entity/world/worldmapupdater.cpp \
         src/exithandler.cpp \
+        src/gui/mainwindow.cpp \
+        src/gui/soccerview/soccerview.cpp \
+        src/gui/soccerview/util/glfield.cpp \
+        src/gui/soccerview/util/gltext.cpp \
+        src/gui/vssgui.cpp \
         src/instancechecker.cpp \
         src/utils/fields/field.cpp \
         src/utils/fields/field_vss.cpp \
@@ -128,6 +133,16 @@ HEADERS += \
     src/entity/world/world.h \
     src/entity/world/worldmapupdater.h \
     src/exithandler.h \
+    src/gui/mainwindow.h \
+    src/gui/soccerview/soccerview.h \
+    src/gui/soccerview/util/field_default_constants.h \
+    src/gui/soccerview/util/geometry.h \
+    src/gui/soccerview/util/glfield.h \
+    src/gui/soccerview/util/gltext.h \
+    src/gui/soccerview/util/gvector.h \
+    src/gui/soccerview/util/timer.h \
+    src/gui/soccerview/util/util.h \
+    src/gui/vssgui.h \
     src/instancechecker.h \
     src/utils/color/color.h \
     src/utils/fields/field.h \
@@ -139,3 +154,6 @@ HEADERS += \
     src/utils/timer/timer.h \
     src/utils/utils.h \
     src/vss.h
+
+FORMS += \
+    src/gui/mainwindow.ui

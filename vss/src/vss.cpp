@@ -63,6 +63,10 @@ bool VSS::start(){
     strategy = new MRCStrategy();
     _coach->setStrategy(strategy);
 
+    // Setup GUI
+    _gui = new VSSGui(_ourTeam, _opTeam);
+    _world->addEntity(_gui, 3);
+
     // Start world
     _world->start();
 

@@ -1,5 +1,5 @@
 // QCoreApplication from Qt
-#include <QCoreApplication>
+#include <QApplication>
 
 // ExitHandler and InstanceChecker
 #include <src/exithandler.h>
@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setApplicationName("Maracatronics-VSS");
     app.setApplicationVersion("0.0.1");
 
