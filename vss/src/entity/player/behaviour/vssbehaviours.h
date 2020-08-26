@@ -6,5 +6,6 @@
 #include <src/entity/player/behaviour/basics/behaviour_pushball.h>
 #include <src/entity/player/behaviour/basics/behaviour_goalkeeper.h>
 #include <src/entity/player/behaviour/basics/behaviour_assistant.h>
+#include <src/entity/player/behaviour/basics/behaviour_barrier.h>
 
 #endif // VSSBEHAVIOURS_H
