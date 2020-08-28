@@ -29,6 +29,7 @@ public:
     SoccerView(QWidget *parent = 0);
     void updateDetection(VSSTeam *ourTeam, VSSTeam *theirTeam);
     void setLeftIsBlue(bool _leftIsBlue) { leftIsBlue = _leftIsBlue; }
+    void drawBallProjection();
 
     struct FieldDimensions {
         vector<FieldLine*> lines;

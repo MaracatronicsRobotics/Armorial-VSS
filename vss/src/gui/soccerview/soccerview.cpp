@@ -275,6 +275,7 @@ void SoccerView::paintEvent(QPaintEvent* event)
     drawFieldLines(fieldDim);
     drawRobots();
     drawBalls();
+    drawBallProjection();
     drawTexts();
     //vectorTextTest();
     glPopMatrix();
@@ -644,7 +645,15 @@ void SoccerView::updateDetection(VSSTeam *ourTeam, VSSTeam *theirTeam) {
     }
 
     ball.set(ourTeam->loc()->ball().x() * 1000.0, ourTeam->loc()->ball().y() * 1000.0);
+    ballVelocity.set(ourTeam->loc()->ballVelocity().x() * 1000.0, ourTeam->loc()->ballVelocity().y() * 1000.0);
 
     graphicsMutex.unlock();
     emit postRedraw();
+}
+
+void SoccerView::drawBallProjection() {
+    vector2d trueVelocity;
+    trueVelocity.x = ball.x + ballVelocity.x;
+    trueVelocity.y = ball.y + ballVelocity.y;
+    drawLine(ball, trueVelocity, 0.0);
 }
