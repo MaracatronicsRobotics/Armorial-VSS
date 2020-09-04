@@ -60,6 +60,7 @@ void Behaviour_Barrier::run(){
         }
     //setting goto
     _sk_goto->setGoToPos(desiredPosition);
+    _sk_goto->setGoToVelocityFactor(2.0);
     //setting intercept dont need
 
     //setting spin

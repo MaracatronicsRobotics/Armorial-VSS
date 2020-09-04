@@ -29,7 +29,7 @@ class Playbook_Halt : public Playbook {
 private:
     // Roles
     QList<Role_Halt*> _rl_halt;
-
+    QList<Role_Supporter*> _rl_supporter;
     void configure(int numPlayers);
     void run(int numPlayers);
     int maxNumPlayer();

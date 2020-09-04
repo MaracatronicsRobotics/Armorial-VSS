@@ -57,6 +57,7 @@ SOURCES += \
         src/entity/player/behaviour/behaviour.cpp \
         src/entity/player/playeraccess.cpp \
         src/entity/player/playerbus.cpp \
+        src/entity/player/role/basics/role_supporter.cpp \
         src/entity/player/role/basics/role_goalkeeper.cpp \
         src/entity/player/role/basics/role_halt.cpp \
         src/entity/player/role/role.cpp \
@@ -84,6 +85,7 @@ SOURCES += \
         src/utils/timer/timer.cpp \
         src/utils/utils.cpp \
         src/vss.cpp
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -121,6 +123,7 @@ HEADERS += \
     src/entity/player/behaviour/vssbehaviours.h \
     src/entity/player/playeraccess.h \
     src/entity/player/playerbus.h \
+    src/entity/player/role/basics/role_supporter.h \
     src/entity/player/role/basics/role_goalkeeper.h \
     src/entity/player/role/basics/role_halt.h \
     src/entity/player/role/role.h \
@@ -157,7 +160,7 @@ HEADERS += \
     src/utils/knn/knn.h \
     src/utils/timer/timer.h \
     src/utils/utils.h \
-    src/vss.h
+    src/vss.h \
 
 FORMS += \
     src/gui/mainwindow.ui
