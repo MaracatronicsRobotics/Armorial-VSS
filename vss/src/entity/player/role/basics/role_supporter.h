@@ -11,11 +11,12 @@ private:
 
     Behaviour_Assistant *_bh_as;
     Behaviour_Barrier *_bh_br;
+    Behaviour_StayBack *_bh_sb;
 
     // Behaviours ids!
     enum{
-
-        BHV_ASSISTANT ,
+        BHV_STAYBACK,
+        BHV_ASSISTANT,
         BHV_BARRIER
     };
 

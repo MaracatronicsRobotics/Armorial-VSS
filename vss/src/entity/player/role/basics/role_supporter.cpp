@@ -5,14 +5,15 @@ QString Role_Supporter::name(){
 }
 Role_Supporter::Role_Supporter()
 {
-
     _bh_br = nullptr;
     _bh_as = nullptr;
+    _bh_sb = nullptr;
 
 }
 void Role_Supporter::initializeBehaviours(){
     usesBehaviour(BHV_ASSISTANT, _bh_as = new Behaviour_Assistant());
     usesBehaviour(BHV_BARRIER , _bh_br = new Behaviour_Barrier());
+    usesBehaviour(BHV_STAYBACK , _bh_sb = new Behaviour_StayBack());
 }
 void Role_Supporter::configure(){
     setBehaviour(BHV_ASSISTANT); //initial behaviour

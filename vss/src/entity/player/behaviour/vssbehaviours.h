@@ -7,5 +7,6 @@
 #include <src/entity/player/behaviour/basics/behaviour_goalkeeper.h>
 #include <src/entity/player/behaviour/basics/behaviour_assistant.h>
 #include <src/entity/player/behaviour/basics/behaviour_barrier.h>
+#include <src/entity/player/behaviour/basics/behaviour_stayback.h>
 
 #endif // VSSBEHAVIOURS_H

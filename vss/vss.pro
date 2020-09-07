@@ -54,6 +54,7 @@ SOURCES += \
         src/entity/player/behaviour/basics/behaviour_donothing.cpp \
         src/entity/player/behaviour/basics/behaviour_goalkeeper.cpp \
         src/entity/player/behaviour/basics/behaviour_pushball.cpp \
+        src/entity/player/behaviour/basics/behaviour_stayback.cpp \
         src/entity/player/behaviour/behaviour.cpp \
         src/entity/player/playeraccess.cpp \
         src/entity/player/playerbus.cpp \
@@ -119,6 +120,7 @@ HEADERS += \
     src/entity/player/behaviour/basics/behaviour_donothing.h \
     src/entity/player/behaviour/basics/behaviour_goalkeeper.h \
     src/entity/player/behaviour/basics/behaviour_pushball.h \
+    src/entity/player/behaviour/basics/behaviour_stayback.h \
     src/entity/player/behaviour/behaviour.h \
     src/entity/player/behaviour/vssbehaviours.h \
     src/entity/player/playeraccess.h \
