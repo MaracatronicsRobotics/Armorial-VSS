@@ -275,8 +275,9 @@ void SoccerView::paintEvent(QPaintEvent* event)
     drawFieldLines(fieldDim);
     drawRobots();
     drawBalls();
-    drawBallProjection();
+    //drawBallProjection();
     drawTexts();
+    //drawPathPlanning();
     //vectorTextTest();
     glPopMatrix();
     swapBuffers();
@@ -620,6 +621,7 @@ void SoccerView::updateDetection(VSSTeam *ourTeam, VSSTeam *theirTeam) {
 
     robots.clear();
     ballVelocity.set(0,0);
+    path.clear();
 
     vector2d velocity;
     SoccerViewRobot robot;
@@ -632,6 +634,8 @@ void SoccerView::updateDetection(VSSTeam *ourTeam, VSSTeam *theirTeam) {
         robot.angle = ourPlayers.at(x)->angle().value() * 180.0/M_PI;
         robot.loc.set(ourPlayers.at(x)->position().x() * 1000.0, ourPlayers.at(x)->position().y() * 1000.0);
         robots.append(robot);
+
+        //path = ourPlayers[x]->getPath();
     }
 
     QList<VSSPlayer *> theirPlayers = theirTeam->avPlayers().values();
@@ -656,4 +660,22 @@ void SoccerView::drawBallProjection() {
     trueVelocity.x = ball.x + ballVelocity.x;
     trueVelocity.y = ball.y + ballVelocity.y;
     drawLine(ball, trueVelocity, 0.0);
+}
+
+void SoccerView::drawPathPlanning() {
+    for (int i = 2; i < path.size(); i++) {
+        double firstPoint_x = path[i - 2].x();
+        double firstPoint_y = path[i - 2].y();
+        std::cout << "First Point (x, y): (" << firstPoint_x << ", " << firstPoint_y << ")\n";
+
+        double secondPoint_x = path[i - 1].x();
+        double secondPoint_y = path[i - 1].y();
+        std::cout << "Second Point (x, y): (" << secondPoint_x << ", " << secondPoint_y << ")\n";
+
+        vector2d firstPoint(firstPoint_x * 1000.0, firstPoint_y * 1000.0);
+        vector2d secondPoint(secondPoint_x * 1000.0, secondPoint_y * 1000.0);
+        std::cout << std::endl;
+
+        drawLine(firstPoint, secondPoint, BallZ + 0.01);
+    }
 }

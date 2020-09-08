@@ -29,7 +29,6 @@ public:
     SoccerView(QWidget *parent = 0);
     void updateDetection(VSSTeam *ourTeam, VSSTeam *theirTeam);
     void setLeftIsBlue(bool _leftIsBlue) { leftIsBlue = _leftIsBlue; }
-    void drawBallProjection();
 
     struct FieldDimensions {
         vector<FieldLine*> lines;
@@ -99,13 +98,17 @@ private:
 
     double tLastRedraw;
 
+    QList<Position> path;
+
     FieldDimensions fieldDim;
 
 private:
     void drawFieldLines(FieldDimensions &dimensions);
     void drawRobots();
     void drawBalls();
+    void drawBallProjection();
     void drawTexts();
+    void drawPathPlanning();
     void drawLine(vector2d v1, vector2d v2, double z);
     void drawQuad(vector2d loc1, vector2d loc2, double z=0.0);
     void drawQuad(double x1, double y1, double x2, double y2, double z=0.0){drawQuad(vector2d(x1,y1),vector2d(x2,y2),z);}
