@@ -30,6 +30,7 @@ private:
     // Roles
     QList<Role_Halt*> _rl_halt;
     QList<Role_Supporter*> _rl_supporter;
+    QList<Role_Defender*> _rl_defender;
     void configure(int numPlayers);
     void run(int numPlayers);
     int maxNumPlayer();

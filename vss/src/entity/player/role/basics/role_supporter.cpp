@@ -41,18 +41,18 @@ void Role_Supporter::run(){
     if(distBallfromTopCorner <= dist_Corner_LeftPost || distBallfromBottomCorner <= dist_Corner_LeftPost){
         if(EnemyHasBallPossession()){
             setBehaviour(BHV_BARRIER);
-            std::cout << "BHV_BARRIER" << std::endl;
+            //std::cout << "BHV_BARRIER" << std::endl;
         }
         else{
             setBehaviour(BHV_ASSISTANT);
-            std::cout << "BHV_ASSISTANT" << std::endl;
+            //std::cout << "BHV_ASSISTANT" << std::endl;
         }
 
     }
 
     else{
         setBehaviour(BHV_ASSISTANT);
-        std::cout << "BHV_ASSISTANT" << std::endl;
+        //std::cout << "BHV_ASSISTANT" << std::endl;
     }
 }
 bool Role_Supporter::EnemyHasBallPossession(){

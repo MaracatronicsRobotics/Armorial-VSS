@@ -4,7 +4,11 @@ QString Behaviour_StayBack::name() {
     return "Behaviour_StayBack";
 }
 
-Behaviour_StayBack::Behaviour_StayBack(){}
+Behaviour_StayBack::Behaviour_StayBack(){
+    _sk_goTo = nullptr;
+    _sk_spin = nullptr;
+    _sk_rotateTo = nullptr;
+}
 
 void Behaviour_StayBack::configure() {
     //initializing variables

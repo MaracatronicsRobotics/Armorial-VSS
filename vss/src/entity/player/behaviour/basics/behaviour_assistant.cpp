@@ -9,7 +9,10 @@ QString Behaviour_Assistant::name() {
 }
 
 Behaviour_Assistant::Behaviour_Assistant() {
-
+    _sk_goTo = nullptr;
+    _sk_spin = nullptr;
+    _sk_rotateTo = nullptr;
+    _sk_pushBall = nullptr;
 }
 
 void Behaviour_Assistant::configure() {
@@ -142,10 +145,10 @@ void Behaviour_Assistant::run(){
         //setting skill goTo velocity factor
         // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
         float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
-        if(2 < 1.0*velocityNeeded){
-            _sk_goTo->setGoToVelocityFactor(1.0*velocityNeeded);
+        if(3.0f < 1.0f*velocityNeeded){
+            _sk_goTo->setGoToVelocityFactor(1.0f*velocityNeeded);
         }else{
-            //_sk_goTo->setGoToVelocityFactor(2.0);
+            _sk_goTo->setGoToVelocityFactor(3.0f);
         }
 
         //setting skill push

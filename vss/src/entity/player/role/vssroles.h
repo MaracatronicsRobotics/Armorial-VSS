@@ -5,6 +5,7 @@
 #include <src/entity/player/role/basics/role_halt.h>
 #include <src/entity/player/role/basics/role_goalkeeper.h>
 #include <src/entity/player/role/basics/role_supporter.h>
+#include <src/entity/player/role/basics/role_defender.h>
 
 
 #endif // VSSROLES_H
