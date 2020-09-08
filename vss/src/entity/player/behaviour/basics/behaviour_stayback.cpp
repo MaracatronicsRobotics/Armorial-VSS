@@ -22,6 +22,7 @@ void Behaviour_StayBack::configure() {
     //skills
     usesSkill(_sk_goTo = new Skill_GoTo());
     usesSkill(_sk_rotateTo = new Skill_RotateTo());
+    usesSkill(_sk_spin = new Skill_Spin());
 
     //initial skill
     setInitialSkill(_sk_goTo);
@@ -57,38 +58,38 @@ void Behaviour_StayBack::run(){
         Position desiredPosition(false, 0, 0, 0);
 
         //if ball is in their field - change this condition
-            int factor = 1;
-            if(loc()->ourSide().isRight()) factor = 1;
-            else factor = -1;
-            Position upper(true, loc()->ourFieldTopCorner().x() - factor*loc()->fieldLength()*0.2f, loc()->ourFieldTopCorner().y(), 0.0);
-            Position lower(true, loc()->ourFieldBottomCorner().x() - factor*loc()->fieldLength()*0.2f, loc()->ourFieldBottomCorner().y(), 0.0);
-            desiredPosition = (WR::Utils::projectPointAtSegment(upper, lower, loc()->ball()));
+        int factor = 1;
+        if(loc()->ourSide().isRight()) factor = 1;
+        else factor = -1;
+        Position upper(true, loc()->ourFieldTopCorner().x() - factor*loc()->fieldLength()*0.2f, loc()->ourFieldTopCorner().y(), 0.0);
+        Position lower(true, loc()->ourFieldBottomCorner().x() - factor*loc()->fieldLength()*0.2f, loc()->ourFieldBottomCorner().y(), 0.0);
+        desiredPosition = (WR::Utils::projectPointAtSegment(upper, lower, loc()->ball()));
 
-            //Calculating limit value to desiredPosition.y()
-            float tan = fabs(loc()->ball().y() - loc()->ourGoal().y())/fabs(loc()->ball().x() - loc()->ourGoal().x());
-            float Ylim = tan * fabs(desiredPosition.x() - loc()->ourGoal().x());
+        //Calculating limit value to desiredPosition.y()
+        float tan = fabs(loc()->ball().y() - loc()->ourGoal().y())/fabs(loc()->ball().x() - loc()->ourGoal().x());
+        float Ylim = tan * fabs(desiredPosition.x() - loc()->ourGoal().x());
 
-            float posY = desiredPosition.y();
-            WR::Utils::limitValue(&posY, -Ylim, Ylim);
-            desiredPosition.setPosition(desiredPosition.x(), posY, desiredPosition.z());
+        float posY = desiredPosition.y();
+        WR::Utils::limitValue(&posY, -Ylim, Ylim);
+        desiredPosition.setPosition(desiredPosition.x(), posY, desiredPosition.z());
 
-            //setting skill rotateTo
-            _sk_rotateTo->setDesiredPosition(loc()->ball());
+        //setting skill rotateTo
+        _sk_rotateTo->setDesiredPosition(loc()->ball());
 
-            //setting skill goTo position
-            desiredPosition = projectPosOutsideGoalArea(desiredPosition, true, false);
-            _sk_goTo->setGoToPos(desiredPosition);
-            //setting skill goTo velocity factor
-            //default value to increase robot vellocity (needs adjustment)
-            _sk_goTo->setGoToVelocityFactor(2.0);
+        //setting skill goTo position
+        desiredPosition = projectPosOutsideGoalArea(desiredPosition, true, false);
+        _sk_goTo->setGoToPos(desiredPosition);
+        //setting skill goTo velocity factor
+        //default value to increase robot vellocity (needs adjustment)
+        _sk_goTo->setGoToVelocityFactor(2.0);
 
-            //transitions
-            //if this player is at the desiredPosition: rotateTo(ballPosition)
-            if(player()->isNearbyPosition(desiredPosition, 0.03f)){
-                enableTransition(STATE_ROTATE);
-            }else{
-                enableTransition(STATE_GOTO);
-            }
+        //transitions
+        //if this player is at the desiredPosition: rotateTo(ballPosition)
+        if(player()->isNearbyPosition(desiredPosition, 0.03f)){
+            enableTransition(STATE_ROTATE);
+        }else{
+            enableTransition(STATE_GOTO);
+        }
         break;
     }
     }
@@ -215,6 +216,7 @@ bool Behaviour_StayBack::checkIfShouldSpin(){
             }else{
                 _state = STATE_STAYBACK;
                 returnBool = false;
+                loopsInSameRegionWithBall = 0;
             }
         }else{
             loopsInSameRegionWithBall = 0;
@@ -232,6 +234,7 @@ bool Behaviour_StayBack::checkIfShouldSpin(){
                 }else{
                     _state = STATE_STAYBACK;
                     returnBool = false;
+                    loopsInSameRegionWithOpp = 0;
                 }
             }
         }else{

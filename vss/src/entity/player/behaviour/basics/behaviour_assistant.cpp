@@ -320,6 +320,7 @@ bool Behaviour_Assistant::checkIfShouldSpin(){
             }else{
                 _state = STATE_GOTOBALL;
                 returnBool = false;
+                loopsInSameRegionWithBall = 0;
             }
         }else{
             loopsInSameRegionWithBall = 0;
@@ -337,6 +338,7 @@ bool Behaviour_Assistant::checkIfShouldSpin(){
                 }else{
                     _state = STATE_GOTOBALL;
                     returnBool = false;
+                    loopsInSameRegionWithOpp = 0;
                 }
             }
         }else{

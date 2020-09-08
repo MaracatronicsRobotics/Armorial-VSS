@@ -25,17 +25,14 @@ void Role_Defender::run(){
     bool theyAreNearBall = false;
     for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
         if(PlayerBus::theirPlayerAvailable(x)){
-            if(PlayerBus::theirPlayer(x)->hasBallPossession()){
-                theyAreNearBall = true;
-                break;
-            }else if(PlayerBus::theirPlayer(x)->isNearbyPosition(loc()->ball(), player()->distBall())){
+            if(PlayerBus::theirPlayer(x)->hasBallPossession() || PlayerBus::theirPlayer(x)->isNearbyPosition(loc()->ball(), player()->distBall())){
                 theyAreNearBall = true;
                 break;
             }
         }
     }
-    //if ball is closer to their goal: stay back
-    if(loc()->isInsideTheirField(loc()->ball()) && fabs(loc()->ball().x()) >= 0.2f*loc()->fieldMaxX()){
+    //if ball is closer to their goal and it isn't with this player (nor very close to it): stay back
+    if(loc()->isInsideTheirField(loc()->ball()) && fabs(loc()->ball().x()) >= 0.2f*loc()->fieldMaxX() && !player()->isNearbyPosition(loc()->ball(), 0.07f)){
         setBehaviour(BHV_STAYBACK);
     }else{
         //if ball is distant from their goal and there's an opponent closer to it: barrier
