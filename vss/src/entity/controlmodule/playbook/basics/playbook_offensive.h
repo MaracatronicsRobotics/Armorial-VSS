@@ -19,31 +19,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#include "strategy_halt.h"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#ifndef PLAYBOOK_OFFENSIVE_H
+#define PLAYBOOK_OFFENSIVE_H
 
-QString Strategy_Halt::name() {
-    return "Strategy_Halt";
-}
+#include <src/entity/controlmodule/playbook/playbook.h>
+#include <src/entity/player/role/vssroles.h>
 
-Strategy_Halt::Strategy_Halt() {
-    _pb_defensive = nullptr;
-    _pb_offensive = nullptr;
-}
+class Playbook_Offensive : public Playbook {
+private:
+    // Roles
+    QList<Role_Halt*> _rl_halt;
 
-void Strategy_Halt::configure(int numOurPlayers) {
-    usesPlaybook(_pb_defensive = new Playbook_Defensive());
-    usesPlaybook(_pb_offensive = new Playbook_Offensive());
-}
+    void configure(int numPlayers);
+    void run(int numPlayers);
+    int maxNumPlayer();
 
-void Strategy_Halt::run(int numOurPlayers) {
-    quint8 goalier = dist()->getPlayer();
-    if(PlayerBus::ourPlayerAvailable(goalier)){
-        _pb_defensive->addPlayer(goalier);
-        _pb_defensive->setGoalierId(goalier);
-    }
+public:
+    Playbook_Offensive();
+    QString name();
+};
 
-    QList<quint8> allPlayers = dist()->getAllPlayers();
-    if(!allPlayers.isEmpty())
-        _pb_offensive->addPlayers(allPlayers);
-}
+#endif // PLAYBOOK_OFFENSIVE_H

@@ -19,31 +19,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#include "strategy_halt.h"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include "playbook_defensive.h"
 
-QString Strategy_Halt::name() {
-    return "Strategy_Halt";
+
+QString Playbook_Defensive::name() {
+    return "Playbook_Defensive";
 }
 
-Strategy_Halt::Strategy_Halt() {
-    _pb_defensive = nullptr;
-    _pb_offensive = nullptr;
+Playbook_Defensive::Playbook_Defensive() {
+    _GK_ID = DIST_INVALID_ID;
 }
 
-void Strategy_Halt::configure(int numOurPlayers) {
-    usesPlaybook(_pb_defensive = new Playbook_Defensive());
-    usesPlaybook(_pb_offensive = new Playbook_Offensive());
+int Playbook_Defensive::maxNumPlayer() {
+    return INT_MAX;
 }
 
-void Strategy_Halt::run(int numOurPlayers) {
-    quint8 goalier = dist()->getPlayer();
-    if(PlayerBus::ourPlayerAvailable(goalier)){
-        _pb_defensive->addPlayer(goalier);
-        _pb_defensive->setGoalierId(goalier);
+void Playbook_Defensive::configure(int numPlayers) {
+    usesRole(_rl_gk = new Role_Goalkeeper());
+    usesRole(_rl_halt = new Role_Halt());
+}
+
+void Playbook_Defensive::run(int numPlayers) {
+    // Taking the goalkeeper
+    if(_GK_ID != DIST_INVALID_ID){
+        dist()->removePlayer(_GK_ID);
+        setPlayerRole(_GK_ID, _rl_gk);
+    } else std::cout << "[PLAYBOOK DEFENSIVE] Goleiro Indisponível\n";
+
+    for(int i = 0; i < numPlayers - 1; i++){
+        quint8 playerId = dist()->getPlayer();
+        setPlayerRole(playerId, _rl_halt);
     }
-
-    QList<quint8> allPlayers = dist()->getAllPlayers();
-    if(!allPlayers.isEmpty())
-        _pb_offensive->addPlayers(allPlayers);
 }

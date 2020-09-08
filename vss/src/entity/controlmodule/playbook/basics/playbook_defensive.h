@@ -19,31 +19,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#include "strategy_halt.h"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#ifndef PLAYBOOK_DEFENSIVE_H
+#define PLAYBOOK_DEFENSIVE_H
 
-QString Strategy_Halt::name() {
-    return "Strategy_Halt";
-}
+#include <src/entity/controlmodule/playbook/playbook.h>
+#include <src/entity/player/role/vssroles.h>
 
-Strategy_Halt::Strategy_Halt() {
-    _pb_defensive = nullptr;
-    _pb_offensive = nullptr;
-}
+class Playbook_Defensive : public Playbook {
+private:
+    // Roles
+    Role_Goalkeeper *_rl_gk;
+    Role_Halt *_rl_halt;
 
-void Strategy_Halt::configure(int numOurPlayers) {
-    usesPlaybook(_pb_defensive = new Playbook_Defensive());
-    usesPlaybook(_pb_offensive = new Playbook_Offensive());
-}
+    // Parameters
+    quint8 _GK_ID;
 
-void Strategy_Halt::run(int numOurPlayers) {
-    quint8 goalier = dist()->getPlayer();
-    if(PlayerBus::ourPlayerAvailable(goalier)){
-        _pb_defensive->addPlayer(goalier);
-        _pb_defensive->setGoalierId(goalier);
-    }
+    void configure(int numPlayers);
+    void run(int numPlayers);
+    int maxNumPlayer();
 
-    QList<quint8> allPlayers = dist()->getAllPlayers();
-    if(!allPlayers.isEmpty())
-        _pb_offensive->addPlayers(allPlayers);
-}
+public:
+    Playbook_Defensive();
+    QString name();
+
+    void setGoalierId(quint8 GK_ID) { _GK_ID = GK_ID; }
+};
+
+#endif // PLAYBOOK_DEFENSIVE_H

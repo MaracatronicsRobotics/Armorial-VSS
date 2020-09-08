@@ -33,6 +33,7 @@ private:
     void configure(int numPlayers);
     void run(int numPlayers);
     int maxNumPlayer();
+
 public:
     Playbook_Halt();
     QString name();

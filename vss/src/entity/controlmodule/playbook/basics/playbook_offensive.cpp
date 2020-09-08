@@ -19,31 +19,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#include "strategy_halt.h"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include "playbook_offensive.h"
 
-QString Strategy_Halt::name() {
-    return "Strategy_Halt";
+QString Playbook_Offensive::name() {
+    return "Playbook_Offensive";
 }
 
-Strategy_Halt::Strategy_Halt() {
-    _pb_defensive = nullptr;
-    _pb_offensive = nullptr;
+Playbook_Offensive::Playbook_Offensive() {
 }
 
-void Strategy_Halt::configure(int numOurPlayers) {
-    usesPlaybook(_pb_defensive = new Playbook_Defensive());
-    usesPlaybook(_pb_offensive = new Playbook_Offensive());
+int Playbook_Offensive::maxNumPlayer() {
+    return INT_MAX;
 }
 
-void Strategy_Halt::run(int numOurPlayers) {
-    quint8 goalier = dist()->getPlayer();
-    if(PlayerBus::ourPlayerAvailable(goalier)){
-        _pb_defensive->addPlayer(goalier);
-        _pb_defensive->setGoalierId(goalier);
+void Playbook_Offensive::configure(int numPlayers) {
+    for(int i = 0; i < numPlayers; i++) {
+        Role_Halt *rl_halt = new Role_Halt();
+        usesRole(rl_halt);
+        _rl_halt.push_back(rl_halt);
     }
+}
 
-    QList<quint8> allPlayers = dist()->getAllPlayers();
-    if(!allPlayers.isEmpty())
-        _pb_offensive->addPlayers(allPlayers);
+void Playbook_Offensive::run(int numPlayers) {
+    for(int i = 0; i < numPlayers; i++){
+        quint8 playerId = dist()->getPlayer();
+        setPlayerRole(playerId, _rl_halt.at(i));
+    }
 }

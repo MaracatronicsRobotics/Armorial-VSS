@@ -28,9 +28,12 @@
 class Strategy_Halt : public StrategyState {
 private:
     // Playbooks
-    Playbook_Halt *_pb_halt;
+    Playbook_Defensive *_pb_defensive;
+    Playbook_Offensive *_pb_offensive;
+
     void configure(int numOurPlayers);
     void run(int numOurPlayers);
+
 public:
     Strategy_Halt();
     QString name();
