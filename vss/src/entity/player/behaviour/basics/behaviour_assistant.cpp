@@ -191,6 +191,7 @@ void Behaviour_Assistant::run(){
 Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea){
     Position L1, L2, R1, R2;
     bool shouldProjectPos = false, isOurArea = false;
+    float smallMargin = 0.05f;
 
     if(fabs(pos.x()) > (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && fabs(pos.y()) < loc()->fieldDefenseLength()/2){
         shouldProjectPos = true;
@@ -207,7 +208,7 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
             shouldProjectPos = false;
         }
     }
-    //if should project position outside our defense area
+    //if should project position outside a defense area
     if(shouldProjectPos){
         //multiplying factor changes if area's team is the left team or the right team
         float mult = -1.0;
@@ -219,11 +220,11 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
         //getting segments
 
         //left segment points (defense area)
-        L1 = Position(true, -mult*loc()->fieldMaxX(), loc()->fieldDefenseLength()/2, 0.0f);
-        L2 = Position(true, L1.x() + mult * loc()->fieldDefenseWidth(), L1.y(), 0.0f);
+        L1 = Position(true, -mult*loc()->fieldMaxX(), loc()->fieldDefenseLength()/2 + smallMargin, 0.0f);
+        L2 = Position(true, L1.x() + mult * (loc()->fieldDefenseWidth() + smallMargin), L1.y(), 0.0f);
         //right segment points (defense area)
-        R1 = Position(true, -mult*loc()->fieldMaxX(), -loc()->fieldDefenseLength()/2, 0.0f);
-        R2 = Position(true, R1.x() + mult * loc()->fieldDefenseWidth(), R1.y(), 0.0f);
+        R1 = Position(true, -mult*loc()->fieldMaxX(), -(loc()->fieldDefenseLength()/2 + smallMargin), 0.0f);
+        R2 = Position(true, R1.x() + mult * (loc()->fieldDefenseWidth() + smallMargin), R1.y(), 0.0f);
         //front segment is composed by L2 and R2 (defense area)
 
         //projecting position on segments L1->L2, R1->R2, L2->R2
@@ -237,7 +238,7 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
         Position front = WR::Utils::hasInterceptionSegments(L2, R2, player()->position(), pos);
 
         //if there is an interception between playerPos->pos and L1->L2 on L1->L2
-        if(left.isValid() && fabs(left.x()) >= (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && fabs(left.x()) <= loc()->fieldMaxX()){
+        if(left.isValid() && fabs(left.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && fabs(left.x()) <= loc()->fieldMaxX()){
             //if initial position isn't between goal post and defense area post
             if(fabs(pos.y()) < fabs(loc()->ourGoalLeftPost().y())){
                 return pointProjFront;
@@ -246,7 +247,7 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
             }
         }
         //if there is an interception between playerPos->pos and R1->R2 on R1->R2
-        else if(right.isValid() && fabs(right.x()) >= (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && fabs(right.x()) <= loc()->fieldMaxX()){
+        else if(right.isValid() && fabs(right.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && fabs(right.x()) <= loc()->fieldMaxX()){
             //if initial position isn't between goal post and defense area post
             if(fabs(pos.y()) < fabs(loc()->ourGoalLeftPost().y())){
                 return pointProjFront;
@@ -255,7 +256,7 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
             }
         }
         //if there is an interception between playerPos->pos and L2->R2 on L2->R2
-        else if(front.isValid() && fabs(front.x()) >= (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && fabs(front.x()) <= loc()->fieldMaxX()){
+        else if(front.isValid() && fabs(front.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && fabs(front.x()) <= loc()->fieldMaxX()){
             return pointProjFront;
         }else{
             return pos;
