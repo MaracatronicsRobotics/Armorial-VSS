@@ -34,8 +34,8 @@ int Playbook_Halt::maxNumPlayer() {
 
 void Playbook_Halt::configure(int numPlayers) {
     for(int i = 0; i < numPlayers; i++) {
-        Role_Halt *rl_halt = new Role_Halt();
-        Role_Supporter *rl_supporter = new Role_Supporter();
+        //Role_Halt *rl_halt = new Role_Halt();
+        //Role_Supporter *rl_supporter = new Role_Supporter();
         Role_Defender *rl_defender = new Role_Defender();
         //usesRole(rl_halt);
         //usesRole(rl_supporter);

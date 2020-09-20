@@ -28,11 +28,15 @@
 class Playbook_Offensive : public Playbook {
 private:
     // Roles
-    QList<Role_Halt*> _rl_halt;
+    Role_Defender *_rl_def;
+    Role_Supporter *_rl_sup;
 
     void configure(int numPlayers);
     void run(int numPlayers);
     int maxNumPlayer();
+
+    // Parameters
+    quint8 previousSupporter;
 
 public:
     Playbook_Offensive();
