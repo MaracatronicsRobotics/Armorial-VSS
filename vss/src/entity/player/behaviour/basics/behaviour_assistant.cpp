@@ -70,9 +70,19 @@ void Behaviour_Assistant::run(){
     case STATE_GOTOBALL:{
         Position _aimPosition;
 
+        //is player behind ball x? (reference: their goal)
+        bool playerBehindBall = false;
+        if(loc()->ourSide().isRight()){
+            if(player()->position().x() > loc()->ball().x()) playerBehindBall = true;
+        }else{
+            if(player()->position().x() < loc()->ball().x()) playerBehindBall = true;
+        }
+
         bool closestToBall = false;
+
         //checking if our player is closest to ball
         quint8 allyId = closestAllyToBall();
+
         //if allyId is a valid id
         if(PlayerBus::ourPlayerAvailable(allyId)){
             //if there's an ally closer to the ball: keep some distance from ball
@@ -114,7 +124,11 @@ void Behaviour_Assistant::run(){
             behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.02f, GEARSystem::Angle::pi);
         }
 
-        if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
+        if(player()->isNearbyPosition(loc()->ball(), 0.1f) && playerBehindBall){
+            //if the player is behind ball x and should go to ball position
+            behindBall = loc()->ball();
+            //std::cout << "locball\n";
+        }else if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
             //calc unitary vector of velocity
             const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
 
@@ -152,13 +166,13 @@ void Behaviour_Assistant::run(){
         }
 
         //setting skill push
-        _sk_pushBall->setSpeedAndOmega(1.0, 0.0);
+        _sk_pushBall->setSpeedAndOmega(1.5, 0.0);
 
         //setting skill rotateTo
-        _sk_rotateTo->setDesiredPosition(loc()->ball());
+        _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
 
         //transitions
-        if(player()->isLookingTo(loc()->ball(), 1.5) && closestToBall){
+        if(player()->isLookingTo(loc()->ball(), 2.0) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f)){
             //std::cout << "PUSH" << std::endl;
             enableTransition(STATE_PUSH);
         }else if(player()->isNearbyPosition(behindBall, 0.03f)){

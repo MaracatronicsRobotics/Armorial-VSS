@@ -46,7 +46,8 @@ void Strategy_Halt::run(int numOurPlayers) {
     }
 
     QList<quint8> allPlayers = dist()->getAllPlayers();
-    if(!allPlayers.isEmpty())
+    if(!allPlayers.isEmpty()){
         //_pb_offensive->addPlayers(allPlayers);
         //_pb_halt->addPlayers(allPlayers);
+    }
 }
