@@ -15,12 +15,12 @@ QString Behaviour_Barrier::name() {
 
 Behaviour_Barrier::Behaviour_Barrier()
 {
-    setD(0.05);
-    setRadius(0.21);//hyperparameter para distancia do centro do gol
+    setD(0.05f);
+    setRadius(0.21f);//hyperparameter para distancia do centro do gol
 
-    _sk_goto = NULL;
-    _sk_intercept = NULL;
-    _sk_spin = NULL;
+    _sk_goto = nullptr;
+    _sk_intercept = nullptr;
+    _sk_spin = nullptr;
 
 }
 
@@ -60,8 +60,22 @@ void Behaviour_Barrier::run(){
         }
     //setting goto
     _sk_goto->setGoToPos(desiredPosition);
-    _sk_goto->setGoToVelocityFactor(2.0);
-    //setting intercept dont need
+    //adjusting velocity factor according to: ball distance to our goal and ball velocity
+    float velFacDist = 1 - (loc()->distBallOurGoal()/WR::Utils::distance(loc()->fieldLeftTopCorner(), Position(true, loc()->fieldMaxX(), 0.0f, 0.0f)));
+    float velFacVel = (loc()->ballVelocity().abs())/15.0f;
+    float velFac = (velFacDist + velFacVel) * 16.0f;
+    if(velFac < 4.0f) velFac = 4.0f;
+    _sk_goto->setGoToVelocityFactor(velFac);
+
+    //setting intercept
+    float multFactor = 1.0;
+    if(loc()->ourSide().isLeft()){
+        multFactor = -1.0;
+    }
+    Position interceptPoinLeft(true, multFactor * (loc()->fieldMaxX() - loc()->fieldDefenseWidth()), multFactor * loc()->fieldDefenseLength()/2.0f, 0.0f);
+    Position interceptPointRight(true, multFactor * (loc()->fieldMaxX() - loc()->fieldDefenseWidth()), -1.0f * multFactor * loc()->fieldDefenseLength()/2.0f, 0.0f);
+    _sk_intercept->setInterceptSegment(interceptPoinLeft, interceptPointRight);
+    _sk_intercept->setDesiredVelocity(4.0f);
 
     //setting spin
     if(loc()->ourSide().isLeft()){//se for lado esquerdo
@@ -82,11 +96,11 @@ void Behaviour_Barrier::run(){
         }
     }
 
-    //Transitions
+    //Transitions with intercept bhv
     if(player()->distBall() > INTERCEPT_MINBALLDIST && isBallComingToGoal(INTERCEPT_MINBALLVELOCITY)){
         enableTransition(STATE_INTERCEPT);
     } else {
-        if(player()->distBall() <=0.075){ //hyperparameter
+        if(player()->distBall() <=0.075f){ //hyperparameter
             enableTransition(STATE_SPIN);
         } else {
             enableTransition(STATE_GOTO);
