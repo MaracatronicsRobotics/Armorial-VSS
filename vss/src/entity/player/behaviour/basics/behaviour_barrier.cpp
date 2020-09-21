@@ -95,8 +95,8 @@ void Behaviour_Barrier::run(){
             _sk_spin->setClockWise(true);
         }
     }
-
-    //Transitions with intercept bhv
+    /*
+    //Transitions with intercept skill
     if(player()->distBall() > INTERCEPT_MINBALLDIST && isBallComingToGoal(INTERCEPT_MINBALLVELOCITY)){
         enableTransition(STATE_INTERCEPT);
     } else {
@@ -106,7 +106,13 @@ void Behaviour_Barrier::run(){
             enableTransition(STATE_GOTO);
         }
     }
-
+    */
+    //Transitions without intercept skill
+    if(player()->distBall() <=0.075f){ //hyperparameter
+        enableTransition(STATE_SPIN);
+    } else {
+        enableTransition(STATE_GOTO);
+    }
 }
 
 bool Behaviour_Barrier::isBallComingToGoal(float minSpeed , float postsFactor){
