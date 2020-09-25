@@ -33,15 +33,19 @@ Role::Role() {
     _loc = NULL;
     _initialized = false;
     _configureEnabled = true; // for set behaviours
+    _actualBehaviour = -1;
 }
 
 Role::~Role() {
     // Delete behaviours
-    QHash<int, Behaviour*>:: iterator it;
-    for(it = _behaviourList.begin(); it != _behaviourList.end(); it++){
-        delete *it;
-    }
-    _behaviourList.clear();
+     QHash<int, Behaviour*>:: iterator it;
+     for(it = _behaviourList.begin(); it != _behaviourList.end(); it++){
+         if((*it) == NULL)
+             continue;
+         else
+             delete *it;
+     }
+     _behaviourList.clear();
 }
 
 Locations* Role::loc() {

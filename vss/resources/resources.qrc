@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>gui/tree.png</file>
+        <file>gui/config.png</file>
+        <file>gui/maracatronics.png</file>
+        <file>gui/robot.png</file>
+        <file>gui/yellowcard.png</file>
+        <file>gui/time.png</file>
+        <file>gui/referee.png</file>
+        <file>gui/redcard.png</file>
+        <file>gui/connect.png</file>
+        <file>gui/command.png</file>
+        <file>gui/battery.png</file>
+        <file>gui/armorial.ico</file>
+        <file>gui/dribble.png</file>
+        <file>gui/atk.png</file>
+        <file>gui/sup.png</file>
+        <file>gui/none.png</file>
+        <file>gui/gk.png</file>
+        <file>gui/chute.png</file>
+        <file>gui/bar.png</file>
+        <file>gui/adam.png</file>
+    </qresource>
+</RCC>

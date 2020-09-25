@@ -168,3 +168,6 @@ HEADERS += \
 
 FORMS += \
     src/gui/mainwindow.ui
+
+RESOURCES += \
+    resources/resources.qrc

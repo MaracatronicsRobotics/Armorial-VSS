@@ -23,7 +23,14 @@
 #define ROLE_H
 
 #include <src/entity/player/baseplayer.h>
+#include <src/entity/player/playeraccess.h>
+#include <src/entity/player/playerbus.h>
+#include <src/entity/controlmodule/vssteam.h>
+#include <src/entity/controlmodule/coach/playersdistribution.h>
+#include <src/entity/player/behaviour/vssbehaviours.h>
 #include <QObject>
+
+#define STRIKER_INTERCEPT_MINVEL 0.5f
 
 class Role : public QObject {
         Q_OBJECT
@@ -54,6 +61,9 @@ public:
 protected:
     // Behaviour list functions
     void usesBehaviour(int id, Behaviour *behaviour);
+
+    // canKickBall (for parameters)
+    bool canKickBall() const;
 
     // Utils, loc and player access
     Locations* loc();

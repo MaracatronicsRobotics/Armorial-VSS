@@ -57,6 +57,8 @@ public:
     float distTheirGoal() const;
     // Angles
     Angle angleTo(const Position &pos) const;
+    // Role
+    QString roleName() const;
 };
 
 

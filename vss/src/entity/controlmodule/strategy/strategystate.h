@@ -23,6 +23,7 @@
 #define STRATEGYSTATE_H
 
 #include <src/entity/controlmodule/coach/basecoach.h>
+#include <src/utils/color/color.h>
 
 class StrategyState {
 public:
@@ -39,16 +40,10 @@ public:
 
     // Auxiliary methods
     QList<Playbook*> getPlaybooks() { return _playbookList; }
+    Colors::Color teamColor();
 protected:
     // Playbook functions
     void usesPlaybook(Playbook *playbook);
-
-    // canKickBall access (normal start)
-    bool canKickBall() const;
-
-    // Ball possession access
-    bool hasBallPossession() const;
-    quint8 ballPossession() const;
 
     // Utils, loc and dist access
     CoachUtils* utils() { return _utils; }

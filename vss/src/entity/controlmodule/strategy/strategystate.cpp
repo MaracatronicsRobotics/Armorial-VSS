@@ -25,6 +25,7 @@
 #include <src/entity/player/vssplayer.h>
 #include <src/entity/locations.h>
 #include <src/entity/controlmodule/playbook/playbook.h>
+#include <src/gui/vssgui.h>
 
 StrategyState::StrategyState() {
     _initialized = false;
@@ -53,6 +54,7 @@ void StrategyState::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils 
 }
 
 void StrategyState::runStrategyState() {
+    // don't make changes when timeout or halt is enabled
     QList<Playbook*>::iterator it;
     // Run configurate(numOurPlayers) if num of players changed
     QHash<quint8,VSSPlayer*> avPlayers = _ourTeam->avPlayers();
@@ -63,6 +65,7 @@ void StrategyState::runStrategyState() {
         configure(_lastNumOurPlayers);
         _configureEnabled = false;
     }
+
     // For each playbook, initialize (if necessary) and clear old players
     for(it = _playbookList.begin(); it != _playbookList.end(); it++) {
         Playbook *playbook = *it;
@@ -73,19 +76,23 @@ void StrategyState::runStrategyState() {
         // Clear old players added
         playbook->clearPlayers();
     }
+
     // Reset players distribution
     _dist->clear();
     QList<VSSPlayer*> players = avPlayers.values();
     QList<VSSPlayer*>::iterator it2;
     for(it2=players.begin(); it2!=players.end(); it2++)
         _dist->insert((*it2)->playerId());
+
     // Run state implemented by child
     // It set players to playbooks created on configure()
     run(_lastNumOurPlayers);
+
     // Effectivelly run playbook
     for(it = _playbookList.begin(); it != _playbookList.end(); it++) {
         (*it)->runPlaybook(name());
     }
+
     // If still players on players distribution, set them to DoNothing
     while(_dist->hasPlayersAvailable()) {
         quint8 id = _dist->getPlayer();
@@ -93,29 +100,43 @@ void StrategyState::runStrategyState() {
         player->setRole(NULL);
         std::cout << "[WARNING] " << name().toStdString() << ", player #" << (int)id << " wasn't allocated in a Playbook!\n";
     }
+
     // Cleanup playbook old roles
     for(it = _playbookList.begin(); it != _playbookList.end(); it++) {
         if((*it)->numPlayers()!=0)
             (*it)->clearOldRoles();
     }
+
     // Clear old playbook
     clearOldPlaybook();
+
+    if(VSSGui::_isEnabled)
+        VSSGui::updateTree(this);
+
 }
 
 void StrategyState::setCurrPlaybookToOld() {
-    while(_playbookList.empty()==false)
+    while(!_playbookList.isEmpty())
         _oldPlaybook.push_back(_playbookList.takeFirst());
 }
 
 void StrategyState::clearOldPlaybook() {
-    while(_oldPlaybook.empty()==false)
-        delete _oldPlaybook.takeFirst();
+    int sz = _oldPlaybook.size();
+    for(int x = 0; x < sz; x++){
+        if(_oldPlaybook.at(x) == NULL){
+            continue;
+        }
+        else
+            delete _oldPlaybook.at(x);
+    }
+
+    _oldPlaybook.clear();
 }
 
 void StrategyState::usesPlaybook(Playbook *playbook) {
     // Check if call is inside configure()
     if(_configureEnabled==false) {
-        std::cout << "[WARNING] Blocked strategy state '" << name().toStdString() << "' setting Playbook to use outside configure().\n";
+        std::cout <<"[WARNING] Blocked strategy state '" << name().toStdString() << "' setting Playbook to use outside configure().\n";
         return;
     }
     // Check null pointer
@@ -126,6 +147,7 @@ void StrategyState::usesPlaybook(Playbook *playbook) {
         _playbookList.push_back(playbook);
 }
 
-bool StrategyState::hasBallPossession() const {
-    return _ourTeam->hasBallPossession();
+Colors::Color StrategyState::teamColor(){
+    return _ourTeam->teamColor();
 }
+

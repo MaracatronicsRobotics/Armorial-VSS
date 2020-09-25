@@ -50,7 +50,9 @@ public:
     virtual QString name() = 0;
 
     // Auxiliary methods
+    QList<quint8> getPlayers() { return _assignmentTable.keys(); }
     QList<Role*> getRoles() { return _assignmentTable.values(); }
+    Colors::Color teamColor() { return _ourTeam->teamColor(); }
 protected:
     // Players on this playbook access
     bool hasPlayer(quint8 id);
@@ -63,6 +65,7 @@ protected:
     CoachUtils* utils() { return _utils; }
     Locations* loc() const;
     PlayersDistribution* dist() { return _dist; }
+    VSSTeam* team() { return _ourTeam; }
 private:
     // Implemented by children
     virtual void run(int numPlayers) = 0;

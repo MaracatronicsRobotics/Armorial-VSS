@@ -106,19 +106,25 @@ void Playbook::updatePlayersRoles() {
 }
 
 void Playbook::setCurrRolesToOld() {
-    while(_rolesList.empty()==false)
+    while(!_rolesList.isEmpty())
         _oldRoles.push_back(_rolesList.takeFirst());
 }
 
 void Playbook::clearOldRoles() {
-    while(_oldRoles.empty()==false)
-        delete _oldRoles.takeFirst();
+    int sz = _oldRoles.size();
+    for(int x = 0; x < sz; x++)
+        if(_oldRoles.at(x) == NULL)
+            continue;
+        else
+            delete _oldRoles.at(x);
+
+    _oldRoles.clear();
 }
 
 void Playbook::usesRole(Role *role) {
     // Check if call is inside configure()
     if(_configureEnabled==false) {
-        std::cout << "[WARNING] Blocked playbook '" << name().toStdString() << "' setting Role to use outside configure().\n";
+        std::cout << "[WARNING] " << "Blocked playbook '" << name().toStdString() << "' setting Role to use outside configure().\n";
         return;
     }
     // Check null pointer
