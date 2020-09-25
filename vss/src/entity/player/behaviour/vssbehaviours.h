@@ -8,5 +8,6 @@
 #include <src/entity/player/behaviour/basics/behaviour_assistant.h>
 #include <src/entity/player/behaviour/basics/behaviour_barrier.h>
 #include <src/entity/player/behaviour/basics/behaviour_stayback.h>
+#include <src/entity/player/behaviour/basics/behaviour_attacker.h>
 
 #endif // VSSBEHAVIOURS_H

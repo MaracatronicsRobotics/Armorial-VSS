@@ -19,6 +19,5 @@
         <file>gui/gk.png</file>
         <file>gui/chute.png</file>
         <file>gui/bar.png</file>
-        <file>gui/adam.png</file>
     </qresource>
 </RCC>

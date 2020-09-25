@@ -19,38 +19,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef ROLE_HALT_H
-#define ROLE_HALT_H
+#ifndef BEHAVIOUR_ATTACKER_H
+#define BEHAVIOUR_ATTACKER_H
 
-#include <src/entity/player/behaviour/vssbehaviours.h>
-#include <src/entity/player/role/role.h>
+#include <src/entity/player/behaviour/behaviour.h>
+#include <src/entity/player/skill/vssskills.h>
 
-class Role_Halt : public Role {
+class Behaviour_Attacker : public Behaviour {
 private:
-    // Behaviours
-    Behaviour_DoNothing *_bh_dn;
-    Behaviour_PushBall *_bh_pb;
-    Behaviour_Goalkeeper *_bh_gk;
-    Behaviour_Assistant *_bh_as;
-    Behaviour_Attacker *_bh_at;
-
-    // Behaviours ids!
-    enum{
-        BHV_DONOTHING,
-        BHV_PUSHBALL,
-        BHV_GK,
-        BHV_ASSISTANT,
-        BHV_ATTACKER
-    };
-
-    // Inherited functions
     void configure();
     void run();
+    int _state;
 
+    Skill_GoTo *_sk_goto;
+    Skill_RotateTo *_sk_rotateTo;
+
+    bool isBehindBall(Position posObjective);
 public:
-    Role_Halt();
-    void initializeBehaviours();
+    Behaviour_Attacker();
     QString name();
 };
 
-#endif // ROLE_HALT_H
+#endif // BEHAVIOUR_DONOTHING_H

@@ -231,6 +231,7 @@ void VSSPlayer::goTo(Position targetPosition, float velocityFactor){
             setSpeed(velocityFactor * vx, rotateSpeed); // caso esteja de boa, gogo
         }
     }
+
 }
 
 /* Player info methods */
