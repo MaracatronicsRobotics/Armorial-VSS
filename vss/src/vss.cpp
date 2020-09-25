@@ -1,5 +1,7 @@
 #include "vss.h"
 
+#include <src/entity/player/control/pid.h>
+
 VSS::VSS(quint8 teamId, Colors::Color teamColor, FieldSide teamSide) :
     _teamId(teamId), _teamColor(teamColor), _teamSide(teamSide)
 {
@@ -113,7 +115,7 @@ void VSS::setupOurPlayers(){
     QList<quint8> playerList = _world->getWorldMap()->players(_teamId);
     for(quint8 i = 0; i < playerList.size() && i < VSSConstants::qtPlayers(); i++){
         // Create player pointer
-        VSSPlayer *player = new VSSPlayer(playerList.at(i), _ourTeam, _ctr, new Role_Halt());
+        VSSPlayer *player = new VSSPlayer(playerList.at(i), _ourTeam, _ctr, new Role_Halt(), new PID(4.0, 0.1, 0.0, 8*GEARSystem::Angle::pi, -8*GEARSystem::Angle::pi));
 
         // Enable player
         player->enable(true);
@@ -131,7 +133,7 @@ void VSS::setupOpPlayers(quint8 opTeamId){
     QList<quint8> playerList = _world->getWorldMap()->players(opTeamId);
     for(quint8 i = 0; i < playerList.size() && i < VSSConstants::qtPlayers(); i++){
         // Create player pointer
-        VSSPlayer *player = new VSSPlayer(playerList.at(i), _opTeam, NULL, new Role_Halt());
+        VSSPlayer *player = new VSSPlayer(playerList.at(i), _opTeam, NULL, new Role_Halt(), NULL);
 
         // Enable player
         player->enable(false);

@@ -32,13 +32,15 @@ QString VSSPlayer::name(){
     return "Player " + QString::number(int(_playerId)) + " : Team " + teamColor;
 }
 
-VSSPlayer::VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole) : Entity(ENT_PLAYER)
+VSSPlayer::VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole, PID *vwPID) : Entity(ENT_PLAYER)
 {
     _playerId = playerId;
     _playerTeam = playerTeam;
     _ctr = ctr;
     _role = NULL;
     _defaultRole = defaultRole;
+
+    _vwPID = vwPID;
 
     _playerAccessSelf = new PlayerAccess(true, this, playerTeam->loc());
     _playerAccessBus = new PlayerAccess(false, this, playerTeam->loc());
@@ -171,13 +173,36 @@ float VSSPlayer::getVxToTarget(Position targetPosition){
     // Pegando modulo do vetor distancia
     float distanceMod = sqrtf(powf(dx, 2.0) + powf(dy, 2.0));
 
-    WR::Utils::limitValue(&distanceMod, 0.0, 1.0);
-
     return distanceMod;
 }
 
 float VSSPlayer::getRotateSpeed(float angleRobotToTarget){
-    float speed = 5.0f * angleRobotToTarget;
+
+    float ori = angle().value();
+    if(ori > M_PI) ori -= 2.0 * M_PI;
+    if(ori < -M_PI) ori += 2.0 * M_PI;
+
+    bool swapSpeed = false;
+    if(angleRobotToTarget > float(M_PI) / 2.0f){
+        angleRobotToTarget -= float(M_PI);
+        swapSpeed = true;
+    }
+    else if(angleRobotToTarget < float(-M_PI) / 2.0f){
+        angleRobotToTarget += float(M_PI);
+        swapSpeed = true;
+    }
+
+    if(swapSpeed){
+        if(ori > float(M_PI) / 2.0f){
+            ori -= float(M_PI);
+        }
+        else if(ori < float(-M_PI) / 2.0f){
+            ori += float(M_PI);
+        }
+    }
+
+    float angleToTarget = angleRobotToTarget + ori;
+    float speed = _vwPID->calculate(angleToTarget, ori);
 
     return speed;
 }

@@ -25,11 +25,12 @@
 #include <src/entity/entity.h>
 #include <src/utils/utils.h>
 #include <src/entity/player/baseplayer.h>
+#include <src/entity/player/control/pid.h>
 
 class VSSPlayer : public Entity
 {
 public:
-    VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole6);
+    VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole, PID *vwPID);
     ~VSSPlayer();
 
     // Getters
@@ -87,6 +88,10 @@ private:
     float _lError;
     float _aError;
     int _idleCount;
+
+    // PID Controller
+    PID *_vxPID;
+    PID *_vwPID;
 
     // Player data
     Position _playerPosition;

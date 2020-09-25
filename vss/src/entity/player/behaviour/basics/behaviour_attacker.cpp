@@ -39,6 +39,7 @@ void Behaviour_Attacker::configure() {
 };
 
 void Behaviour_Attacker::run() {
+    /*
     Position behindBall = WR::Utils::threePoints(loc()->ball(), loc()->theirGoal(), 0.3f, GEARSystem::Angle::pi);
 
     if(!loc()->isOutsideField(behindBall)){
@@ -58,6 +59,12 @@ void Behaviour_Attacker::run() {
         Position chaseBall = WR::Utils::threePoints(player()->position(), loc()->ball(), 1.0f, 0.0f);
         _sk_goto->setGoToPos(chaseBall);
     }
+    */
+
+    //enableTransition(0);
+    //_sk_rotateTo->setDesiredPosition(loc()->ball());
+
+    _sk_goto->setGoToPos(loc()->ball());
 }
 
 bool Behaviour_Attacker::isBehindBall(Position posObjective){

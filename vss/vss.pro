@@ -57,6 +57,7 @@ SOURCES += \
         src/entity/player/behaviour/basics/behaviour_pushball.cpp \
         src/entity/player/behaviour/basics/behaviour_stayback.cpp \
         src/entity/player/behaviour/behaviour.cpp \
+        src/entity/player/control/pid.cpp \
         src/entity/player/playeraccess.cpp \
         src/entity/player/playerbus.cpp \
         src/entity/player/role/basics/role_defender.cpp \
@@ -126,6 +127,7 @@ HEADERS += \
     src/entity/player/behaviour/basics/behaviour_stayback.h \
     src/entity/player/behaviour/behaviour.h \
     src/entity/player/behaviour/vssbehaviours.h \
+    src/entity/player/control/pid.h \
     src/entity/player/playeraccess.h \
     src/entity/player/playerbus.h \
     src/entity/player/role/basics/role_defender.h \
