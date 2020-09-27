@@ -35,32 +35,20 @@ int Playbook_Offensive::maxNumPlayer() {
 }
 
 void Playbook_Offensive::configure(int numPlayers) {
-    previousSupporter = 100;
     usesRole(_rl_def = new Role_Defender());
     usesRole(_rl_sup = new Role_Supporter());
 }
 
 void Playbook_Offensive::run(int numPlayers) {
-    QList<quint8> playersId;
-    for(int i = 0; i < numPlayers; i++){
-        quint8 playerId = dist()->getPlayer();
-        playersId.push_back(playerId);
-    }
-
-    if (_rl_sup == nullptr) {
-        setPlayerRole(playersId[0], _rl_sup);
-        previousSupporter = playersId[0];
-    }
-    if (_rl_def == nullptr) setPlayerRole(playersId[1], _rl_def);
-
-    //Neste escopo, playersId[0] se referirá ao id do Supporter, enquanto que players[1] se referirá ao Striker
+    static quint8 strikerId = dist()->getPlayer();
+    static quint8 supporterId = dist()->getPlayer();
     //Se num alcance de 0.5m da bola, o Supporter estiver dentro do alcance e o Striker estiver fora, as Roles se trocam
-    if (PlayerBus::ourPlayer(playersId[0])->distBall() < 0.5f && PlayerBus::ourPlayer(playersId[1])->distBall() > 0.5f)
-        playersId.swap(0, 1);
-
-    if (previousSupporter != playersId[0]) {
-        setPlayerRole(playersId[0], _rl_sup);
-        setPlayerRole(playersId[1], _rl_def);
-        previousSupporter = playersId[0];
+    if (PlayerBus::ourPlayer(supporterId)->distBall() < 0.5f && PlayerBus::ourPlayer(strikerId)->distBall() > 0.5f) {
+        quint8 id = strikerId;
+        strikerId = supporterId;
+        supporterId = id;
     }
+
+    setPlayerRole(strikerId, _rl_def);
+    setPlayerRole(supporterId, _rl_sup);
 }

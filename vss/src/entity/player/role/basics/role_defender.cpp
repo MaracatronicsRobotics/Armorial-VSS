@@ -21,7 +21,6 @@ void Role_Defender::configure(){
 }
 
 void Role_Defender::run(){
-
     bool theyAreNearBall = false;
     for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
         if(PlayerBus::theirPlayerAvailable(x)){

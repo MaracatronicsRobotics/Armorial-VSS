@@ -42,7 +42,6 @@ public:
     void initializeBehaviours();
     QString name();
     bool EnemyHasBallPossession();
-
 };
 
 #endif // ROLE_SUPPORTER_H

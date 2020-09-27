@@ -27,15 +27,15 @@ QString Strategy_Halt::name() {
 }
 
 Strategy_Halt::Strategy_Halt() {
-    _pb_halt = nullptr;
+    //_pb_halt = nullptr;
     _pb_defensive = nullptr;
-    //_pb_offensive = nullptr;
+    _pb_offensive = nullptr;
 }
 
 void Strategy_Halt::configure(int numOurPlayers) {
-    usesPlaybook(_pb_halt = new Playbook_Halt());
+    //usesPlaybook(_pb_halt = new Playbook_Halt());
     usesPlaybook(_pb_defensive = new Playbook_Defensive());
-    //usesPlaybook(_pb_offensive = new Playbook_Offensive());
+    usesPlaybook(_pb_offensive = new Playbook_Offensive());
 }
 
 void Strategy_Halt::run(int numOurPlayers) {
@@ -47,7 +47,7 @@ void Strategy_Halt::run(int numOurPlayers) {
 
     QList<quint8> allPlayers = dist()->getAllPlayers();
     if(!allPlayers.isEmpty()){
-        //_pb_offensive->addPlayers(allPlayers);
+        _pb_offensive->addPlayers(allPlayers);
         //_pb_halt->addPlayers(allPlayers);
     }
 }

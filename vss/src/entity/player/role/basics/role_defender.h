@@ -28,7 +28,6 @@ public:
     Role_Defender();
     void initializeBehaviours();
     QString name();
-
 };
 
 #endif // ROLE_SUPPORTER_H

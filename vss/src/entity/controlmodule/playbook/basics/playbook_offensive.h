@@ -35,9 +35,6 @@ private:
     void run(int numPlayers);
     int maxNumPlayer();
 
-    // Parameters
-    quint8 previousSupporter;
-
 public:
     Playbook_Offensive();
     QString name();
