@@ -344,6 +344,7 @@ bool VSSPlayer::isLookingTo(const Position &pos, float error) const{
 
     // Calc diff
     float dif = abs(WR::Utils::angleDiff(angle(), angle1));
+    if(dif > Angle::pi/2) dif = Angle::pi - dif;
     return (dif <= error);
 }
 
