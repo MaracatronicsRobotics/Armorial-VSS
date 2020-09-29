@@ -23,10 +23,10 @@
 #define ROLE_H
 
 #include <src/entity/player/baseplayer.h>
-#include <src/entity/player/playeraccess.h>
-#include <src/entity/player/playerbus.h>
-#include <src/entity/controlmodule/vssteam.h>
-#include <src/entity/controlmodule/coach/playersdistribution.h>
+//#include <src/entity/player/playeraccess.h>
+//#include <src/entity/player/playerbus.h>
+//#include <src/entity/controlmodule/vssteam.h>
+//#include <src/entity/controlmodule/coach/playersdistribution.h>
 #include <src/entity/player/behaviour/vssbehaviours.h>
 #include <QObject>
 
@@ -57,6 +57,10 @@ public:
 
     // PlayerAcess
     PlayerAccess* player();
+
+    // Global behaviours
+    Behaviour_GoBack *_bh_gb;
+    bool _retreated;
 
 protected:
     // Behaviour list functions
@@ -89,6 +93,11 @@ private:
     QHash<int, Behaviour*> _behaviourList;
     Behaviour *_behaviour;
     int _actualBehaviour;
+
+    //Check Collision
+    bool canMove();
+    Timer _timer;
+    bool _retBefore;
 
 };
 
