@@ -19,31 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef SKILL_ROTATETO_H
-#define SKILL_ROTATETO_H
+#include "edge.hh"
 
-#include <src/entity/player/skill/skill.h>
-
-class Skill_RotateTo : public Skill{
-private:
-    void run();
-
-    // Parameters
-    Position _desiredPosition;
-    float _angle;
-    bool _rot;
-
-public:
-    Skill_RotateTo();
-    QString name();
-
-    void setDesiredPosition(Position pos) {
-        _rot = false;
-        _desiredPosition = pos; }
-    void setDesiredAngle(float angle){
-        _rot = true;
-        _angle = angle;
-    }
-};
-
-#endif // SKILL_ROTATETO_H
+Edge::Edge(Vertex *v1, Vertex *v2, float weight) {
+    _v1 = v1;
+    _v2 = v2;
+    _weight = weight;
+}

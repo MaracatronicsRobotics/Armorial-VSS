@@ -19,31 +19,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef SKILL_ROTATETO_H
-#define SKILL_ROTATETO_H
+#ifndef GRAPH_HH
+#define GRAPH_HH
 
-#include <src/entity/player/skill/skill.h>
+#include <QList>
+#include <QLinkedList>
+#include <QHash>
+#include <QMap>
+#include <src/utils/graph/vertex.hh>
 
-class Skill_RotateTo : public Skill{
-private:
-    void run();
-
-    // Parameters
-    Position _desiredPosition;
-    float _angle;
-    bool _rot;
-
+class Graph {
 public:
-    Skill_RotateTo();
-    QString name();
+    Graph();
+    ~Graph();
 
-    void setDesiredPosition(Position pos) {
-        _rot = false;
-        _desiredPosition = pos; }
-    void setDesiredAngle(float angle){
-        _rot = true;
-        _angle = angle;
-    }
+    // Modifiers
+    void addVertex(Vertex *vertex);
+    void connect(Vertex *v1, Vertex *v2, float weight);
+
+    // Dijkstra algorithm: finds the shortest path between source and dest
+    QLinkedList<Vertex *> getShortestPath(Vertex *source, Vertex *dest);
+
+private:
+    QList<Vertex*> _vertices;
+    QLinkedList<Edge*> _edges;
 };
 
-#endif // SKILL_ROTATETO_H
+#endif // GRAPH_HH

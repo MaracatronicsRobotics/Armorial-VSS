@@ -103,3 +103,7 @@ Angle PlayerAccess::angleTo(const Position &pos) const {
 QString PlayerAccess::roleName() const {
     return _player->getRoleName();
 }
+
+void PlayerAccess::setGoal(const Position &pos) const {
+    return _player->setGoal(pos);
+}

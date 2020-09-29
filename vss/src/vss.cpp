@@ -1,5 +1,4 @@
 #include "vss.h"
-
 #include <src/entity/player/control/pid.h>
 
 VSS::VSS(quint8 teamId, Colors::Color teamColor, FieldSide teamSide) :
@@ -72,6 +71,9 @@ bool VSS::start(){
     // Start world
     _world->start();
 
+    // Initialize freeangles
+    FreeAngles::initialize(_ourTeam, _opTeam);
+
     // If all succeed, return true
     return true;
 }
@@ -114,8 +116,10 @@ void VSS::setupOurPlayers(){
     // Create our players
     QList<quint8> playerList = _world->getWorldMap()->players(_teamId);
     for(quint8 i = 0; i < playerList.size() && i < VSSConstants::qtPlayers(); i++){
+        NavigationAlgorithm *navAlg = new RRT();
+
         // Create player pointer
-        VSSPlayer *player = new VSSPlayer(playerList.at(i), _ourTeam, _ctr, new Role_Halt(), new PID(4.0, 0.1, 0.0, 8*GEARSystem::Angle::pi, -8*GEARSystem::Angle::pi));
+        VSSPlayer *player = new VSSPlayer(playerList.at(i), _ourTeam, _ctr, new Role_Halt(), new PID(4.0, 0.1, 0.0, 8*GEARSystem::Angle::pi, -8*GEARSystem::Angle::pi), navAlg);
 
         // Enable player
         player->enable(true);
@@ -133,7 +137,7 @@ void VSS::setupOpPlayers(quint8 opTeamId){
     QList<quint8> playerList = _world->getWorldMap()->players(opTeamId);
     for(quint8 i = 0; i < playerList.size() && i < VSSConstants::qtPlayers(); i++){
         // Create player pointer
-        VSSPlayer *player = new VSSPlayer(playerList.at(i), _opTeam, NULL, new Role_Halt(), NULL);
+        VSSPlayer *player = new VSSPlayer(playerList.at(i), _opTeam, NULL, new Role_Halt(), NULL, NULL);
 
         // Enable player
         player->enable(false);

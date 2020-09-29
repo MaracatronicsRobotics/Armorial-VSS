@@ -54,10 +54,19 @@ SOURCES += \
         src/entity/player/behaviour/basics/behaviour_barrier.cpp \
         src/entity/player/behaviour/basics/behaviour_donothing.cpp \
         src/entity/player/behaviour/basics/behaviour_goalkeeper.cpp \
+        src/entity/player/behaviour/basics/behaviour_goback.cpp \
         src/entity/player/behaviour/basics/behaviour_pushball.cpp \
         src/entity/player/behaviour/basics/behaviour_stayback.cpp \
         src/entity/player/behaviour/behaviour.cpp \
         src/entity/player/control/pid.cpp \
+        src/entity/player/navigation/fana.cpp \
+        src/entity/player/navigation/navalgorithm.cpp \
+        src/entity/player/navigation/navigation.cpp \
+        src/entity/player/navigation/rrt/rrt.cpp \
+        src/entity/player/navigation/rrt/rrtnode.cpp \
+        src/entity/player/navigation/rrt/rrtobstacle.cpp \
+        src/entity/player/navigation/rrt/rrttree.cpp \
+        src/entity/player/navigation/rrt/rrtvertex.cpp \
         src/entity/player/playeraccess.cpp \
         src/entity/player/playerbus.cpp \
         src/entity/player/role/basics/role_defender.cpp \
@@ -85,6 +94,11 @@ SOURCES += \
         src/utils/fields/field.cpp \
         src/utils/fields/field_vss.cpp \
         src/utils/fieldside/fieldside.cpp \
+        src/utils/freeangles/freeangles.cpp \
+        src/utils/freeangles/obstacle.cpp \
+        src/utils/graph/edge.cc \
+        src/utils/graph/graph.cc \
+        src/utils/graph/vertex.cc \
         src/utils/knn/knn.cpp \
         src/utils/timer/timer.cpp \
         src/utils/utils.cpp \
@@ -123,11 +137,20 @@ HEADERS += \
     src/entity/player/behaviour/basics/behaviour_barrier.h \
     src/entity/player/behaviour/basics/behaviour_donothing.h \
     src/entity/player/behaviour/basics/behaviour_goalkeeper.h \
+    src/entity/player/behaviour/basics/behaviour_goback.h \
     src/entity/player/behaviour/basics/behaviour_pushball.h \
     src/entity/player/behaviour/basics/behaviour_stayback.h \
     src/entity/player/behaviour/behaviour.h \
     src/entity/player/behaviour/vssbehaviours.h \
     src/entity/player/control/pid.h \
+    src/entity/player/navigation/fana.h \
+    src/entity/player/navigation/navalgorithm.h \
+    src/entity/player/navigation/navigation.h \
+    src/entity/player/navigation/rrt/rrt.h \
+    src/entity/player/navigation/rrt/rrtnode.h \
+    src/entity/player/navigation/rrt/rrtobstacle.h \
+    src/entity/player/navigation/rrt/rrttree.h \
+    src/entity/player/navigation/rrt/rrtvertex.h \
     src/entity/player/playeraccess.h \
     src/entity/player/playerbus.h \
     src/entity/player/role/basics/role_defender.h \
@@ -165,6 +188,12 @@ HEADERS += \
     src/utils/fields/fields.h \
     src/utils/fieldside/fieldside.h \
     src/utils/fieldside/side.h \
+    src/utils/freeangles/freeangles.h \
+    src/utils/freeangles/obstacle.h \
+    src/utils/graph/basegraph.hh \
+    src/utils/graph/edge.hh \
+    src/utils/graph/graph.hh \
+    src/utils/graph/vertex.hh \
     src/utils/knn/knn.h \
     src/utils/timer/timer.h \
     src/utils/utils.h \

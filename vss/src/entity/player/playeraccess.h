@@ -59,7 +59,8 @@ public:
     Angle angleTo(const Position &pos) const;
     // Role
     QString roleName() const;
+    // Path Planning
+    void setGoal(const Position &pos) const;
 };
-
 
 #endif // PLAYERACCESS_H

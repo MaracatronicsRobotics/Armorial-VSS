@@ -19,31 +19,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef SKILL_ROTATETO_H
-#define SKILL_ROTATETO_H
+#ifndef EDGE_HH
+#define EDGE_HH
 
-#include <src/entity/player/skill/skill.h>
+#include <src/utils/graph/basegraph.hh>
 
-class Skill_RotateTo : public Skill{
-private:
-    void run();
-
-    // Parameters
-    Position _desiredPosition;
-    float _angle;
-    bool _rot;
-
+class Edge {
 public:
-    Skill_RotateTo();
-    QString name();
+    Edge(Vertex *v1, Vertex *v2, float weight);
 
-    void setDesiredPosition(Position pos) {
-        _rot = false;
-        _desiredPosition = pos; }
-    void setDesiredAngle(float angle){
-        _rot = true;
-        _angle = angle;
-    }
+    // Getters
+    Vertex* getVertex1() const { return _v1; }
+    Vertex* getVertex2() const { return _v2; }
+    float getWeight() const { return _weight; }
+
+private:
+    Vertex *_v1;
+    Vertex *_v2;
+    float _weight;
 };
 
-#endif // SKILL_ROTATETO_H
+#endif // EDGE_HH

@@ -29,8 +29,8 @@
 
 class VSSPlayer : public Entity
 {
-public:
-    VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole, PID *vwPID);
+public:  
+    VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole, PID *vwPID, NavigationAlgorithm *navAlg);
     ~VSSPlayer();
 
     // Getters
@@ -67,14 +67,20 @@ public:
     void setRole(Role *b);
     QString getRoleName();
 
+    // pp
+    QLinkedList<Position> getPath() const;
+    void setGoal(Position pos) const;
+
     // Control functions
     void idle();
     void setSpeed(float vx, float omega);
     float getRotateAngle(Position targetPosition);
     float getRotateSpeed(float angleRobotToTarget);
     float getVxToTarget(Position targetPosition);
-    void rotateTo(Position targetPosition);
-    void goTo(Position targetPosition, float velocityFactor = 1.0f);
+    void rotateTo(Position targetPosition, bool rot, float angle);
+    void goTo(Position targetPosition, float velocityFactor, float minVel, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea);
+    Angle orientation() const;
+    std::pair<Angle,float> getNavDirectionDistance(const Position &destination, const Angle &positionToLook, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea);
 
 private:
     // Inherited methods from Entity
@@ -100,6 +106,9 @@ private:
     AngularSpeed _playerAngularSpeed;
     PlayerAccess *_playerAccessSelf;
     PlayerAccess *_playerAccessBus;
+
+    // Navigation
+    Navigation *_nav;
 
     // Controller acess
     Controller *_ctr;

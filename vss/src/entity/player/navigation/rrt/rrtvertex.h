@@ -1,9 +1,9 @@
 /***
- * Maracatronics Robotics
- * Federal University of Pernambuco (UFPE) at Recife
- * http://www.maracatronics.com/
+ * Warthog Robotics
+ * University of Sao Paulo (USP) at Sao Carlos
+ * http://www.warthog.sc.usp.br/
  *
- * This file is part of Armorial project.
+ * This file is part of WRCoach project.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef SKILL_ROTATETO_H
-#define SKILL_ROTATETO_H
+#ifndef RRTVERTEX_H
+#define RRTVERTEX_H
 
-#include <src/entity/player/skill/skill.h>
+#include <GEARSystem/gearsystem.hh>
+#include <src/utils/graph/graph.hh>
 
-class Skill_RotateTo : public Skill{
-private:
-    void run();
-
-    // Parameters
-    Position _desiredPosition;
-    float _angle;
-    bool _rot;
-
+class RRTVertex : public Vertex {
 public:
-    Skill_RotateTo();
-    QString name();
+    RRTVertex(const Position &pos);
 
-    void setDesiredPosition(Position pos) {
-        _rot = false;
-        _desiredPosition = pos; }
-    void setDesiredAngle(float angle){
-        _rot = true;
-        _angle = angle;
-    }
+    // Getters
+    Position getPosition() const { return _pos; }
+
+private:
+    Position _pos;
 };
 
-#endif // SKILL_ROTATETO_H
+#endif // RRTVERTEX_H

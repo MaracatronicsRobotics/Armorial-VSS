@@ -19,31 +19,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef SKILL_ROTATETO_H
-#define SKILL_ROTATETO_H
+#include "vertex.hh"
+#include <src/utils/graph/edge.hh>
 
-#include <src/entity/player/skill/skill.h>
+int Vertex::_vertexId = 0;
 
-class Skill_RotateTo : public Skill{
-private:
-    void run();
+Vertex::Vertex() {
+    Vertex::_vertexId++;
+    _id = Vertex::_vertexId;
+}
 
-    // Parameters
-    Position _desiredPosition;
-    float _angle;
-    bool _rot;
+void Vertex::addEdge(Edge *edge) {
+    // Add edge
+    _edges.push_back(edge);
+}
 
-public:
-    Skill_RotateTo();
-    QString name();
+bool Vertex::connectedTo(Vertex *vertex) const {
+    // Search for edge
+    for(int i=0; i<_edges.size(); i++) {
+        Edge *edge = _edges.at(i);
 
-    void setDesiredPosition(Position pos) {
-        _rot = false;
-        _desiredPosition = pos; }
-    void setDesiredAngle(float angle){
-        _rot = true;
-        _angle = angle;
+        // Return true if conected
+        if(edge->getVertex1()==vertex || edge->getVertex2()==vertex)
+            return true;
     }
-};
 
-#endif // SKILL_ROTATETO_H
+    // False otherwise
+    return false;
+}

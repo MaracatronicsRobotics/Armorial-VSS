@@ -1,9 +1,9 @@
 /***
- * Maracatronics Robotics
- * Federal University of Pernambuco (UFPE) at Recife
- * http://www.maracatronics.com/
+ * Warthog Robotics
+ * University of Sao Paulo (USP) at Sao Carlos
+ * http://www.warthog.sc.usp.br/
  *
- * This file is part of Armorial project.
+ * This file is part of WRCoach project.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,20 +19,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef BASEPLAYER_H
-#define BASEPLAYER_H
+#include "rrtvertex.h"
 
-#include <iostream>
-#include <GEARSystem/gearsystem.hh>
-class VSSTeam;
-class VSSPlayer;
-class Locations;
-class PlayerAccess;
-class Skill;
-class Behaviour;
-class Role;
-class CoachUtils;
-class Navigation;
-class NavigationAlgorithm;
-
-#endif // BASEPLAYER_H
+RRTVertex::RRTVertex(const Position &pos) {
+    _pos = pos;
+}

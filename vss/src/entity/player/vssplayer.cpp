@@ -26,19 +26,22 @@
 #include <src/entity/controlmodule/vssteam.h>
 #include <src/const/constants.h>
 #include <src/entity/player/role/role.h>
+#include <src/entity/player/navigation/navalgorithm.h>
+#include <src/entity/player/navigation/navigation.h>
 
 QString VSSPlayer::name(){
     QString teamColor = playerTeam()->teamColor() == Colors::BLUE ? "Blue" : "Yellow";
     return "Player " + QString::number(int(_playerId)) + " : Team " + teamColor;
 }
 
-VSSPlayer::VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole, PID *vwPID) : Entity(ENT_PLAYER)
+VSSPlayer::VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole, PID *vwPID, NavigationAlgorithm *navAlg) : Entity(ENT_PLAYER)
 {
     _playerId = playerId;
     _playerTeam = playerTeam;
     _ctr = ctr;
     _role = NULL;
     _defaultRole = defaultRole;
+    _nav = new Navigation(this, navAlg, new VSSConstants());
 
     _vwPID = vwPID;
 
@@ -177,7 +180,6 @@ float VSSPlayer::getVxToTarget(Position targetPosition){
 }
 
 float VSSPlayer::getRotateSpeed(float angleRobotToTarget){
-
     float ori = angle().value();
     if(ori > M_PI) ori -= 2.0 * M_PI;
     if(ori < -M_PI) ori += 2.0 * M_PI;
@@ -207,56 +209,89 @@ float VSSPlayer::getRotateSpeed(float angleRobotToTarget){
     return speed;
 }
 
-void VSSPlayer::rotateTo(Position targetPosition){
-    float angleRobotToTarget = getRotateAngle(targetPosition);
-    float speed = getRotateSpeed(angleRobotToTarget);
-
+void VSSPlayer::rotateTo(Position targetPosition, bool rot, float angleTarget){
+    float speed;
+    if(rot){
+        float angleDif = angleTarget - angle().value();
+        speed = getRotateSpeed(angleDif);
+    }
+    else{
+        float angleRobotToTarget = getRotateAngle(targetPosition);
+        speed = getRotateSpeed(angleRobotToTarget);
+    }
     setSpeed(0.0, speed);
 }
 
-void VSSPlayer::goTo(Position targetPosition, float velocityFactor){
-    float rotateAngle = getRotateAngle(targetPosition);
+std::pair<Angle,float> VSSPlayer::getNavDirectionDistance(const Position &destination, const Angle &positionToLook, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea) {
+    _nav->setGoal(destination, positionToLook, avoidTeammates, avoidOpponents, avoidBall, avoidOurGoalArea, avoidTheirGoalArea);
+    Angle direction = _nav->getDirection();
+    float distance = _nav->getDistance();
+
+    std::pair<Angle,float> movement = std::make_pair(direction, distance);
+    movement.first.setValue(movement.first.value() - orientation().value());
+    return movement;
+}
+
+void VSSPlayer::goTo(Position targetPosition, float velocityFactor, float minVel, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea){
+    // Taking orientation from path planning
+    Angle anglePP;
+    float help = getRotateAngle(targetPosition);
+
+    if(targetPosition.isUnknown())
+        anglePP = Angle(false, 0.0);
+    else
+        anglePP = Angle(true, help);
+
+    std::pair<Angle, float> a = getNavDirectionDistance(targetPosition, anglePP, avoidTeammates, avoidOpponents, avoidBall, avoidOurGoalArea, avoidTheirGoalArea);
 
     // Verificando se o lado de trás pra movimentação é a melhor escolha
+    help = a.first.value();
+    if(help > float(M_PI)) help -= 2.0f * float(M_PI);
+    if(help < float(-M_PI)) help += 2.0f * float(M_PI);
+
     bool swapSpeed = false;
-    if(rotateAngle > float(M_PI) / 2.0f){
-        rotateAngle -= float(M_PI);
+    if(help > float(M_PI) / 2.0f){
+        help -= float(M_PI);
         swapSpeed = true;
     }
-    else if(rotateAngle < float(-M_PI) / 2.0f){
-        rotateAngle += float(M_PI);
+    else if(help < float(-M_PI) / 2.0f){
+        help += float(M_PI);
         swapSpeed = true;
     }
 
-    float rotateSpeed = getRotateSpeed(rotateAngle);
-    float vx = getVxToTarget(targetPosition);
+    float rotateSpeed = getRotateSpeed(help);
+    float vel = a.second;
+
+    // Adjusting to minVel if lower
+    if(vel <= minVel){
+        // Adjusting absolute value of velocity
+        vel = minVel;
+    }
+    if(swapSpeed) vel *= -1;
+
     float dist = WR::Utils::distance(position(), targetPosition);
 
-    // Se escolheu o lado de trás, inverte o vx
-    if(swapSpeed) vx *= (-1);
-
     if(dist <= 0.1f){ // se estiver a 10cm ou menos do alvo
-        if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
+        if(abs(help) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
             setSpeed(0.0, rotateSpeed); // zera a linear e espera girar
         }else{
-            setSpeed(velocityFactor * vx, rotateSpeed); // caso esteja de boa, gogo
+            setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
         }
     }
     else if(dist > 0.1f && dist <= 0.5f){ // se estiver entre 10cm a 50cm do alvo
-        if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
-            setSpeed(velocityFactor * 0.3f * vx, rotateSpeed); // linear * 0.3 e gira
+        if(abs(help) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
+            setSpeed(velocityFactor * 0.3f * vel, rotateSpeed); // linear * 0.3 e gira
         }else{
-            setSpeed(velocityFactor * vx, rotateSpeed); // caso esteja de boa, gogo
+            setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
         }
     }
     else if(dist > 0.5f){ // se estiver a mais de 50cm do alvo
-        if(abs(rotateAngle) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
-            setSpeed(velocityFactor * 0.5f * vx, rotateSpeed); // linear * 0.5 e gira
+        if(abs(help) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
+            setSpeed(velocityFactor * 0.5f * vel, rotateSpeed); // linear * 0.5 e gira
         }else{
-            setSpeed(velocityFactor * vx, rotateSpeed); // caso esteja de boa, gogo
+            setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
         }
     }
-
 }
 
 /* Player info methods */
@@ -342,4 +377,16 @@ float VSSPlayer::distTheirGoal() const{
 
 Angle VSSPlayer::angleTo(const Position &pos) const{
     return Angle(true, WR::Utils::getAngle(position(), pos));
+}
+
+Angle VSSPlayer::orientation() const{
+    return _playerTeam->wm()->playerOrientation(_playerTeam->teamId(), _playerId);
+}
+
+void VSSPlayer::setGoal(Position pos) const{
+    _nav->setGoal(pos, orientation(), true, true, true, true, true);
+}
+
+QLinkedList<Position> VSSPlayer::getPath() const {
+    return _nav->getPath();
 }

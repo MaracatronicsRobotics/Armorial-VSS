@@ -30,6 +30,7 @@
 #include <src/utils/color/color.h>
 #include <src/utils/fieldside/fieldside.h>
 #include <src/utils/fields/fields.h>
+#include <src/utils/freeangles/freeangles.h>
 
 // World
 #include <src/entity/world/world.h>
@@ -42,6 +43,11 @@
 
 // Roles
 #include <src/entity/player/role/vssroles.h>
+
+//Navigation
+#include <src/entity/player/navigation/navalgorithm.h>
+#include <src/entity/player/navigation/fana.h>
+#include <src/entity/player/navigation/rrt/rrt.h>
 
 // GUI
 #include <src/gui/vssgui.h>

@@ -27,15 +27,34 @@
 class Skill_GoTo : public Skill {
 private:
     void run();
-public:
+
+    // Avoid Parameters
+    bool _avoidTeammates;
+    bool _avoidOpponents;
+    bool _avoidBall;
+    bool _avoidOurGoalArea;
+    bool _avoidTheirGoalArea;
+    float _minVelocity;
+
+    // Move Parameters
     Position _goToPos;
     float _goToVelocityFactor;
 
+public:
     QString name();
     Skill_GoTo();
 
+    // Move methods
     void setGoToPos(Position pos) { _goToPos = pos; }
     void setGoToVelocityFactor(float vel) { _goToVelocityFactor = vel; }
+
+    // Avoid methods
+    void setAvoidTeammates(bool cond) { _avoidTeammates = cond; }
+    void setAvoidOpponents(bool cond) { _avoidOpponents = cond; }
+    void setAvoidBall(bool cond) { _avoidBall = cond; }
+    void setAvoidOurGoalArea(bool cond) { _avoidOurGoalArea = cond; }
+    void setAvoidTheirGoalArea(bool cond) { _avoidTheirGoalArea = cond; }
+    void setMinVelocity(float minVelocity) { _minVelocity = minVelocity; }
 };
 
 #endif // SKILL_GOTO_H
