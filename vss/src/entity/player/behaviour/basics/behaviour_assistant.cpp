@@ -78,6 +78,17 @@ void Behaviour_Assistant::run(){
             if(player()->position().x() < loc()->ball().x()) playerBehindBall = true;
         }
 
+        //std::cout << player()->distBall() << " " << playerBehindBall << std::endl;
+        float ballOffset = 0;
+        if(player()->isNearbyPosition(loc()->ball(), 0.1f) && playerBehindBall){
+            //if the player is behind ball x and should go to ball position
+            ballOffset = 0.02f;
+            //std::cout << "locball\n";
+        }else{
+            //std::cout << "behindball\n";
+            ballOffset = 0.02f;
+        }
+
         bool closestToBall = false;
 
         //checking if our player is closest to ball
@@ -119,16 +130,12 @@ void Behaviour_Assistant::run(){
         Position behindBall;
         //if there's an ally closer to the ball: keep some distance from ball
         if(!closestToBall){
-            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.22f, GEARSystem::Angle::pi);
+            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.2f + ballOffset, GEARSystem::Angle::pi);
         }else{
-            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.02f, GEARSystem::Angle::pi);
+            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, ballOffset, GEARSystem::Angle::pi);
         }
 
-        if(player()->isNearbyPosition(loc()->ball(), 0.1f) && playerBehindBall){
-            //if the player is behind ball x and should go to ball position
-            behindBall = loc()->ball();
-            //std::cout << "locball\n";
-        }else if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
+        if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
             //calc unitary vector of velocity
             const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
 
@@ -145,9 +152,9 @@ void Behaviour_Assistant::run(){
                 //projecting point further than calculated position
                 //if there's an ally closer to the ball: keep some distance from ball
                 if(!closestToBall){
-                    behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), 0.22f, GEARSystem::Angle::pi);
+                    behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), 0.2f + ballOffset, GEARSystem::Angle::pi);
                 }else{
-                    behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), 0.02f, GEARSystem::Angle::pi);
+                    behindBall = WR::Utils::threePoints(projectedPos, loc()->ball(), ballOffset, GEARSystem::Angle::pi);
                 }
             }
         }
@@ -171,15 +178,23 @@ void Behaviour_Assistant::run(){
         //setting skill rotateTo
         _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
 
+        //error parameter to determine if player is looking to their goal
+        float errorAngleToTheirGoal = 0;
+        float angLeft = (WR::Utils::getAngle(player()->position(), loc()->theirGoalLeftPost()));
+        float angRight = (WR::Utils::getAngle(player()->position(), loc()->theirGoalRightPost()));
+        errorAngleToTheirGoal = 0.9f*fabs(angRight - angLeft)/2.0f;
+
         //transitions
-        if(player()->isLookingTo(loc()->ball(), 2.0) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f)){
+        //std::cout << WR::Utils::getAngle(player()->position(), loc()->theirGoalLeftPost()) << " " << WR::Utils::getAngle(player()->position(), loc()->theirGoalRightPost()) << std::endl;
+        //std::cout << player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) << std::endl;
+        if(player()->isLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
             //std::cout << "PUSH" << std::endl;
             enableTransition(STATE_PUSH);
-        }else if(player()->isNearbyPosition(behindBall, 0.03f)){
-            //std::cout << "ROTATE " << player()->isLookingTo(loc()->ball()) << std::endl;
+        }else if(player()->isNearbyPosition(behindBall, 0.08f) && !player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+            //std::cout << "ROTATE " << std::endl;
             enableTransition(STATE_ROTATE);
         }else{
-            //std::cout << "GO BEHIND BALL" << std::endl;
+            //std::cout << "GOTO" << std::endl;
             enableTransition(STATE_GOTO);
         }
         break;
