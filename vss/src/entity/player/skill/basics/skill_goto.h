@@ -34,6 +34,7 @@ private:
     bool _avoidBall;
     bool _avoidOurGoalArea;
     bool _avoidTheirGoalArea;
+    bool _pathActivated;
     float _minVelocity;
 
     // Move Parameters
@@ -49,6 +50,7 @@ public:
     void setGoToVelocityFactor(float vel) { _goToVelocityFactor = vel; }
 
     // Avoid methods
+    void isPathActive(bool pathActiveted) { _pathActivated = pathActiveted; }
     void setAvoidTeammates(bool cond) { _avoidTeammates = cond; }
     void setAvoidOpponents(bool cond) { _avoidOpponents = cond; }
     void setAvoidBall(bool cond) { _avoidBall = cond; }

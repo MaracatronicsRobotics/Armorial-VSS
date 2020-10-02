@@ -30,10 +30,6 @@ Skill_GoTo::Skill_GoTo(){
     _goToVelocityFactor = 1.0;
     _avoidTeammates = true;
     _avoidOpponents = true;
-    _avoidBall = false;
-    _avoidOurGoalArea = false;
-    _avoidTheirGoalArea = false;
-    _minVelocity = 0.0;
 }
 
 void Skill_GoTo::run(){

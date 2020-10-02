@@ -232,7 +232,7 @@ std::pair<Angle,float> VSSPlayer::getNavDirectionDistance(const Position &destin
     return movement;
 }
 
-void VSSPlayer::goTo(Position targetPosition, float velocityFactor, float minVel, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea){
+void VSSPlayer::goTo(Position targetPosition, float velocityFactor, float minVel, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea, bool pathActivated){
     // Taking orientation from path planning
     Angle anglePP;
     float help = getRotateAngle(targetPosition);
@@ -260,36 +260,44 @@ void VSSPlayer::goTo(Position targetPosition, float velocityFactor, float minVel
     }
 
     float rotateSpeed = getRotateSpeed(help);
-    float vel = a.second;
+    float vel;
+
+    if (pathActivated) vel = a.second;
+    else vel = getVxToTarget(targetPosition);
 
     // Adjusting to minVel if lower
     if(vel <= minVel){
         // Adjusting absolute value of velocity
         vel = minVel;
     }
+    // Se escolheu o lado de trás, inverte o vx
     if(swapSpeed) vel *= -1;
 
     float dist = WR::Utils::distance(position(), targetPosition);
 
-    if(dist <= 0.1f){ // se estiver a 10cm ou menos do alvo
-        if(abs(help) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
-            setSpeed(0.0, rotateSpeed); // zera a linear e espera girar
-        }else{
-            setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
+    if (abs(help) > GEARSystem::Angle::toRadians(75)) {
+        setSpeed(0.0, rotateSpeed);
+    } else {
+        if(dist <= 0.1f){ // se estiver a 10cm ou menos do alvo
+            if(abs(help) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
+                setSpeed(0.0, rotateSpeed); // zera a linear e espera girar
+            }else{
+                setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
+            }
         }
-    }
-    else if(dist > 0.1f && dist <= 0.5f){ // se estiver entre 10cm a 50cm do alvo
-        if(abs(help) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
-            setSpeed(velocityFactor * 0.3f * vel, rotateSpeed); // linear * 0.3 e gira
-        }else{
-            setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
+        else if(dist > 0.1f && dist <= 0.5f){ // se estiver entre 10cm a 50cm do alvo
+            if(abs(help) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
+                setSpeed(0.3f * vel, rotateSpeed); // linear * 0.3 e gira
+            }else{
+                setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
+            }
         }
-    }
-    else if(dist > 0.5f){ // se estiver a mais de 50cm do alvo
-        if(abs(help) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
-            setSpeed(velocityFactor * 0.5f * vel, rotateSpeed); // linear * 0.5 e gira
-        }else{
-            setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
+        else if(dist > 0.5f){ // se estiver a mais de 50cm do alvo
+            if(abs(help) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
+                setSpeed(0.5f * vel, rotateSpeed); // linear * 0.5 e gira
+            }else{
+                setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
+            }
         }
     }
 }
