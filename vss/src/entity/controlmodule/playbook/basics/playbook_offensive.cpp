@@ -49,6 +49,6 @@ void Playbook_Offensive::run(int numPlayers) {
         supporterId = id;
     }
 
-    setPlayerRole(strikerId, _rl_def);
-    setPlayerRole(supporterId, _rl_sup);
+    setPlayerRole(strikerId, _rl_sup);
+    setPlayerRole(supporterId, _rl_def);
 }
