@@ -283,17 +283,27 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
         Position pointProjFront = WR::Utils::projectPointAtSegment(L2, R2, pos);
 
         //interception points between the segment playerPos->pos and defense area segments (L1->L2, R1->R2, L2->R2)
-        Position left = WR::Utils::hasInterceptionSegments(L1, L2, loc()->ourGoal(), pos);
-        Position right = WR::Utils::hasInterceptionSegments(R1, R2, loc()->ourGoal(), pos);
-        Position front = WR::Utils::hasInterceptionSegments(L2, R2, loc()->ourGoal(), pos);
+        Position left = WR::Utils::hasInterceptionSegments(L1, L2, player()->position(), pos);
+        Position right = WR::Utils::hasInterceptionSegments(R1, R2, player()->position(), pos);
+        Position front = WR::Utils::hasInterceptionSegments(L2, R2, player()->position(), pos);
 
         //if there is an interception between playerPos->pos and L1->L2 on L1->L2
         if(left.isValid() && fabs(left.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && fabs(left.x()) <= loc()->fieldMaxX()){
-            return pointProjLeft;
+            //if initial position isn't between goal post and defense area post
+            if(fabs(pos.y()) < fabs(loc()->ourGoalLeftPost().y())){
+                return pointProjFront;
+            }else{
+                return pointProjLeft;
+            }
         }
         //if there is an interception between playerPos->pos and R1->R2 on R1->R2
         else if(right.isValid() && fabs(right.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && fabs(right.x()) <= loc()->fieldMaxX()){
-            return pointProjRight;
+            //if initial position isn't between goal post and defense area post
+            if(fabs(pos.y()) < fabs(loc()->ourGoalLeftPost().y())){
+                return pointProjFront;
+            }else{
+                return pointProjRight;
+            }
         }
         //if there is an interception between playerPos->pos and L2->R2 on L2->R2
         else if(front.isValid() && fabs(front.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && fabs(front.x()) <= loc()->fieldMaxX()){

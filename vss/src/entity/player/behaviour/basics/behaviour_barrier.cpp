@@ -173,7 +173,7 @@ bool Behaviour_Barrier::isBallComingToGoal(float minSpeed , float postsFactor){
 }
 
 Position Behaviour_Barrier::projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea){
-    Position L1, L2, R1, R2;
+    Position L1, L2, R1, R2, goal;
     bool shouldProjectPos = false, isOurArea = false;
     float smallMargin = 0.05f;
 
@@ -183,11 +183,13 @@ Position Behaviour_Barrier::projectPosOutsideGoalArea(Position pos, bool avoidOu
         if(loc()->isInsideOurField(pos) && avoidOurArea){
             shouldProjectPos = true;
             isOurArea = true;
+            goal = loc()->ourGoal();
         }
         //check if desiredPosition is inside their defense area and if we should avoid it
         else if(loc()->isInsideTheirField(pos) && avoidTheirArea){
             shouldProjectPos = true;
             isOurArea = false;
+            goal = loc()->theirGoal();
         }else{
             shouldProjectPos = false;
         }
@@ -217,9 +219,9 @@ Position Behaviour_Barrier::projectPosOutsideGoalArea(Position pos, bool avoidOu
         Position pointProjFront = WR::Utils::projectPointAtSegment(L2, R2, pos);
 
         //interception points between the segment playerPos->pos and defense area segments (L1->L2, R1->R2, L2->R2)
-        Position left = WR::Utils::hasInterceptionSegments(L1, L2, loc()->ourGoal(), pos);
-        Position right = WR::Utils::hasInterceptionSegments(R1, R2, loc()->ourGoal(), pos);
-        Position front = WR::Utils::hasInterceptionSegments(L2, R2, loc()->ourGoal(), pos);
+        Position left = WR::Utils::hasInterceptionSegments(L1, L2, goal, pos);
+        Position right = WR::Utils::hasInterceptionSegments(R1, R2, goal, pos);
+        Position front = WR::Utils::hasInterceptionSegments(L2, R2, goal, pos);
 
         //if there is an interception between playerPos->pos and L1->L2 on L1->L2
         if(left.isValid() && fabs(left.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && fabs(left.x()) <= loc()->fieldMaxX()){
