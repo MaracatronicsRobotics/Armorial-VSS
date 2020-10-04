@@ -35,6 +35,7 @@ public:
 
     void setD(float d) {_d = d ;}
     void setRadius(float radius) {_radius = radius;}
+    Position projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea);
 };
 
 #endif // BEHAVIOUR_BARRIER_H
