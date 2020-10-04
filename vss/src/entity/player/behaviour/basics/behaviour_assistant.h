@@ -34,6 +34,14 @@ private:
     long int loopsInSameRegionWithBall, loopsInSameRegionWithOpp; //initialize with 0
     Position lastPlayerPosition, ballPos, playerPos;
 
+    //skill
+    int _skill;
+    enum{
+        ROT,
+        PUSH,
+        GOTO
+    };
+
 public:
     Behaviour_Assistant();
     QString name();
@@ -43,6 +51,7 @@ public:
     bool checkIfShouldSpin();
     quint8 closestAllyToBall();
     Position projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea);
+    bool localIsLookingTo(const Position &pos, float error);
 };
 
 #endif // BEHAVIOUR_ASSISTANT_H
