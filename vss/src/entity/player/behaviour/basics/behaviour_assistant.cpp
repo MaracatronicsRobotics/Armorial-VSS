@@ -168,9 +168,6 @@ void Behaviour_Assistant::run(){
             _sk_goTo->setGoToVelocityFactor(4.0f);
         }
 
-        //setting skill push
-        _sk_pushBall->setSpeedAndOmega(1.5, 0.0);
-
         //setting skill rotateTo
         _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
 
@@ -199,7 +196,12 @@ void Behaviour_Assistant::run(){
             //std::cout << "ROTATE" << std::endl;
             if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
                 //PUSH
-                if(player()->isLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+                if(localIsLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+                    if(!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+                        _sk_pushBall->setSpeedAndOmega(-1.5, 0.0);
+                    }else{
+                        _sk_pushBall->setSpeedAndOmega(1.5, 0.0);
+                    }
                     enableTransition(STATE_PUSH);
                     _skill = PUSH;
                 }
@@ -212,7 +214,12 @@ void Behaviour_Assistant::run(){
         }else if(_skill == GOTO){
             //std::cout << "GOTO" << std::endl;
             //PUSH
-            if(player()->isLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+            if(localIsLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+                if(!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+                    _sk_pushBall->setSpeedAndOmega(-1.5, 0.0);
+                }else{
+                    _sk_pushBall->setSpeedAndOmega(1.5, 0.0);
+                }
                 enableTransition(STATE_PUSH);
                 _skill = PUSH;
             }
