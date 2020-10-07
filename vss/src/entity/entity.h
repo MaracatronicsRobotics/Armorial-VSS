@@ -28,7 +28,7 @@
 class Entity : public QThread {
 public:
     // Enumerating all entities (for control in worldmap)
-    enum EntityType {ENT_WORLD, ENT_PLAYER, ENT_CONTROLMODULE, ENT_SENSOR, ENT_GUI};
+    enum EntityType {ENT_WORLD, ENT_PLAYER, ENT_CONTROLMODULE, ENT_SENSOR, ENT_GUI, ENT_REFEREE};
 
     // Constructor
     Entity(EntityType type);

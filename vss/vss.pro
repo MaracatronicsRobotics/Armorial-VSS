@@ -31,6 +31,9 @@ LIBS *= -lprotobuf -lGLU -pthread -lGEARSystem -lomniORB4 -lomnithread -lQt5Core
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        include/vssref_command.pb.cc \
+        include/vssref_common.pb.cc \
+        include/vssref_placement.pb.cc \
         main.cpp \
         src/const/constants.cpp \
         src/entity/controlmodule/coach/coach.cpp \
@@ -82,6 +85,7 @@ SOURCES += \
         src/entity/player/skill/basics/skill_rotateto.cpp \
         src/entity/player/skill/skill.cpp \
         src/entity/player/vssplayer.cpp \
+        src/entity/referee/vssreferee.cpp \
         src/entity/world/world.cpp \
         src/entity/world/worldmapupdater.cpp \
         src/exithandler.cpp \
@@ -102,6 +106,8 @@ SOURCES += \
         src/utils/knn/knn.cpp \
         src/utils/timer/timer.cpp \
         src/utils/utils.cpp \
+        src/utils/vssclient/netraw.cpp \
+        src/utils/vssclient/vssclient.cpp \
         src/vss.cpp
 
 
@@ -111,6 +117,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    include/vssref_command.pb.h \
+    include/vssref_common.pb.h \
+    include/vssref_placement.pb.h \
     src/const/constants.h \
     src/entity/controlmodule/coach/basecoach.h \
     src/entity/controlmodule/coach/coach.h \
@@ -168,6 +177,7 @@ HEADERS += \
     src/entity/player/skill/skill.h \
     src/entity/player/skill/vssskills.h \
     src/entity/player/vssplayer.h \
+    src/entity/referee/vssreferee.h \
     src/entity/world/world.h \
     src/entity/world/worldmapupdater.h \
     src/exithandler.h \
@@ -197,6 +207,9 @@ HEADERS += \
     src/utils/knn/knn.h \
     src/utils/timer/timer.h \
     src/utils/utils.h \
+    src/utils/vssclient/netraw.h \
+    src/utils/vssclient/util.h \
+    src/utils/vssclient/vssclient.h \
     src/vss.h \
 
 FORMS += \

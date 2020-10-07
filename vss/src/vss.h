@@ -49,6 +49,9 @@
 #include <src/entity/player/navigation/fana.h>
 #include <src/entity/player/navigation/rrt/rrt.h>
 
+// Referee
+#include <src/entity/referee/vssreferee.h>
+
 // GUI
 #include <src/gui/vssgui.h>
 
@@ -81,6 +84,7 @@ private:
     World *_world;
     Coach *_coach;
     VSSGui *_gui;
+    VSSReferee *_ref;
 
     // Teams
     void setupTeams(quint8 opTeamId, Colors::Color opTeamColor, FieldSide opTeamSide);
