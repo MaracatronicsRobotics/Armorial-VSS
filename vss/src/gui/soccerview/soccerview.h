@@ -98,7 +98,7 @@ private:
 
     double tLastRedraw;
 
-    QList<Position> path;
+    QLinkedList<Position> path;
 
     FieldDimensions fieldDim;
 
