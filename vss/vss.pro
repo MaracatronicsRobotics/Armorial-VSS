@@ -109,7 +109,8 @@ SOURCES += \
         src/utils/utils.cpp \
         src/utils/vssclient/netraw.cpp \
         src/utils/vssclient/vssclient.cpp \
-        src/vss.cpp
+        src/vss.cpp \
+    src/entity/player/role/basics/role_striker.cpp
 
 
 # Default rules for deployment.
@@ -213,6 +214,7 @@ HEADERS += \
     src/utils/vssclient/util.h \
     src/utils/vssclient/vssclient.h \
     src/vss.h \
+    src/entity/player/role/basics/role_striker.h
 
 FORMS += \
     src/gui/mainwindow.ui

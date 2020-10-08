@@ -36,13 +36,16 @@ void Playbook_Halt::configure(int numPlayers) {
     for(int i = 0; i < numPlayers; i++) {
         //Role_Halt *rl_halt = new Role_Halt();
         //Role_Supporter *rl_supporter = new Role_Supporter();
-        Role_Defender *rl_defender = new Role_Defender();
+        //Role_Defender *rl_defender = new Role_Defender();
+        Role_Striker *rl_striker = new Role_Striker();
         //usesRole(rl_halt);
         //usesRole(rl_supporter);
-        usesRole(rl_defender);
+        //usesRole(rl_defender);
+        usesRole(rl_striker);
         //_rl_halt.push_back(rl_halt);
         //_rl_supporter.push_back(rl_supporter);
-        _rl_defender.push_back(rl_defender);
+        //_rl_defender.push_back(rl_defender);
+        _rl_striker.push_back(rl_striker);
     }
 }
 
@@ -51,6 +54,7 @@ void Playbook_Halt::run(int numPlayers) {
         quint8 playerId = dist()->getPlayer();
         //setPlayerRole(playerId, _rl_halt.at(i));
         //setPlayerRole(playerId, _rl_supporter.at(i));
-        setPlayerRole(playerId, _rl_defender.at(i));
+        //setPlayerRole(playerId, _rl_defender.at(i));
+        setPlayerRole(playerId , _rl_striker.at(i));
     }
 }

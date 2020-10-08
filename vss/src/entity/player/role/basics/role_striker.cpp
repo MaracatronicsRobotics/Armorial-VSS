@@ -18,27 +18,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
+#include "role_striker.h"
 
-#ifndef PLAYBOOK_HALT_H
-#define PLAYBOOK_HALT_H
+QString Role_Striker::name(){
+    return "Role_Striker";
+}
+Role_Striker::Role_Striker()
+{
+    _bh_at = nullptr;
+}
+void Role_Striker::initializeBehaviours(){
+    usesBehaviour(BHV_AT, _bh_at = new Behaviour_Attacker());
+}
+void Role_Striker::configure(){
 
-#include <src/entity/controlmodule/playbook/playbook.h>
-#include <src/entity/player/role/vssroles.h>
+}
 
-class Playbook_Halt : public Playbook {
-private:
-    // Roles
-    QList<Role_Halt*> _rl_halt;
-    QList<Role_Supporter*> _rl_supporter;
-    QList<Role_Defender*> _rl_defender;
-    QList<Role_Striker*> _rl_striker;
-    void configure(int numPlayers);
-    void run(int numPlayers);
-    int maxNumPlayer();
-
-public:
-    Playbook_Halt();
-    QString name();
-};
-
-#endif // PLAYBOOK_HALT_H
+void Role_Striker::run(){
+    setBehaviour(BHV_AT);
+}

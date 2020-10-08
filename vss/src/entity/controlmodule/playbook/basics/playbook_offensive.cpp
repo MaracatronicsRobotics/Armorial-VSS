@@ -28,6 +28,7 @@ QString Playbook_Offensive::name() {
 Playbook_Offensive::Playbook_Offensive() {
     _rl_def = nullptr;
     _rl_sup = nullptr;
+    _rl_str = nullptr;
 }
 
 int Playbook_Offensive::maxNumPlayer() {
@@ -37,6 +38,7 @@ int Playbook_Offensive::maxNumPlayer() {
 void Playbook_Offensive::configure(int numPlayers) {
     usesRole(_rl_def = new Role_Defender());
     usesRole(_rl_sup = new Role_Supporter());
+    usesRole(_rl_str = new Role_Striker());
 }
 
 void Playbook_Offensive::run(int numPlayers) {

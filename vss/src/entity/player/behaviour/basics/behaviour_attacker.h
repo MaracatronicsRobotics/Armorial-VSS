@@ -24,20 +24,42 @@
 
 #include <src/entity/player/behaviour/behaviour.h>
 #include <src/entity/player/skill/vssskills.h>
+#include <math.h>
 
 class Behaviour_Attacker : public Behaviour {
 private:
     void configure();
     void run();
+    //Machine State
     int _state;
-
-    Skill_GoTo *_sk_goto;
+    enum{
+        STATE_ATTACK ,
+        STATE_WAIT
+    };
+    //States
+    enum {
+        STATE_GOTO ,
+        STATE_ROTATETO,
+        STATE_PUSHBALL,
+        STATE_SPIN
+    };
+    //Skills
+    Skill_GoTo *_sk_goTo;
     Skill_RotateTo *_sk_rotateTo;
-
+    Skill_PushBall *_sk_pushBall;
+    Skill_Spin *_sk_Spin;
+    //Aux Functions
     bool isBehindBall(Position posObjective);
+    bool isInsideAreaBehindBall(Position behindBall);
+    bool lookAtGoal();
+    bool isInsideProjectArea(Position posProjected);
+
+    void CheckIfAttack();
+
+
 public:
     Behaviour_Attacker();
     QString name();
 };
 
-#endif // BEHAVIOUR_DONOTHING_H
+#endif // BEHAVIOUR_ATTACKER_H
