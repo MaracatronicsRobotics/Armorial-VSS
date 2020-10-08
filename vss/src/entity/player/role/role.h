@@ -98,7 +98,7 @@ private:
     bool canMove();
     Timer _timer;
     bool _retBefore;
-
+    bool _wall;
 };
 
 #endif // ROLE_H

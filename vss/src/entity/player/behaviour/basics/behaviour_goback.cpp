@@ -1,7 +1,7 @@
 #include "behaviour_goback.h"
 #include <iostream>
 
-#define distToBack 0.10
+#define distToBack 0.10f
 
 QString Behaviour_GoBack::name() {
     return "Behaviour_GoBack";
@@ -40,7 +40,6 @@ void Behaviour_GoBack::run() {
         _start = false;
         _retreated = false;
         _state = STATE_GOBACK;
-        std::cout<<"Entrou - GoBack"<<std::endl;
     }
 
     switch (_state) {
@@ -52,7 +51,7 @@ void Behaviour_GoBack::run() {
         _sk_goTo->setAvoidTeammates(true);
         _sk_goTo->isPathActive(true);
 
-        if(abs(_playerPos.x() - _newPos.x()) < 0.01 && abs(_playerPos.y() - _newPos.y()) < 0.01){
+        if(abs(_playerPos.x() - _newPos.x()) < 0.01f && abs(_playerPos.y() - _newPos.y()) < 0.01f){
             _state = STATE_LOOKAT;
             _angleBefore = player()->orientation().value();
         }
@@ -67,8 +66,9 @@ void Behaviour_GoBack::run() {
         //_sk_rotateTo->setDesiredPosition(loc()->ball());
         enableTransition(STATE_ROTATE);
 
-        if(player()->orientation().value() > 0.95 *_angleTarget){
+        if(player()->orientation().value() > 0.95f *_angleTarget){
             _retreated = true;
+            _wall = false;
         }
         break;
     }
@@ -81,20 +81,32 @@ Position Behaviour_GoBack:: newPosBack(Position playerPos){
     Position obsPos;
     float dist;
 
-    for(quint8 i = 0; i < 3; i++){
-        obsPos = PlayerBus::theirPlayer(i)->position();
-        dist = WR::Utils::distance(playerPos, obsPos);
+    if(_wall){
+        Position centre(true, 0.0, 0.0, 0.0);
+        dist = WR::Utils::distance(playerPos, centre);
 
-        if(dist < 0.11){
-            break;
+        Position direction(true, - playerPos.x()/dist, - playerPos.y()/dist, 0.0);
+
+        //New Point
+        Position newP(true, playerPos.x() + distToBack * direction.x(), playerPos.y() + distToBack * direction.y(), 0.0);
+
+        return newP;
+    } else {
+        for(quint8 i = 0; i < 3; i++){
+            obsPos = PlayerBus::theirPlayer(i)->position();
+            dist = WR::Utils::distance(playerPos, obsPos);
+
+            if(dist < 0.11f){
+                break;
+            }
         }
+
+        Position direction(true, (obsPos.x() - playerPos.x())/dist, (obsPos.y() - playerPos.y())/dist, 0.0);
+
+        //New Point
+        Position newP(true, playerPos.x() - distToBack * direction.x(), playerPos.y() - distToBack * direction.y(), 0.0);
+
+        return newP;
     }
-
-    Position direction(true, (obsPos.x() - playerPos.x())/dist, (obsPos.y() - playerPos.y())/dist, 0.0);
-
-    //New Point
-    Position newP(true, playerPos.x() - distToBack * direction.x(), playerPos.y() - distToBack * direction.y(), 0.0);
-
-    return newP;
 }
 

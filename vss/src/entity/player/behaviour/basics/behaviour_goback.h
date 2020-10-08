@@ -18,6 +18,7 @@ private:
     Position _newPos, _playerPos;
     bool _retreated;
     bool _start;
+    bool _wall;
 
     //Machine State
     int _state;
@@ -38,6 +39,7 @@ public:
     Behaviour_GoBack();
     bool getDone(){return _retreated;}
     void setStart(bool start){_start = start;}
+    void setWall(bool wall){ _wall = wall;}
     QString name();
 };
 

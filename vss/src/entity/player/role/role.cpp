@@ -32,6 +32,7 @@ Role::Role() {
     _initialized = false;
     _configureEnabled = true; // for set behaviours
     _actualBehaviour = -1;
+    _wall = false;
 }
 
 Role::~Role() {
@@ -78,9 +79,8 @@ void Role::runRole(){
     //Check Collision
     if(canMove()){
         if(player()->velocity().abs() < 0.2f){
-            if(_timer.timemsec() > COLLISION_TIME || true){
-                _retreated = false;
-            }
+            //if(_timer.timemsec() > COLLISION_TIME || true){
+            _retreated = false;
         } else {
             _timer.stop();
         }
@@ -91,6 +91,7 @@ void Role::runRole(){
             _bh_gb->initialize(_loc);
 
         // Configure
+        if(_wall) _bh_gb->setWall(true);
         _bh_gb->setPlayer(_player, _playerAccess);
         _bh_gb->runBehaviour();
 
@@ -120,11 +121,20 @@ bool Role::canMove(){
     //std::cout<<"entrou"<<std::endl;
     playerPos = player()->position();
 
+    if(abs(playerPos.y()) > 0.6f){
+        _wall = true;
+        return true;
+    }
+    else if(abs(playerPos.x()) > 0.7f){
+        _wall = true;
+        return true;
+    }
+
     for(quint8 i = 0; i < 3; i++){
         obstPos = PlayerBus::theirPlayer(i)->position();
         dist = WR::Utils::distance(playerPos, obstPos);
 
-        if(dist < 0.11){
+        if(dist < 0.11f){
             return true;
         }
     }
