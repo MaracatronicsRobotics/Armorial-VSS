@@ -19,37 +19,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#include "playbook_offensive.h"
+#include "playbook_balance.h"
 
-QString Playbook_Offensive::name() {
+QString Playbook_Balance::name() {
     return "Playbook_Offensive";
 }
 
-Playbook_Offensive::Playbook_Offensive() {
+Playbook_Balance::Playbook_Balance() {
     _rl_def = nullptr;
     _rl_sup = nullptr;
 }
 
-int Playbook_Offensive::maxNumPlayer() {
+int Playbook_Balance::maxNumPlayer() {
     return INT_MAX;
 }
 
-void Playbook_Offensive::configure(int numPlayers) {
+void Playbook_Balance::configure(int numPlayers) {
     usesRole(_rl_def = new Role_Defender());
     usesRole(_rl_sup = new Role_Supporter());
 }
 
-void Playbook_Offensive::run(int numPlayers) {
+void Playbook_Balance::run(int numPlayers) {
     static quint8 strikerId = dist()->getPlayer();
-    static quint8 supporterId = dist()->getPlayer();
+    static quint8 defenderId = dist()->getPlayer();
 
-    //Se num alcance de 0.5m da bola, o Supporter estiver dentro do alcance e o Striker estiver fora, as Roles se trocam
-    if (PlayerBus::ourPlayer(supporterId)->distBall() < 0.5f && PlayerBus::ourPlayer(strikerId)->distBall() > 0.5f) {
+    //Se num alcance de 0.5m da bola, o Defender estiver dentro do alcance e o Striker estiver fora, as Roles se trocam
+    if (PlayerBus::ourPlayer(defenderId)->distBall() < 0.5f && PlayerBus::ourPlayer(strikerId)->distBall() > 0.5f) {
         quint8 id = strikerId;
-        strikerId = supporterId;
-        supporterId = id;
+        strikerId = defenderId;
+        defenderId = id;
     }
 
-    setPlayerRole(strikerId, _rl_def);
-    setPlayerRole(supporterId, _rl_sup);
+    setPlayerRole(strikerId, _rl_sup);
+    setPlayerRole(defenderId, _rl_def);
 }

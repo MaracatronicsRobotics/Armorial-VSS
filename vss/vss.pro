@@ -40,6 +40,7 @@ SOURCES += \
         src/entity/controlmodule/coach/coachutils.cpp \
         src/entity/controlmodule/coach/playersdistribution.cpp \
         src/entity/controlmodule/controlmodule.cpp \
+        src/entity/controlmodule/playbook/basics/playbook_balance.cpp \
         src/entity/controlmodule/playbook/basics/playbook_defensive.cpp \
         src/entity/controlmodule/playbook/basics/playbook_halt.cpp \
         src/entity/controlmodule/playbook/basics/playbook_offensive.cpp \
@@ -126,6 +127,7 @@ HEADERS += \
     src/entity/controlmodule/coach/coachutils.h \
     src/entity/controlmodule/coach/playersdistribution.h \
     src/entity/controlmodule/controlmodule.h \
+    src/entity/controlmodule/playbook/basics/playbook_balance.h \
     src/entity/controlmodule/playbook/basics/playbook_defensive.h \
     src/entity/controlmodule/playbook/basics/playbook_halt.h \
     src/entity/controlmodule/playbook/basics/playbook_offensive.h \

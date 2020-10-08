@@ -19,27 +19,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-#ifndef SSLSTRATEGY_HALT_H
-#define SSLSTRATEGY_HALT_H
+#ifndef PLAYBOOK_BALANCE_H
+#define PLAYBOOK_BALANCE_H
 
-#include <src/entity/controlmodule/strategy/strategystate.h>
-#include <src/entity/controlmodule/playbook/vssplaybooks.h>
+#include <src/entity/controlmodule/playbook/playbook.h>
+#include <src/entity/player/role/vssroles.h>
 
-class Strategy_Halt : public StrategyState {
+class Playbook_Balance : public Playbook {
 private:
-    // Playbooks
-    Playbook_Halt *_pb_halt;
-    Playbook_Defensive *_pb_defensive;
-    Playbook_Offensive *_pb_offensive;
-    Playbook_Balance *_pb_balance;
+    // Roles
+    Role_Defender *_rl_def;
+    Role_Supporter *_rl_sup;
 
-    void configure(int numOurPlayers);
-    void run(int numOurPlayers);
+    void configure(int numPlayers);
+    void run(int numPlayers);
+    int maxNumPlayer();
 
 public:
-    Strategy_Halt();
+    Playbook_Balance();
     QString name();
 };
 
-
-#endif // SSLSTRATEGY_HALT_H
+#endif // PLAYBOOK_BALANCE_H
