@@ -90,12 +90,14 @@ void Behaviour_Attacker::run() {
                          std::cout << "[BHV_ATTACKER]: " <<"Ta olhando pro gol" << std::endl; //ele entra nessa  mas o goto nao ta indo
                          _sk_goTo->setGoToPos(DesiredBall);
                          _sk_goTo->setGoToVelocityFactor(2.0f);
+                         _sk_goTo->setAvoidBall(false);
                          enableTransition(STATE_GOTO);
                     }
                     else{
                         std::cout << "[BHV_ATTACKER]: " <<"Ta olhando pra fora" << std::endl;
                         _sk_goTo->setGoToPos(DesiredBall);
                         _sk_goTo->setGoToVelocityFactor(2.0f);
+                        _sk_goTo->setAvoidBall(false);
                         enableTransition(STATE_GOTO);
                     }
                 }
@@ -106,6 +108,7 @@ void Behaviour_Attacker::run() {
                 std::cout <<"Not behind ball" << std::endl;
                 _sk_goTo->setGoToPos(behindBall);
                 _sk_goTo->setGoToVelocityFactor(3.0f);
+                _sk_goTo->setAvoidBall(true);
                 enableTransition(STATE_GOTO);
             }
         }
@@ -114,7 +117,9 @@ void Behaviour_Attacker::run() {
 
             Position chaseBall = WR::Utils::threePoints(player()->position(), loc()->ball(), 1.0f, 0.0f);
             _sk_goTo->setGoToPos(chaseBall);
+            _sk_goTo->setAvoidBall(false);
              enableTransition(STATE_GOTO);
+
         }
         break;
 
