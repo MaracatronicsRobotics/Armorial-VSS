@@ -30,6 +30,7 @@ private:
     // Roles
     Role_Defender *_rl_def;
     Role_Supporter *_rl_sup;
+    Role_Striker *_rl_str;
 
     void configure(int numPlayers);
     void run(int numPlayers);

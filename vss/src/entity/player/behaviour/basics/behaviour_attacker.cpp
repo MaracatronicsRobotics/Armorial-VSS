@@ -50,9 +50,11 @@ void Behaviour_Attacker::configure() {
 };
 
 void Behaviour_Attacker::run() {
+    std::cout<< "Fon\n";
     CheckIfAttack();
     switch(_state){
     case STATE_WAIT:{
+        std::cout << "Waiting...\n";
         //hold the position
         Position posWait(true , 0.375f , 0.0f , 0.0f);
         _sk_goTo->setGoToPos(posWait);
@@ -60,6 +62,7 @@ void Behaviour_Attacker::run() {
         break;
     }
     case STATE_ATTACK:{
+        std::cout << "Attacking! Let's take this guys down!\n";
         //goto behind
         Position behindBall = WR::Utils::threePoints(loc()->ball(), loc()->theirGoal(), 0.1f, GEARSystem::Angle::pi);
         double angleToGoal = WR::Utils::getAngle(loc()->ball() , loc()->theirGoal());
@@ -135,7 +138,7 @@ void Behaviour_Attacker::CheckIfAttack(){
     if(loc()->isInsideOurField(posBall)){
 
         _state = STATE_WAIT;
-        std::cout << "WAIT " << loc()->isInsideOurField(posBall) << std::endl;
+        //std::cout << "WAIT " << loc()->isInsideOurField(posBall) << std::endl;
     }
     else{
         _state = STATE_ATTACK;
@@ -149,7 +152,7 @@ bool Behaviour_Attacker::isBehindBall(Position posObjective){
     float angleDest = WR::Utils::getAngle(posBall, posObjective);
     float diff = WR::Utils::angleDiff(anglePlayer, angleDest);
 
-    return (diff>GEARSystem::Angle::pi/2.0f);
+    return (diff>GEARSystem::Angle::pi/18.0f);
 }
 
 bool Behaviour_Attacker::isInsideAreaBehindBall(Position behindBall){

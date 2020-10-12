@@ -28,6 +28,7 @@ QString Playbook_Balance::name() {
 Playbook_Balance::Playbook_Balance() {
     _rl_def = nullptr;
     _rl_sup = nullptr;
+    //_rl_str = nullptr;
 }
 
 int Playbook_Balance::maxNumPlayer() {
@@ -37,6 +38,7 @@ int Playbook_Balance::maxNumPlayer() {
 void Playbook_Balance::configure(int numPlayers) {
     usesRole(_rl_def = new Role_Defender());
     usesRole(_rl_sup = new Role_Supporter());
+    //usesRole(_rl_str = new Role_Striker());
 }
 
 void Playbook_Balance::run(int numPlayers) {
