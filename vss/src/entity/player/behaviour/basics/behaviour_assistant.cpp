@@ -71,12 +71,26 @@ void Behaviour_Assistant::run(){
     case STATE_GOTOBALL:{
         Position _aimPosition;
 
+        //error parameter to determine if player is looking to our goal
+        float errorAngleToOurGoal = 0;
+        float angLeftOur = (WR::Utils::getAngle(player()->position(), loc()->ourGoalLeftPost()));
+        float angRightOur = (WR::Utils::getAngle(player()->position(), loc()->ourGoalRightPost()));
+        errorAngleToOurGoal = abs(angRightOur - angLeftOur)/2.0f;
+
         //is player behind ball x? (reference: their goal)
         bool playerBehindBall = false;
         if(loc()->ourSide().isRight()){
-            if(player()->position().x() > loc()->ball().x()) playerBehindBall = true;
+            if(player()->position().x() > loc()->ball().x()){
+                _sk_goTo->setAvoidBall(false);
+                playerBehindBall = true;
+            }
+            else if(localIsLookingTo(loc()->ourGoal(), errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
         }else{
-            if(player()->position().x() < loc()->ball().x()) playerBehindBall = true;
+            if(player()->position().x() < loc()->ball().x()){
+                _sk_goTo->setAvoidBall(false);
+                playerBehindBall = true;
+            }
+            else if(localIsLookingTo(loc()->ourGoal(), errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
         }
 
         /*
