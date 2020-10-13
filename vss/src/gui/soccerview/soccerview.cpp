@@ -277,7 +277,7 @@ void SoccerView::paintEvent(QPaintEvent* event)
     drawBalls();
     //drawBallProjection();
     drawTexts();
-    drawPathPlanning();
+    //drawPathPlanning();
     //vectorTextTest();
     glPopMatrix();
     swapBuffers();

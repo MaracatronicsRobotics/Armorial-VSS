@@ -60,13 +60,13 @@ void Behaviour_GoBack::run() {
     case STATE_LOOKAT:{
 
         //Rotate
-        _angleTarget = _angleBefore + 30 * (GEARSystem::Angle::pi / 180); //15 graus
+        _angleTarget = _angleBefore + 15 * (GEARSystem::Angle::pi / 180); //15 graus
         _sk_rotateTo->setDesiredAngle(_angleTarget);
 
         //_sk_rotateTo->setDesiredPosition(loc()->ball());
         enableTransition(STATE_ROTATE);
 
-        if(player()->orientation().value() > 0.95f *_angleTarget){
+        if(player()->orientation().value() > 0.9f *_angleTarget){
             _retreated = true;
             _wall = false;
         }
@@ -96,7 +96,7 @@ Position Behaviour_GoBack:: newPosBack(Position playerPos){
             obsPos = PlayerBus::theirPlayer(i)->position();
             dist = WR::Utils::distance(playerPos, obsPos);
 
-            if(dist < 0.11f){
+            if(dist < 0.105f){
                 break;
             }
         }

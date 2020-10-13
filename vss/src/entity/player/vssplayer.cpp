@@ -222,7 +222,7 @@ void VSSPlayer::rotateTo(Position targetPosition, bool rot, float angleTarget){
     setSpeed(0.0, speed);
 }
 
-/*std::pair<Angle,float> VSSPlayer::getNavDirectionDistance(const Position &destination, const Angle &positionToLook, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea) {
+std::pair<Angle,float> VSSPlayer::getNavDirectionDistance(const Position &destination, const Angle &positionToLook, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea) {
     _nav->setGoal(destination, positionToLook, avoidTeammates, avoidOpponents, avoidBall, avoidOurGoalArea, avoidTheirGoalArea);
     Angle direction = _nav->getDirection();
     float distance = _nav->getDistance();
@@ -230,7 +230,7 @@ void VSSPlayer::rotateTo(Position targetPosition, bool rot, float angleTarget){
     std::pair<Angle,float> movement = std::make_pair(direction, distance);
     movement.first.setValue(movement.first.value() - orientation().value());
     return movement;
-}*/
+}
 
 void VSSPlayer::goTo(Position targetPosition, float velocityFactor, float minVel, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea, bool pathActivated){
     // Taking orientation from path planning
@@ -242,10 +242,10 @@ void VSSPlayer::goTo(Position targetPosition, float velocityFactor, float minVel
     else
         anglePP = Angle(true, help);
 
-    //std::pair<Angle, float> a = getNavDirectionDistance(targetPosition, anglePP, avoidTeammates, avoidOpponents, avoidBall, avoidOurGoalArea, avoidTheirGoalArea);
+    std::pair<Angle, float> a = getNavDirectionDistance(targetPosition, anglePP, avoidTeammates, avoidOpponents, avoidBall, avoidOurGoalArea, avoidTheirGoalArea);
 
     // Verificando se o lado de trás pra movimentação é a melhor escolha
-    //help = a.first.value();
+    help = a.first.value();
     if(help > float(M_PI)) help -= 2.0f * float(M_PI);
     if(help < float(-M_PI)) help += 2.0f * float(M_PI);
 
@@ -392,10 +392,10 @@ Angle VSSPlayer::orientation() const{
     return _playerTeam->wm()->playerOrientation(_playerTeam->teamId(), _playerId);
 }
 
-/*void VSSPlayer::setGoal(Position pos) const{
+void VSSPlayer::setGoal(Position pos) const{
     _nav->setGoal(pos, orientation(), true, true, true, true, true);
 }
 
 QLinkedList<Position> VSSPlayer::getPath() const {
     return _nav->getPath();
-}*/
+}

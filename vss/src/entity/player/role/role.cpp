@@ -76,33 +76,30 @@ void Role::setPlayer(VSSPlayer *player, PlayerAccess *playerAccess){
 }
 
 void Role::runRole(){
-    //Check Collision
-    if(canMove()){
-        if(player()->velocity().abs() < 0.2f){
-            //if(_timer.timemsec() > COLLISION_TIME || true){
-            _retreated = false;
-        } else {
-            _timer.stop();
-        }
+    if(_behaviourList.size() == 0){
+        std::cout << "[ERROR] " << name().toStdString() << " has no behaviours set!\n";
+        return ;
     }
 
-    if(!_retreated){
+    //Check Collision
+    /*if(!canMove() && player()->velocity().abs() < 0.2f){
+        _retreated = false;
+    } else {
+        _retreated = true;
+    }*/
+
+    if(!canMove()){
         if(_bh_gb->isInitialized() == false)
             _bh_gb->initialize(_loc);
 
         // Configure
         if(_wall) _bh_gb->setWall(true);
+        else _bh_gb->setWall(false);
         _bh_gb->setPlayer(_player, _playerAccess);
         _bh_gb->runBehaviour();
 
-        _retreated = _bh_gb->getDone();
+        //_retreated = _bh_gb->getDone();
     } else {
-        _bh_gb->setStart(true);
-        if(_behaviourList.size() == 0){
-            std::cout << "[ERROR] " << name().toStdString() << " has no behaviours set!\n";
-            return ;
-        }
-
         // Run role (child)
         run();
 
@@ -116,29 +113,30 @@ void Role::runRole(){
 }
 
 bool Role::canMove(){
-    Position playerPos, obstPos;
-    float dist;
-    //std::cout<<"entrou"<<std::endl;
-    playerPos = player()->position();
-
-    if(abs(playerPos.y()) > 0.6f){
-        _wall = true;
-        return true;
+    if(abs(player()->position().y()) > 0.6f){
+        if (abs(player()->orientation().value() - 3 * GEARSystem::Angle::pi / 2) < 0.18f ||
+                abs(player()->orientation().value() - GEARSystem::Angle::pi / 2) < 0.18f) {
+            _wall = true;
+            return false;
+        } else _wall = false;
     }
-    else if(abs(playerPos.x()) > 0.7f){
-        _wall = true;
-        return true;
+    if(abs(player()->position().x()) > 0.7f){
+        if (abs(player()->orientation().value() - GEARSystem::Angle::pi) < 0.18f ||
+                abs(player()->orientation().value()) < 0.18f) {
+            _wall = true;
+            return false;
+        } else _wall = false;
     }
 
-    for(quint8 i = 0; i < 3; i++){
-        obstPos = PlayerBus::theirPlayer(i)->position();
-        dist = WR::Utils::distance(playerPos, obstPos);
+    for(quint8 i = 0; i < _ourTeam->opTeam()->avPlayersSize(); i++){
+        Position obstPos = PlayerBus::theirPlayer(i)->position();
+        float dist = WR::Utils::distance(player()->position(), obstPos);
 
-        if(dist < 0.11f){
-            return true;
+        if(dist < 0.105f){
+            return false;
         }
     }
-    return false;
+    return true;
 }
 
 QHash<int, Behaviour*> Role::getBehaviours(){
