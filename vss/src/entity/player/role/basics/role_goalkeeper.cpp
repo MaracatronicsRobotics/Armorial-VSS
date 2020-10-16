@@ -38,6 +38,5 @@ void Role_Goalkeeper::configure(){
 }
 
 void Role_Goalkeeper::run(){
-    std::cout << "Irineu\n";
     setBehaviour(BHV_GK);
 }

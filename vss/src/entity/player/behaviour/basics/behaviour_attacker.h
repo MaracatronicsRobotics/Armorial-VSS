@@ -30,29 +30,34 @@ class Behaviour_Attacker : public Behaviour {
 private:
     void configure();
     void run();
-    //Machine State
+
+    // Machine State
     int _state;
     enum{
         STATE_ATTACK ,
         STATE_WAIT
     };
-    //States
+
+    // States
     enum {
         STATE_GOTO ,
         STATE_ROTATETO,
         STATE_PUSHBALL,
         STATE_SPIN
     };
-    //Skills
+
+    // Skills
     Skill_GoTo *_sk_goTo;
     Skill_RotateTo *_sk_rotateTo;
     Skill_PushBall *_sk_pushBall;
     Skill_Spin *_sk_Spin;
-    //Aux Functions
+
+    // Auxiliary Functions
     bool isBehindBall(Position posObjective);
     bool isInsideAreaBehindBall(Position behindBall);
     bool lookAtGoal();
-    bool isInsideProjectArea(Position posProjected);
+    bool isInsideDashArea();
+    bool isLookingToBall();
 
     void CheckIfAttack();
 

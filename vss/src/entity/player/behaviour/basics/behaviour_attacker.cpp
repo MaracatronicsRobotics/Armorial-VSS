@@ -38,19 +38,18 @@ void Behaviour_Attacker::configure() {
     usesSkill(_sk_Spin = new Skill_Spin());
 
     addTransition(STATE_ROTATETO, _sk_goTo, _sk_rotateTo);
-    addTransition(STATE_ROTATETO, _sk_Spin, _sk_rotateTo);
+    addTransition(STATE_ROTATETO, _sk_pushBall, _sk_rotateTo);
 
     addTransition(STATE_GOTO, _sk_rotateTo, _sk_goTo);
-    addTransition(STATE_GOTO, _sk_Spin , _sk_goTo);
+    addTransition(STATE_GOTO, _sk_pushBall , _sk_goTo);
 
-    addTransition(STATE_SPIN , _sk_goTo , _sk_Spin);
-    addTransition(STATE_SPIN , _sk_rotateTo , _sk_Spin);
+    addTransition(STATE_PUSHBALL, _sk_goTo , _sk_pushBall);
+    addTransition(STATE_PUSHBALL, _sk_rotateTo , _sk_pushBall);
 
-    setInitialSkill(_sk_goTo);
+    setInitialSkill(_sk_pushBall);
 };
 
 void Behaviour_Attacker::run() {
-    std::cout<< "Fon\n";
     CheckIfAttack();
     switch(_state){
     case STATE_WAIT:{
@@ -89,7 +88,7 @@ void Behaviour_Attacker::run() {
                         DesiredBall.setPosition(DesiredBall.x() , DesiredBall.y() + tg , DesiredBall.z());
                     }
 
-                    if(isInsideProjectArea(DesiredBall)){ //threePoints apontando mt longe
+                    if(isInsideDashArea()){ //threePoints apontando mt longe
                          std::cout << "[BHV_ATTACKER]: " <<"Ta olhando pro gol" << std::endl; //ele entra nessa  mas o goto nao ta indo
                          _sk_goTo->setGoToPos(DesiredBall);
                          _sk_goTo->setGoToVelocityFactor(2.0f);
@@ -132,6 +131,32 @@ void Behaviour_Attacker::run() {
     //_sk_rotateTo->setDesiredPosition(loc()->ball());
 
     //_sk_goTo->setGoToPos(loc()->ball());
+    /*Position ballPrevision(true, loc()->ball().x() + 2 * loc()->ballVelocity().x(), loc()->ball().y() + 2 * loc()->ballVelocity().y(), 0.0);
+    _sk_goTo->setGoToPos(loc()->ball());
+    _sk_goTo->setAvoidBall(true);
+    _sk_goTo->setGoToVelocityFactor(4.0);
+
+    _sk_rotateTo->setDesiredPosition(loc()->ball());
+
+    if (isInsideDashArea()) {
+        if (abs(abs(WR::Utils::getAngle(player()->position(), loc()->ball()) - player()->orientation().value()) - Angle::pi) < 0.1f) {
+            std::cout << "Me lambe\n";
+            _sk_pushBall->setSpeedAndOmega(-1.0, 0.0);
+            std::cout << "Me lambe\n";
+            enableTransition(STATE_PUSHBALL);
+        } else if (abs(WR::Utils::getAngle(player()->position(), loc()->ball()) - player()->orientation().value()) < 0.1f) {
+            std::cout << "Chupa-me\n";
+            _sk_pushBall->setSpeedAndOmega(1.0, 0.0);
+            std::cout << "Chupa-me\n";
+            enableTransition(STATE_PUSHBALL);
+        } else {
+            std::cout << "Roda a roda\n";
+            enableTransition(STATE_ROTATETO);
+        }
+    } else {
+        std::cout << "Dale\n";
+        enableTransition(STATE_GOTO);
+    }*/
 }
 void Behaviour_Attacker::CheckIfAttack(){
     Position posBall = loc()->ball();
@@ -168,30 +193,37 @@ bool Behaviour_Attacker::lookAtGoal(){
     return player()->isLookingTo(loc()->theirGoal() , 0.23f);
 }
 
-bool Behaviour_Attacker::isInsideProjectArea(Position posProjected){
-    Position posBall = loc()->ball();
-    Position posPlayer = player()->position();
-    Position leftPost = loc()->theirGoalLeftPost();
-    Position rightPost = loc()->theirGoalRightPost();
-    float angleLeftPost = WR::Utils::getAngle(posBall , leftPost);
-    float angleRightPost = WR::Utils::getAngle(posBall , rightPost );
-    float Yl = tan(angleLeftPost)*posProjected.x() + posPlayer.y();
-    float Yr = tan(angleRightPost)*posProjected.x() + posPlayer.y();
+bool Behaviour_Attacker::isInsideDashArea(){
+    //Definição dos ângulos dos coeficientes angulares
+    float leftPostAngle = WR::Utils::getAngle(loc()->ball() , loc()->theirGoalLeftMidPost());
+    float rightPostAngle = WR::Utils::getAngle(loc()->ball() , loc()->theirGoalRightMidPost());
+
+    //Definição dos coeficientes lineares
+    float leftPost_b = loc()->ball().y() - tan(leftPostAngle)*loc()->ball().x();
+    float rightPost_b = loc()->ball().y() - tan(rightPostAngle)*loc()->ball().x();
+
+    //Definição dos limites verticais de posicionamento do jogador
+    float leftPost_y = tan(leftPostAngle) * player()->position().x() + leftPost_b;
+    float rightPost_y = tan(rightPostAngle) * player()->position().x() + rightPost_b;
+
+    //Avaliação da região que o jogador se encontra
     if(loc()->ourSide().isRight()){
-        if(WR::Utils::checkInterval(posProjected.y() , Yr , Yl)){
-            return true;
-        }
-        else{
-            return false;
-        }
+        if(player()->position().y() < leftPost_y && player()->position().y() > rightPost_y) return true;
+    } else {
+        if(player()->position().y() > leftPost_y && player()->position().y() < rightPost_y) return true;
     }
-    else{
-        if(WR::Utils::checkInterval(posProjected.y() , Yl , Yr)){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
+    return false;
+}
+
+bool Behaviour_Attacker::isLookingToBall() {
+    float rotateAngle = WR::Utils::getAngle(player()->position(), loc()->ball()) - player()->orientation().value();
+
+    if(rotateAngle > float(M_PI)) rotateAngle -= 2.0f * float(M_PI);
+    if(rotateAngle < float(-M_PI)) rotateAngle += 2.0f * float(M_PI);
+
+    if(rotateAngle > float(M_PI_2)) rotateAngle -= float(M_PI);
+    if(rotateAngle < float(-M_PI_2)) rotateAngle += float(M_PI);
+
+    return rotateAngle;
 }
 

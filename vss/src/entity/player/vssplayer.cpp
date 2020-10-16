@@ -136,33 +136,15 @@ void VSSPlayer::setSpeed(float vx, float omega){
 }
 
 float VSSPlayer::getRotateAngle(Position targetPosition){
-    float robot_x, robot_y, angleOriginToRobot = angle().value();
-    robot_x = position().x();
-    robot_y = position().y();
+    float rotateAngle = WR::Utils::getAngle(position(), targetPosition) - orientation().value();
 
-    // Define a velocidade angular do robô para visualizar a bola
-    float vectorRobotToTargetX = (targetPosition.x() - robot_x);
-    float vectorRobotToTargetY = (targetPosition.y() - robot_y);
-    float modVectorRobotToTarget = sqrtf(powf(vectorRobotToTargetX, 2) + powf(vectorRobotToTargetY, 2));
+    if(rotateAngle > float(M_PI)) rotateAngle -= 2.0f * float(M_PI);
+    if(rotateAngle < float(-M_PI)) rotateAngle += 2.0f * float(M_PI);
 
-    if (modVectorRobotToTarget == 0.0f) return 0.0f;
+    if(rotateAngle > float(M_PI_2)) rotateAngle -= float(M_PI);
+    if(rotateAngle < float(-M_PI_2)) rotateAngle += float(M_PI);
 
-    vectorRobotToTargetX = vectorRobotToTargetX / modVectorRobotToTarget;
-
-    float angleOriginToTarget;   //Ângulo do robô entre o alvo e o eixo x do campo
-    float angleRobotToTarget;       //Ângulo do robô entre o alvo e o eixo x do robô
-
-    if(vectorRobotToTargetY < 0){ //terceiro e quarto quadrante
-        angleOriginToTarget = float(2*M_PI) - acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
-    }else{ //primeiro e segundo quadrante
-        angleOriginToTarget = acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
-    }
-
-    angleRobotToTarget = angleOriginToTarget - angleOriginToRobot;
-    if(angleRobotToTarget > float(M_PI)) angleRobotToTarget -= 2.0f * float(M_PI);
-    if(angleRobotToTarget < float(-M_PI)) angleRobotToTarget += 2.0f * float(M_PI);
-
-    return angleRobotToTarget;
+    return rotateAngle;
 }
 
 float VSSPlayer::getVxToTarget(Position targetPosition){
@@ -181,8 +163,8 @@ float VSSPlayer::getVxToTarget(Position targetPosition){
 
 float VSSPlayer::getRotateSpeed(float angleRobotToTarget){
     float ori = angle().value();
-    if(ori > M_PI) ori -= 2.0 * M_PI;
-    if(ori < -M_PI) ori += 2.0 * M_PI;
+    if(ori > float(M_PI)) ori -= 2.0f * float(M_PI);
+    if(ori < float(-M_PI)) ori += 2.0f * float(M_PI);
 
     bool swapSpeed = false;
     if(angleRobotToTarget > float(M_PI) / 2.0f){
