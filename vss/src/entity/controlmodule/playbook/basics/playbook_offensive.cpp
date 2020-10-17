@@ -36,7 +36,7 @@ int Playbook_Offensive::maxNumPlayer() {
 }
 
 void Playbook_Offensive::configure(int numPlayers) {
-    usesRole(_rl_def = new Role_Defender());
+    //usesRole(_rl_def = new Role_Defender());
     usesRole(_rl_sup = new Role_Supporter());
     usesRole(_rl_str = new Role_Striker());
 }
