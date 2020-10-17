@@ -136,6 +136,34 @@ void VSSPlayer::setSpeed(float vx, float omega){
 }
 
 float VSSPlayer::getRotateAngle(Position targetPosition){
+    /*float robot_x, robot_y, angleOriginToRobot = angle().value();
+    robot_x = position().x();
+    robot_y = position().y();
+
+    // Define a velocidade angular do robô para visualizar a bola
+    float vectorRobotToTargetX = (targetPosition.x() - robot_x);
+    float vectorRobotToTargetY = (targetPosition.y() - robot_y);
+    float modVectorRobotToTarget = sqrtf(powf(vectorRobotToTargetX, 2) + powf(vectorRobotToTargetY, 2));
+
+    if (modVectorRobotToTarget == 0.0f) return 0.0f;
+
+    vectorRobotToTargetX = vectorRobotToTargetX / modVectorRobotToTarget;
+
+    float angleOriginToTarget;   //Ângulo do robô entre o alvo e o eixo x do campo
+    float angleRobotToTarget;       //Ângulo do robô entre o alvo e o eixo x do robô
+
+    if(vectorRobotToTargetY < 0){ //terceiro e quarto quadrante
+        angleOriginToTarget = float(2*M_PI) - acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
+    }else{ //primeiro e segundo quadrante
+        angleOriginToTarget = acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
+    }
+
+    angleRobotToTarget = angleOriginToTarget - angleOriginToRobot;
+    if(angleRobotToTarget > float(M_PI)) angleRobotToTarget -= 2.0f * float(M_PI);
+    if(angleRobotToTarget < float(-M_PI)) angleRobotToTarget += 2.0f * float(M_PI);
+
+    return angleRobotToTarget;*/
+
     float rotateAngle = WR::Utils::getAngle(position(), targetPosition) - orientation().value();
 
     if(rotateAngle > float(M_PI)) rotateAngle -= 2.0f * float(M_PI);

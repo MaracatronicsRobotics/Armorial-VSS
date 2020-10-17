@@ -36,6 +36,7 @@ void Behaviour_Attacker::configure() {
     usesSkill(_sk_goTo = new Skill_GoTo());
     usesSkill(_sk_rotateTo = new Skill_RotateTo());
     usesSkill(_sk_Spin = new Skill_Spin());
+    usesSkill(_sk_pushBall = new Skill_PushBall());
 
     addTransition(STATE_ROTATETO, _sk_goTo, _sk_rotateTo);
     addTransition(STATE_ROTATETO, _sk_pushBall, _sk_rotateTo);
@@ -46,11 +47,13 @@ void Behaviour_Attacker::configure() {
     addTransition(STATE_PUSHBALL, _sk_goTo , _sk_pushBall);
     addTransition(STATE_PUSHBALL, _sk_rotateTo , _sk_pushBall);
 
-    setInitialSkill(_sk_pushBall);
+    setInitialSkill(_sk_goTo);
+
+    _state = STATE_GOTO;
 };
 
 void Behaviour_Attacker::run() {
-    CheckIfAttack();
+    /*CheckIfAttack();
     switch(_state){
     case STATE_WAIT:{
         std::cout << "Waiting...\n";
@@ -130,34 +133,113 @@ void Behaviour_Attacker::run() {
     //enableTransition(0);
     //_sk_rotateTo->setDesiredPosition(loc()->ball());
 
-    //_sk_goTo->setGoToPos(loc()->ball());
-    /*Position ballPrevision(true, loc()->ball().x() + 2 * loc()->ballVelocity().x(), loc()->ball().y() + 2 * loc()->ballVelocity().y(), 0.0);
-    _sk_goTo->setGoToPos(loc()->ball());
+    //_sk_goTo->setGoToPos(loc()->ball());*/
+    Position behindBall = WR::Utils::threePoints(loc()->ball(), loc()->theirGoal(), 0.11f, GEARSystem::Angle::pi);
+    Position ballPrevision(true, behindBall.x() + loc()->ballVelocity().x() / 2, behindBall.y() + loc()->ballVelocity().y() / 2, 0.0);
+
     _sk_goTo->setAvoidBall(true);
-    _sk_goTo->setGoToVelocityFactor(4.0);
+    _sk_goTo->setGoToVelocityFactor(5.0);
 
     _sk_rotateTo->setDesiredPosition(loc()->ball());
 
-    if (isInsideDashArea()) {
-        if (abs(abs(WR::Utils::getAngle(player()->position(), loc()->ball()) - player()->orientation().value()) - Angle::pi) < 0.1f) {
-            std::cout << "Me lambe\n";
-            _sk_pushBall->setSpeedAndOmega(-1.0, 0.0);
-            std::cout << "Me lambe\n";
-            enableTransition(STATE_PUSHBALL);
-        } else if (abs(WR::Utils::getAngle(player()->position(), loc()->ball()) - player()->orientation().value()) < 0.1f) {
-            std::cout << "Chupa-me\n";
-            _sk_pushBall->setSpeedAndOmega(1.0, 0.0);
-            std::cout << "Chupa-me\n";
-            enableTransition(STATE_PUSHBALL);
+    switch(_state){
+    case STATE_PUSHBALL: {
+        std::cout << "Fonzinho\n";
+        if (!player()->isNearbyPosition(loc()->ball(), 0.2f)) {
+            _state = STATE_GOTO;
+            break;
         } else {
-            std::cout << "Roda a roda\n";
+            if ((abs(rotateToBall(loc()->ball())) > 1.2f)) {
+                _state = STATE_ROTATETO;
+                enableTransition(STATE_ROTATETO);
+                break;
+            } else {
+                float angLeft = (WR::Utils::getAngle(player()->position(), loc()->theirGoalLeftPost()));
+                float angRight = (WR::Utils::getAngle(player()->position(), loc()->theirGoalRightPost()));
+                float errorAngleToTheirGoal = 0.9f*abs(angRight - angLeft)/2.0f;
+                if (player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)) {
+                    _sk_pushBall->setSpeedAndOmega(1.0, 0.0);
+                } else if (abs(rotateToBall(loc()->theirGoal())) < errorAngleToTheirGoal) {
+                    _sk_pushBall->setSpeedAndOmega(-1.0, 0.0);
+                }
+                enableTransition(STATE_PUSHBALL);
+            }
+        }
+    }
+        break;
+    case STATE_ROTATETO: {
+        std::cout << "Fon\n";
+        if (!player()->isNearbyPosition(ballPrevision, 0.2f)) {
+            _state = STATE_GOTO;
+            break;
+        }
+        if (abs(rotateToBall(loc()->ball())) < 0.7f) {
+            _state = STATE_PUSHBALL;
+            break;
+        }
+    }
+        break;
+    case STATE_GOTO: {
+        bool playerBehindBall = false;
+        if(loc()->ourSide().isRight()){
+            if(player()->position().x() > loc()->ball().x()) {
+                _sk_goTo->setGoToPos(ballPrevision);
+                playerBehindBall = true;
+            } else {
+                _sk_goTo->setGoToPos(loc()->ourGoal());
+                playerBehindBall = false;
+            }
+        }else{
+            if(player()->position().x() < loc()->ball().x()) {
+                _sk_goTo->setGoToPos(ballPrevision);
+                playerBehindBall = true;
+            } else {
+                _sk_goTo->setGoToPos(loc()->ourGoal());
+                playerBehindBall = false;
+            }
+        }
+        enableTransition(STATE_GOTO);
+        if (playerBehindBall) {
+            std::cout << "SAMBA\n";
+            if (player()->isNearbyPosition(ballPrevision, 0.15f)) {
+                std::cout << "RECIFE\n";
+                if (abs(rotateToBall(loc()->ball())) < 1.2f) {
+                    _state = STATE_PUSHBALL;
+                } else {
+                    _state = STATE_ROTATETO;
+                    enableTransition(STATE_ROTATETO);
+                }
+            }
+        }
+    }
+    }
+
+    /*if (isInsideDashArea()) {
+        if (lookingToBall().first) {
+            float angLeft = (WR::Utils::getAngle(player()->position(), loc()->theirGoalLeftPost()));
+            float angRight = (WR::Utils::getAngle(player()->position(), loc()->theirGoalRightPost()));
+            float errorAngleToTheirGoal = 0.9f*abs(angRight - angLeft)/2.0f;
+            if (!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)) {
+                std::cout << "FOGO\n";
+                _sk_pushBall->setSpeedAndOmega(-1.0, 0.0);
+                std::cout << "FOGO\n";
+                enableTransition(STATE_PUSHBALL);
+            } else {
+                std::cout << "ÁGUA\n";
+                _sk_pushBall->setSpeedAndOmega(1.0, 0.0);
+                std::cout << "ÁGUA\n";
+                enableTransition(STATE_PUSHBALL);
+            }
+        } else {
+            std::cout << "AR\n";
             enableTransition(STATE_ROTATETO);
         }
     } else {
-        std::cout << "Dale\n";
+        std::cout << "TERRA\n";
         enableTransition(STATE_GOTO);
     }*/
 }
+
 void Behaviour_Attacker::CheckIfAttack(){
     Position posBall = loc()->ball();
     if(loc()->isInsideOurField(posBall)){
@@ -215,8 +297,8 @@ bool Behaviour_Attacker::isInsideDashArea(){
     return false;
 }
 
-bool Behaviour_Attacker::isLookingToBall() {
-    float rotateAngle = WR::Utils::getAngle(player()->position(), loc()->ball()) - player()->orientation().value();
+float Behaviour_Attacker::rotateToBall(Position something) {
+    float rotateAngle = WR::Utils::getAngle(player()->position(), something) - player()->orientation().value();
 
     if(rotateAngle > float(M_PI)) rotateAngle -= 2.0f * float(M_PI);
     if(rotateAngle < float(-M_PI)) rotateAngle += 2.0f * float(M_PI);

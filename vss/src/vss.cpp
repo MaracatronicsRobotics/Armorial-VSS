@@ -69,8 +69,8 @@ bool VSS::start(){
     _world->addEntity(_gui, 3);
 
     // Setup Referee
-    _ref = new VSSReferee(_ourTeam);
-    _world->addEntity(_ref, 3);
+    //_ref = new VSSReferee(_ourTeam);
+    //_world->addEntity(_ref, 3);
 
     // Start world
     _world->start();
