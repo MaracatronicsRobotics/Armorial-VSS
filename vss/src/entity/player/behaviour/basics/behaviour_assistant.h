@@ -49,9 +49,11 @@ public:
     bool isBehindBall(Position posObjective);
     bool setSpinDirection();
     bool checkIfShouldSpin();
-    quint8 closestAllyToBall();
+    bool canGoToBall();
     Position projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea);
     bool localIsLookingTo(const Position &pos, float error);
+    bool allyInTheirArea();
+    bool isBehindBallX(quint8 id);
 };
 
 #endif // BEHAVIOUR_ASSISTANT_H

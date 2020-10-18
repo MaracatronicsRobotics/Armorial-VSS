@@ -70,6 +70,8 @@ void Behaviour_Assistant::run(){
 
     case STATE_GOTOBALL:{
         Position _aimPosition;
+        _aimPosition.setUnknown();
+        float behindBallAngle = 0;
 
         //error parameter to determine if player is looking to our goal
         float errorAngleToOurGoal = 0;
@@ -78,20 +80,9 @@ void Behaviour_Assistant::run(){
         errorAngleToOurGoal = abs(angRightOur - angLeftOur)/2.0f;
 
         //is player behind ball x? (reference: their goal)
-        bool playerBehindBall = false;
-        if(loc()->ourSide().isRight()){
-            if(player()->position().x() > loc()->ball().x()){
-                _sk_goTo->setAvoidBall(false);
-                playerBehindBall = true;
-            }
-            else if(localIsLookingTo(loc()->ourGoal(), errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
-        }else{
-            if(player()->position().x() < loc()->ball().x()){
-                _sk_goTo->setAvoidBall(false);
-                playerBehindBall = true;
-            }
-            else if(localIsLookingTo(loc()->ourGoal(), errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
-        }
+        bool playerBehindBall = isBehindBallX(player()->playerId());
+        if(playerBehindBall) _sk_goTo->setAvoidBall(false);
+        else if(player()->isLookingTo(loc()->ourGoal(), errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
 
         /*
          * considering angle between the ball and their goal to define the radius of a circle around the ball:
@@ -103,7 +94,12 @@ void Behaviour_Assistant::run(){
 
         //Defining ballOffset: distance from the ball to the point behindthe ball that the player must follow
         float ballOffset = 0;
-        if(player()->isNearbyPosition(loc()->ball(), aroundBall) && playerBehindBall){
+        if(loc()->isInsideOurField(loc()->ball()) && !playerBehindBall){
+            ballOffset = 0.04f;
+            //if ball is inside our field, our player should be between our goal and the ball:
+            _aimPosition = loc()->ourGoal();
+            behindBallAngle = 0;
+        }else if(player()->isNearbyPosition(loc()->ball(), aroundBall) && playerBehindBall){
             //if the player is behind ball x and should go to ball position
             ballOffset = 0.02f;
             //std::cout << "locball\n";
@@ -112,47 +108,32 @@ void Behaviour_Assistant::run(){
             ballOffset = 0.14f;
         }
 
-        bool closestToBall = false;
-
-        //checking if our player is closest to ball
-        quint8 allyId = closestAllyToBall();
-
-        //if allyId is a valid id
-        if(PlayerBus::ourPlayerAvailable(allyId)){
-            //if there's an ally closer to the ball: keep some distance from ball
-            if(PlayerBus::ourPlayer(allyId)->distBall() < player()->distBall()){
-                closestToBall = false;
-            }else{
-                closestToBall = true;
-            }
-        }else{
-            closestToBall = true;
-        }
-
-        _aimPosition.setUnknown();
-
-        //discover their player that have poss
+        /*//discover their player that have poss
         for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
             if(PlayerBus::theirPlayerAvailable(x)){
-                if(PlayerBus::theirPlayer(x)->isNearbyPosition(loc()->ball(), 0.1f) && loc()->isInsideOurField(loc()->ball())){
+                if(PlayerBus::theirPlayer(x)->isNearbyPosition(loc()->ball(), 0.15f) && loc()->isInsideOurField(loc()->ball())){
                     //update _aimposition so that our player follow the point between the ball and our goal (or the ball position)
                     _aimPosition = loc()->ourGoal();
-                    ballOffset *= -1;
+                    behindBallAngle = 0;
                     break;
                 }
             }
+        }*/
+
+        //if ball isn't inside our field, aim position is now their goal
+        if(_aimPosition.isUnknown()){
+            behindBallAngle = GEARSystem::Angle::pi;
+            _aimPosition = loc()->theirGoal();
         }
 
-        //if they don't have poss, aim position is now their goal
-        if(_aimPosition.isUnknown()) _aimPosition = loc()->theirGoal();
-
+        bool shouldGoToBall = canGoToBall();
         //calc behind ball
         Position behindBall;
         //if there's an ally closer to the ball: keep some distance from ball
-        if(!closestToBall){
-            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.2f + ballOffset, GEARSystem::Angle::pi);
+        if(!shouldGoToBall){
+            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.2f + ballOffset, behindBallAngle);
         }else{
-            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, ballOffset, GEARSystem::Angle::pi);
+            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, ballOffset, behindBallAngle);
         }
 
         if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
@@ -169,25 +150,29 @@ void Behaviour_Assistant::run(){
 
             if(isBehindBall(projectedPos)){
                 //if there's an ally closer to the ball: keep some distance from ball
-                if(!closestToBall){
-                    behindBall = WR::Utils::threePoints(projectedPos, _aimPosition, 0.2f + ballOffset, GEARSystem::Angle::pi);
+                if(!shouldGoToBall){
+                    behindBall = WR::Utils::threePoints(projectedPos, _aimPosition, 0.2f + ballOffset, behindBallAngle);
                 }else{
-                    behindBall = WR::Utils::threePoints(projectedPos, _aimPosition, ballOffset, GEARSystem::Angle::pi);
+                    behindBall = WR::Utils::threePoints(projectedPos, _aimPosition, ballOffset, behindBallAngle);
                 }
             }
         }
 
         //setting skill goTo position
-        behindBall = projectPosOutsideGoalArea(behindBall, true, false);
+        bool avoidOurArea = true, avoidTheirArea = allyInTheirArea();
+        _sk_goTo->setAvoidOurGoalArea(avoidOurArea);
+        _sk_goTo->setAvoidTheirGoalArea(avoidTheirArea);
+        behindBall = projectPosOutsideGoalArea(behindBall, avoidOurArea, avoidTheirArea);
         _sk_goTo->setGoToPos(behindBall);
 
         //setting skill goTo velocity factor
         // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
+        float velFac = 1.0f - player()->distBall()/WR::Utils::distance(loc()->fieldLeftTopCorner(), loc()->fieldRightBottomCorner());
         float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
         if(4.0f < 1.0f*velocityNeeded){
             _sk_goTo->setGoToVelocityFactor(1.5f*velocityNeeded);
         }else{
-            _sk_goTo->setGoToVelocityFactor(4.0f);
+            _sk_goTo->setGoToVelocityFactor((1.0f+velFac)*3.0f);
         }
 
         //setting skill rotateTo
@@ -258,12 +243,39 @@ void Behaviour_Assistant::run(){
     }
 }
 
+bool Behaviour_Assistant::isBehindBallX(quint8 id){
+    //is player behind ball x? (reference: their goal)
+    bool playerBehindBall = false;
+    if(loc()->ourSide().isRight()){
+        if(PlayerBus::ourPlayer(id)->position().x() > loc()->ball().x()){
+            playerBehindBall = true;
+        }
+    }else{
+        if(PlayerBus::ourPlayer(id)->position().x() < loc()->ball().x()){
+            playerBehindBall = true;
+        }
+    }
+    return playerBehindBall;
+}
+
+bool Behaviour_Assistant::allyInTheirArea(){
+    //find out if there's an ally inside their area
+    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+        if(PlayerBus::ourPlayerAvailable(x) && PlayerBus::ourPlayer(x)->playerId() != player()->playerId()){
+            if(loc()->isInsideTheirArea(PlayerBus::ourPlayer(x)->position())){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool Behaviour_Assistant::localIsLookingTo(const Position &pos, float error){
     Angle angle1(true, WR::Utils::getAngle(player()->position(), pos));
 
     // Calc diff
     float dif = abs(WR::Utils::angleDiff(player()->orientation(), angle1));
-    if(dif > Angle::pi/2) dif = Angle::pi - dif;
+    if(dif > Angle::pi/2) dif = abs(Angle::pi - dif);
     return (dif <= error);
 }
 
@@ -345,7 +357,7 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
     }
 }
 
-quint8 Behaviour_Assistant::closestAllyToBall(){
+bool Behaviour_Assistant::canGoToBall(){
     float minorDistToBall = 1000;
     quint8 id = 100;
     for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
@@ -357,7 +369,19 @@ quint8 Behaviour_Assistant::closestAllyToBall(){
             }
         }
     }
-    return id;
+    //if allyId is a valid id
+    if(PlayerBus::ourPlayerAvailable(id)){
+        //if there's an ally closer to the ball and he's moving: keep some distance from ball
+        if(PlayerBus::ourPlayer(id)->distBall() < player()->distBall() && PlayerBus::ourPlayer(id)->velocity().abs() > BALLPREVISION_MINVELOCITY){
+            //if the closest ally to ball isn't behind it, and this player is: we can go to ball
+            if(!isBehindBallX(id) && isBehindBallX(player()->playerId())) return true;
+            else return false;
+        }else{
+            return true;
+        }
+    }else{
+        return true;
+    }
 }
 
 bool Behaviour_Assistant::isBehindBall(Position posObjective){
