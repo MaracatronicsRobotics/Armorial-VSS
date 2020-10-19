@@ -20,6 +20,13 @@ private:
         BHV_BARRIER
     };
 
+    // positioning
+    enum{
+        BARRIER_PREDOMINANT,
+        ASSIST_PREDOMINANT,
+        FREE
+    };
+
     // Inherited functions
     void configure();
     void run();
@@ -41,7 +48,9 @@ public:
     Role_Supporter();
     void initializeBehaviours();
     QString name();
-    bool EnemyHasBallPossession();
+    bool EnemyInOurField();
+    int _positioning;
+    int _bhv;
 };
 
 #endif // ROLE_SUPPORTER_H
