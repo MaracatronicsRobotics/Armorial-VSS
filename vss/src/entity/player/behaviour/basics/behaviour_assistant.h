@@ -39,7 +39,8 @@ private:
     enum{
         ROT,
         PUSH,
-        GOTO
+        GOTO,
+        SPIN
     };
 
 public:

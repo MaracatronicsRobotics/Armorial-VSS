@@ -199,6 +199,11 @@ void Behaviour_Assistant::run(){
                     _skill = GOTO;
                 }
             }
+            //SPIN
+            if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+                enableTransition(STATE_SPIN);
+                _skill = SPIN;
+            }
         }else if(_skill == ROT){
             //std::cout << "ROTATE" << std::endl;
             if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) || !localIsLookingTo(loc()->ball(), 0.4f)){
@@ -218,6 +223,11 @@ void Behaviour_Assistant::run(){
                     _skill = GOTO;
                 }
             }
+            //SPIN
+            if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+                enableTransition(STATE_SPIN);
+                _skill = SPIN;
+            }
         }else if(_skill == GOTO){
             //std::cout << "GOTO" << std::endl;
             //PUSH
@@ -234,6 +244,17 @@ void Behaviour_Assistant::run(){
             else if(player()->isNearbyPosition(behindBall, 0.03f) && !localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && localIsLookingTo(loc()->ball(), 0.3f)){
                 enableTransition(STATE_ROTATE);
                 _skill = ROT;
+            }
+            //SPIN
+            if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+                enableTransition(STATE_SPIN);
+                _skill = SPIN;
+            }
+        }
+        if(_skill == SPIN){
+            if(!(!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+                enableTransition(STATE_GOTO);
+                _skill = GOTO;
             }
         }
 
