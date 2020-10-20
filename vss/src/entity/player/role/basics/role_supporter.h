@@ -51,6 +51,7 @@ public:
     bool EnemyInOurField();
     int _positioning;
     int _bhv;
+    bool BySideOfGoal();
 };
 
 #endif // ROLE_SUPPORTER_H

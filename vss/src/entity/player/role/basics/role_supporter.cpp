@@ -28,7 +28,6 @@ void Role_Supporter::run(){
         float ballVelFactor = loc()->ballVelocity().abs()/1.2f;
 
         float avgFactor = (distBallFactor + distPlayerFactor + ballVelFactor + enemyInOurFieldFactor)/4.0f;
-        std::cout << avgFactor << std::endl;
         if(avgFactor > 0.5f && _bhv == BHV_ASSISTANT){
             setBehaviour(BHV_BARRIER);
             _bhv = BHV_BARRIER;
@@ -40,7 +39,7 @@ void Role_Supporter::run(){
     }
     case(BARRIER_PREDOMINANT):{
         if(_bhv == BHV_BARRIER){
-            if(!EnemyInOurField() && player()->isNearbyPosition(loc()->ball(), 0.2f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f)){
+            if(!EnemyInOurField() && player()->isNearbyPosition(loc()->ball(), 0.2f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f) && !BySideOfGoal()){
                 setBehaviour(BHV_ASSISTANT);
                 _bhv = BHV_ASSISTANT;
             }
@@ -50,7 +49,11 @@ void Role_Supporter::run(){
                 _bhv = BHV_BARRIER;
             }
         }
-        std::cout<<_bhv<<std::endl;
+        break;
+    }
+    case(ASSIST_PREDOMINANT):{
+        setBehaviour(BHV_ASSISTANT);
+        break;
     }
     }
 }
@@ -63,4 +66,12 @@ bool Role_Supporter::EnemyInOurField(){
         }
     }
     return false;
+}
+
+bool Role_Supporter::BySideOfGoal(){
+    if(fabs(loc()->ball().y()) > (fabs(loc()->ourGoal().y()) + loc()->fieldDefenseLength()/2.0f)){
+        return true;
+    }else{
+        return false;
+    }
 }
