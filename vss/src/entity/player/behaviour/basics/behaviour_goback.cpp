@@ -1,7 +1,7 @@
 #include "behaviour_goback.h"
 #include <iostream>
 
-#define distToBack 0.10f
+#define distToBack 0.15f
 
 QString Behaviour_GoBack::name() {
     return "Behaviour_GoBack";
@@ -63,7 +63,7 @@ void Behaviour_GoBack::run() {
         //_sk_rotateTo->setDesiredPosition(loc()->ball());
         enableTransition(STATE_ROTATE);
 
-        if(player()->orientation().value() > 0.9f *_angleTarget){
+        if(player()->orientation().value() > 0.8f *_angleTarget){
             _retreated = true;
             _wall = false;
         }

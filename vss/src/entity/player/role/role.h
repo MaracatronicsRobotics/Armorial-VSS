@@ -99,6 +99,7 @@ private:
     Timer _timer;
     bool _retBefore;
     bool _wall;
+    bool print;
 };
 
 #endif // ROLE_H

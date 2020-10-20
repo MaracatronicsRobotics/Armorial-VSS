@@ -68,6 +68,8 @@ void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc){
 
     // Initialize
     _initialized = true;
+
+    print = true;
 }
 
 void Role::setPlayer(VSSPlayer *player, PlayerAccess *playerAccess){
@@ -88,7 +90,7 @@ void Role::runRole(){
         _retreated = true;
     }*/
 
-    /*if(!canMove()){
+    if(!canMove() || !_retreated){
         if(_bh_gb->isInitialized() == false)
             _bh_gb->initialize(_loc);
 
@@ -98,8 +100,12 @@ void Role::runRole(){
         _bh_gb->setPlayer(_player, _playerAccess);
         _bh_gb->runBehaviour();
 
-        //_retreated = _bh_gb->getDone();
-    } else {*/
+        if(_retreated){
+            _bh_gb->setStart(true);
+        }
+        _retreated = _bh_gb->getDone();
+
+    } else if (_retreated){
         // Run role (child)
         run();
 
@@ -113,6 +119,35 @@ void Role::runRole(){
 }
 
 bool Role::canMove(){
+
+    //Definindo cantos do campo
+    Position topRightCorner(true,0.74f,0.64f,0.0f);
+    Position bottomRightCorner(true,0.74f,-0.64f,0.0);
+    Position topLeftCorner(true,-0.74f,0.64f,0.0f);
+    Position bottomLeftCorner(true,-0.74f,-0.64f,0.0);
+
+    //Lista com as 4 posições dos cantos do campo - Sentido horário
+    QList<Position> cornersPosition;
+    cornersPosition.append(topRightCorner);
+    cornersPosition.append(bottomRightCorner);
+    cornersPosition.append(bottomLeftCorner);
+    cornersPosition.append(topLeftCorner);
+
+    //Calcula a distancia do robo aos cantos do campo
+    QList<float> distToCorners;
+    for(int i = 0; i < 4; i++){
+        distToCorners.append(WR::Utils::distance(player()->position(), cornersPosition[i]));
+    }
+
+    //Avalia a proximidade dos cantos do campo
+    for(int i = 0; i < 4; i++){
+        if(distToCorners[i] < 0.1f && (player()->velocity().x() < 0.1 && player()->velocity().y() < 0.1f)){
+            _wall = true;
+            return false;
+        }else _wall = false;
+    }
+
+    //Avalia a proximidade com as paredes paralelas ao eixo x
     if(abs(player()->position().y()) > 0.6f){
         if (abs(player()->orientation().value() - 3 * GEARSystem::Angle::pi / 2) < 0.18f ||
                 abs(player()->orientation().value() - GEARSystem::Angle::pi / 2) < 0.18f) {
@@ -120,6 +155,7 @@ bool Role::canMove(){
             return false;
         } else _wall = false;
     }
+    //Avalia a proximidade com as paredes paralelas ao eixo y
     if(abs(player()->position().x()) > 0.7f){
         if (abs(player()->orientation().value() - GEARSystem::Angle::pi) < 0.18f ||
                 abs(player()->orientation().value()) < 0.18f) {
@@ -128,11 +164,12 @@ bool Role::canMove(){
         } else _wall = false;
     }
 
+    //Avalia a proximidade com os jogadores adversarios
     for(quint8 i = 0; i < _ourTeam->opTeam()->avPlayersSize(); i++){
         Position obstPos = PlayerBus::theirPlayer(i)->position();
         float dist = WR::Utils::distance(player()->position(), obstPos);
 
-        if(dist < 0.105f){
+        if(dist < 0.105f && (player()->velocity().x() < 0.1 && player()->velocity().y() < 0.1f)){
             return false;
         }
     }
