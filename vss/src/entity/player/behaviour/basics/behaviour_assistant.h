@@ -55,6 +55,7 @@ public:
     bool localIsLookingTo(const Position &pos, float error);
     bool allyInTheirArea();
     bool isBehindBallX(quint8 id);
+    float errorAngleToSegment(Position pos1, Position pos2);
 };
 
 #endif // BEHAVIOUR_ASSISTANT_H

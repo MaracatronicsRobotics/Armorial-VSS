@@ -74,10 +74,15 @@ void Behaviour_Assistant::run(){
         float behindBallAngle = 0;
 
         //error parameter to determine if player is looking to our goal
-        float errorAngleToOurGoal = 0;
-        float angLeftOur = (WR::Utils::getAngle(player()->position(), loc()->ourGoalLeftPost()));
-        float angRightOur = (WR::Utils::getAngle(player()->position(), loc()->ourGoalRightPost()));
-        errorAngleToOurGoal = abs(angRightOur - angLeftOur)/2.0f;
+        float errorAngleToOurGoal = errorAngleToSegment(loc()->ourGoalLeftPost(), loc()->ourGoalRightPost());
+
+        //error parameter to determine if player is looking to their side
+        float errorAngleToTheirSide = 0;
+        if(loc()->theirSide().isLeft()){
+            errorAngleToTheirSide = errorAngleToSegment(loc()->fieldLeftBottomCorner(), loc()->fieldLeftTopCorner());
+        }else{
+            errorAngleToTheirSide = errorAngleToSegment(loc()->fieldRightTopCorner(), loc()->fieldRightBottomCorner());
+        }
 
         //is player behind ball x? (reference: their goal)
         bool playerBehindBall = isBehindBallX(player()->playerId());
@@ -90,12 +95,14 @@ void Behaviour_Assistant::run(){
          * the radius determine the maximum distance the player must have to the ball so he can start following its position
         */
         float angleBallToTheirGoal = abs(WR::Utils::getAngle(loc()->ball(), loc()->theirGoal()));
-        float aroundBall = 0.15f + 0.1f*(1.0f - angleBallToTheirGoal/Angle::pi);
+        float aroundBall;
+        if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirSide) && playerBehindBall) aroundBall = 0.17f + 0.05f*(1.0f - angleBallToTheirGoal/Angle::pi);
+        else aroundBall = 0.05f;
 
         //Defining ballOffset: distance from the ball to the point behindthe ball that the player must follow
         float ballOffset = 0;
         if(loc()->isInsideOurField(loc()->ball()) && !playerBehindBall){
-            ballOffset = 0.04f;
+            ballOffset = 0.16f;
             //if ball is inside our field, our player should be between our goal and the ball:
             _aimPosition = loc()->ourGoal();
             behindBallAngle = 0;
@@ -105,20 +112,8 @@ void Behaviour_Assistant::run(){
             //std::cout << "locball\n";
         }else{
             //std::cout << "behindball\n";
-            ballOffset = 0.14f;
+            ballOffset = 0.16f;
         }
-
-        /*//discover their player that have poss
-        for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
-            if(PlayerBus::theirPlayerAvailable(x)){
-                if(PlayerBus::theirPlayer(x)->isNearbyPosition(loc()->ball(), 0.15f) && loc()->isInsideOurField(loc()->ball())){
-                    //update _aimposition so that our player follow the point between the ball and our goal (or the ball position)
-                    _aimPosition = loc()->ourGoal();
-                    behindBallAngle = 0;
-                    break;
-                }
-            }
-        }*/
 
         //if ball isn't inside our field, aim position is now their goal
         if(_aimPosition.isUnknown()){
@@ -129,13 +124,13 @@ void Behaviour_Assistant::run(){
         bool shouldGoToBall = canGoToBall();
         //calc behind ball
         Position behindBall;
-        //if there's an ally closer to the ball: keep some distance from ball
+        //if there's an ally closer to the ball or better positioned: keep some distance from ball
         if(!shouldGoToBall){
             behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.2f + ballOffset, behindBallAngle);
         }else{
             behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, ballOffset, behindBallAngle);
         }
-
+        //ball position projection based on its velocity and actual position
         if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
             //calc unitary vector of velocity
             const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
@@ -167,22 +162,19 @@ void Behaviour_Assistant::run(){
 
         //setting skill goTo velocity factor
         // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
-        float velFac = 1.0f - player()->distBall()/WR::Utils::distance(loc()->fieldLeftTopCorner(), loc()->fieldRightBottomCorner());
+        float distFac = 1.0f - player()->distanceTo(behindBall)/WR::Utils::distance(loc()->fieldLeftTopCorner(), loc()->fieldRightBottomCorner());
         float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
-        if(4.0f < 1.0f*velocityNeeded){
+        if(velocityNeeded > ((1.0f+distFac)*4.0f)){
             _sk_goTo->setGoToVelocityFactor(1.5f*velocityNeeded);
         }else{
-            _sk_goTo->setGoToVelocityFactor((1.0f+velFac)*3.0f);
+            _sk_goTo->setGoToVelocityFactor((1.0f+distFac)*4.0f);
         }
 
         //setting skill rotateTo
         _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
 
         //error parameter to determine if player is looking to their goal
-        float errorAngleToTheirGoal = 0;
-        float angLeft = (WR::Utils::getAngle(player()->position(), loc()->theirGoalLeftPost()));
-        float angRight = (WR::Utils::getAngle(player()->position(), loc()->theirGoalRightPost()));
-        errorAngleToTheirGoal = 0.9f*abs(angRight - angLeft)/2.0f;
+        float errorAngleToTheirGoal = 0.9f * errorAngleToSegment(loc()->theirGoalLeftPost(), loc()->theirGoalRightPost());
 
         //transitions
         if(_skill == PUSH){
@@ -201,6 +193,7 @@ void Behaviour_Assistant::run(){
             }
             //SPIN
             if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+                _sk_spin->setClockWise(!setSpinDirection());
                 enableTransition(STATE_SPIN);
                 _skill = SPIN;
             }
@@ -225,6 +218,7 @@ void Behaviour_Assistant::run(){
             }
             //SPIN
             if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+                _sk_spin->setClockWise(!setSpinDirection());
                 enableTransition(STATE_SPIN);
                 _skill = SPIN;
             }
@@ -247,6 +241,7 @@ void Behaviour_Assistant::run(){
             }
             //SPIN
             if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+                _sk_spin->setClockWise(!setSpinDirection());
                 enableTransition(STATE_SPIN);
                 _skill = SPIN;
             }
@@ -262,6 +257,12 @@ void Behaviour_Assistant::run(){
     }
 
     }
+}
+
+float Behaviour_Assistant::errorAngleToSegment(Position leftPoint, Position rightPoint){
+    float angLeft = (WR::Utils::getAngle(player()->position(), leftPoint));
+    float angRight = (WR::Utils::getAngle(player()->position(), rightPoint));
+    return abs(angRight - angLeft)/2;
 }
 
 bool Behaviour_Assistant::isBehindBallX(quint8 id){
@@ -304,6 +305,13 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
     Position L1, L2, R1, R2;
     bool shouldProjectPos = false, isOurArea = false;
     float smallMargin = 0.05f;
+
+    //if position is beyond field's walls
+    if(pos.y() < loc()->fieldMinY()) pos.setPosition(pos.x(), loc()->fieldMinY(), pos.z());
+    else if(pos.y() > loc()->fieldMaxY()) pos.setPosition(pos.x(), loc()->fieldMaxY(), pos.z());
+
+    if(pos.x() < loc()->fieldMinX()) pos.setPosition(loc()->fieldMinX(), pos.y(), pos.z());
+    else if(pos.x() > loc()->fieldMaxX()) pos.setPosition(loc()->fieldMaxX(), pos.y(), pos.z());
 
     if(abs(pos.x()) > (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && abs(pos.y()) < loc()->fieldDefenseLength()/2){
         shouldProjectPos = true;
