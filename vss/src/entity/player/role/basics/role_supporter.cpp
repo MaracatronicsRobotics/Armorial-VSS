@@ -14,9 +14,16 @@ void Role_Supporter::initializeBehaviours(){
     usesBehaviour(BHV_BARRIER , _bh_br = new Behaviour_Barrier());
 }
 void Role_Supporter::configure(){
-    setBehaviour(BHV_BARRIER); //initial behaviour
-    _positioning = BARRIER_PREDOMINANT;
-    _bhv = BHV_BARRIER;
+    if(_positioning == BARRIER_PREDOMINANT){
+        setBehaviour(BHV_BARRIER); //initial behaviour
+        _bhv = BHV_BARRIER;
+    }else if(_positioning == ASSIST_PREDOMINANT){
+        setBehaviour(BHV_ASSISTANT);
+        _bhv = BHV_ASSISTANT;
+    }else{
+        setBehaviour(BHV_BARRIER);
+        _bhv = BHV_BARRIER;
+    }
 }
 void Role_Supporter::run(){
     switch(_positioning){
