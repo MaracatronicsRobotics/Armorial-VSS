@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("0.0.1");
 
     // Duplicated instance checking
-    InstanceChecker::waitIfDuplicated(app.applicationName());
+    //InstanceChecker::waitIfDuplicated(app.applicationName());
 
     // Command line parser, get arguments
     QCommandLineParser parser;
