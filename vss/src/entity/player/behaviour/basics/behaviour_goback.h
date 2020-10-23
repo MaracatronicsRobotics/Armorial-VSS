@@ -14,8 +14,8 @@ private:
     Skill_RotateTo *_sk_rotateTo;
     Skill_DoNothing *_sk_doNothing;
 
-    float _angleTarget, _angleBefore;
-    Position _newPos, _playerPos;
+    float _angleTarget, _angleBefore, _dist;
+    Position _newPos, _playerPos, _lastPos;
     bool _retreated;
     bool _start;
     bool _wall;

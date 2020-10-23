@@ -1,6 +1,7 @@
 #include "behaviour_goback.h"
 #include <iostream>
 
+#define velToBack 0.5f
 #define distToBack 0.15f
 
 QString Behaviour_GoBack::name() {
@@ -37,6 +38,7 @@ void Behaviour_GoBack::run() {
     //Find New Position
     if(_start){
         _newPos = newPosBack(_playerPos);
+        _lastPos = player()->position();
         _start = false;
         _retreated = false;
         _state = STATE_GOBACK;
@@ -47,8 +49,9 @@ void Behaviour_GoBack::run() {
         enableTransition(STATE_GOTO);
 
         _sk_goTo->setGoToPos(_newPos);
+        _dist = WR::Utils::distance(player()->position(), _lastPos);
 
-        if(abs(_playerPos.x() - _newPos.x()) < 0.01f && abs(_playerPos.y() - _newPos.y()) < 0.01f){
+        if(_dist > distToBack){
             _state = STATE_LOOKAT;
             _angleBefore = player()->orientation().value();
         }
@@ -85,7 +88,7 @@ Position Behaviour_GoBack:: newPosBack(Position playerPos){
         Position direction(true, - playerPos.x()/dist, - playerPos.y()/dist, 0.0);
 
         //New Point
-        Position newP(true, playerPos.x() + distToBack * direction.x(), playerPos.y() + distToBack * direction.y(), 0.0);
+        Position newP(true, playerPos.x() + velToBack * direction.x(), playerPos.y() + velToBack * direction.y(), 0.0);
 
         return newP;
     } else {
@@ -101,7 +104,7 @@ Position Behaviour_GoBack:: newPosBack(Position playerPos){
         Position direction(true, (obsPos.x() - playerPos.x())/dist, (obsPos.y() - playerPos.y())/dist, 0.0);
 
         //New Point
-        Position newP(true, playerPos.x() - distToBack * direction.x(), playerPos.y() - distToBack * direction.y(), 0.0);
+        Position newP(true, playerPos.x() - velToBack * direction.x(), playerPos.y() - velToBack * direction.y(), 0.0);
 
         return newP;
     }

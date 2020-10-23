@@ -68,8 +68,6 @@ void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc){
 
     // Initialize
     _initialized = true;
-
-    print = true;
 }
 
 void Role::setPlayer(VSSPlayer *player, PlayerAccess *playerAccess){
@@ -141,7 +139,7 @@ bool Role::canMove(){
 
     //Avalia a proximidade dos cantos do campo
     for(int i = 0; i < 4; i++){
-        if(distToCorners[i] < 0.1f && (player()->velocity().x() < 0.1 && player()->velocity().y() < 0.1f)){
+        if(distToCorners[i] < 0.12f && (player()->velocity().x() < 0.1 && player()->velocity().y() < 0.1f)){
             _wall = true;
             return false;
         }else _wall = false;
