@@ -81,13 +81,6 @@ void Role::runRole(){
         return ;
     }
 
-    //Check Collision
-    /*if(!canMove() && player()->velocity().abs() < 0.2f){
-        _retreated = false;
-    } else {
-        _retreated = true;
-    }*/
-
     if(!canMove() || !_retreated){
         if(_bh_gb->isInitialized() == false)
             _bh_gb->initialize(_loc);
@@ -113,7 +106,7 @@ void Role::runRole(){
         }
         _behaviour->setPlayer(_player, _playerAccess);
         _behaviour->runBehaviour();
-    //}
+    }
 }
 
 bool Role::canMove(){
