@@ -47,9 +47,6 @@ void Behaviour_GoBack::run() {
         enableTransition(STATE_GOTO);
 
         _sk_goTo->setGoToPos(_newPos);
-        _sk_goTo->setAvoidOpponents(true);
-        _sk_goTo->setAvoidTeammates(true);
-        _sk_goTo->isPathActive(true);
 
         if(abs(_playerPos.x() - _newPos.x()) < 0.01f && abs(_playerPos.y() - _newPos.y()) < 0.01f){
             _state = STATE_LOOKAT;
