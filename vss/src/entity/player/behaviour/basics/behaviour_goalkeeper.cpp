@@ -71,7 +71,7 @@ void Behaviour_Goalkeeper::run() {
         enableTransition(STATE_GOTO);
     } else {
         Position interceptPosition = _sk_intercept->getIntercetPosition();
-        if (player()->distanceTo(interceptPosition) < 0.1f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.1f) {
+        if (player()->distanceTo(interceptPosition) < 0.05f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.05f) {
             bool spinDirection = setSpinDirection();
             _sk_spin->setClockWise(spinDirection);
             enableTransition(STATE_SPIN);

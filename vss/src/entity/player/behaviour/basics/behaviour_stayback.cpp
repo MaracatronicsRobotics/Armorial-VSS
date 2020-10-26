@@ -81,7 +81,7 @@ void Behaviour_StayBack::run(){
         _sk_goTo->setGoToPos(desiredPosition);
         //setting skill goTo velocity factor
         //default value to increase robot vellocity (needs adjustment)
-        _sk_goTo->setGoToVelocityFactor(2.0);
+        _sk_goTo->setVelocityNeeded(2.0);
 
         //transitions
         //if this player is at the desiredPosition: rotateTo(ballPosition)

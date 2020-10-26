@@ -165,9 +165,9 @@ void Behaviour_Assistant::run(){
         float distFac = 1.0f - player()->distanceTo(behindBall)/WR::Utils::distance(loc()->fieldLeftTopCorner(), loc()->fieldRightBottomCorner());
         float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
         if(velocityNeeded > ((1.0f+distFac)*4.0f)){
-            _sk_goTo->setGoToVelocityFactor(1.5f*velocityNeeded);
+            _sk_goTo->setVelocityNeeded(1.5f*velocityNeeded);
         }else{
-            _sk_goTo->setGoToVelocityFactor((1.0f+distFac)*4.0f);
+            _sk_goTo->setVelocityNeeded((1.0f+distFac)*4.0f);
         }
 
         //setting skill rotateTo

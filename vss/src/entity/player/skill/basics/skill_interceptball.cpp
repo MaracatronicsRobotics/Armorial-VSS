@@ -36,7 +36,7 @@ void Skill_InterceptBall::run() {
     Position unitaryBallVelocity = Position(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
 
     // Check ball speed (maybe a error)
-    if(loc()->ballVelocity().abs() <= 0.1f) {
+    if(loc()->ballVelocity().abs() <= 0.05f) {
         _objectivePos = player()->position(); // keep actual position
     }
     else{
@@ -52,10 +52,10 @@ void Skill_InterceptBall::run() {
         _objectivePos = WR::Utils::projectPointAtSegment(_firstLimitationPoint, _secondLimitationPoint, _objectivePos);
     }
 
-    if (_velocityNeeded == 0.0f) {
+    //if (_velocityNeeded == 0.0f) {
         // Vx/Dx = Vy/Dy (V = velocidade/ D = distância)
         _velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(_objectivePos)) / (WR::Utils::distance(loc()->ball(), _objectivePos));
-    }
+    //}
 
     player()->goTo(_objectivePos, _velocityNeeded);
 }

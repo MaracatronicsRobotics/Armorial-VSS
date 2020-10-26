@@ -78,7 +78,7 @@ public:
     float getRotateSpeed(float angleRobotToTarget);
     float getVxToTarget(Position targetPosition);
     void rotateTo(Position targetPosition, bool rot, float angle);
-    void goTo(Position targetPosition, float velocityFactor = 2.0f, float minVel = 0.0, bool avoidTeammates = true, bool avoidOpponents = true, bool avoidBall = false, bool avoidOurGoalArea = false, bool avoidTheirGoalArea = false, bool pathActivated = false);
+    void goTo(Position targetPosition, float velocityNeeded = 0.0f, float velocityFactor = 1.0f, float minVel = 0.0f, bool avoidTeammates = false, bool avoidOpponents = false, bool avoidBall = false, bool avoidOurGoalArea = false, bool avoidTheirGoalArea = false, bool pathActivated = false);
     Angle orientation() const;
     std::pair<Angle,float> getNavDirectionDistance(const Position &destination, const Angle &positionToLook, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea);
 

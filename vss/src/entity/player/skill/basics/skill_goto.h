@@ -40,6 +40,7 @@ private:
     // Move Parameters
     Position _goToPos;
     float _goToVelocityFactor;
+    float _velocityNeeded;
 
 public:
     QString name();
@@ -48,6 +49,7 @@ public:
     // Move methods
     void setGoToPos(Position pos) { _goToPos = pos; }
     void setGoToVelocityFactor(float vel) { _goToVelocityFactor = vel; }
+    void setVelocityNeeded(float velocityNeeded) { _velocityNeeded = velocityNeeded; }
 
     // Avoid methods
     void isPathActive(bool pathActiveted) { _pathActivated = pathActiveted; }

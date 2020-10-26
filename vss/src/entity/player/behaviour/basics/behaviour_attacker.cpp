@@ -57,7 +57,7 @@ void Behaviour_Attacker::run() {
     Position ballPrevision(true, behindBall.x() + loc()->ballVelocity().x() / 2, behindBall.y() + loc()->ballVelocity().y() / 2, 0.0);
 
     _sk_goTo->setAvoidBall(true);
-    _sk_goTo->setGoToVelocityFactor(5.0);
+    //_sk_goTo->setGoToVelocityFactor(5.0);
 
     _sk_rotateTo->setDesiredPosition(loc()->ball());
 
@@ -68,7 +68,7 @@ void Behaviour_Attacker::run() {
             _state = STATE_GOTO;
             break;
         } else {
-            if ((abs(rotateToBall()) > 1.2f)) {
+            if ((abs(rotateToBall()) > 1.5f)) {
                 _state = STATE_ROTATETO;
                 enableTransition(STATE_ROTATETO);
                 break;
@@ -92,9 +92,9 @@ void Behaviour_Attacker::run() {
                 } else {
                     // O robô se desloca até o ponto desejado, baseado no raio de giro
                     if (player()->isLookingTo(loc()->ball(), Angle::pi / 2)) {
-                        _sk_pushBall->setSpeedAndOmega(spinRadius * angularSignal * angularSpeed, angularSignal * angularSpeed);
+                        _sk_pushBall->setSpeedAndOmega(0.5f, angularSignal * 0.5f / spinRadius);
                     } else {
-                        _sk_pushBall->setSpeedAndOmega(-spinRadius * angularSignal * angularSpeed, angularSignal *angularSpeed);
+                        _sk_pushBall->setSpeedAndOmega(-0.5f, angularSignal * 0.5f / spinRadius);
                     }
                 }
                 enableTransition(STATE_PUSHBALL);
