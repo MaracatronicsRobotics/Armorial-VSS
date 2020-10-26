@@ -17,12 +17,9 @@ Behaviour_Assistant::Behaviour_Assistant() {
 
 void Behaviour_Assistant::configure() {
     //initializing variables
-    loopsInSameRegionWithBall = 0;
-    loopsInSameRegionWithOpp = 0;
-    lastPlayerPosition.setPosition(50.0, 0.0, 0.0);
-    lastPlayerPosition.setInvalid();
-    ballPos = lastPlayerPosition;
-    playerPos = lastPlayerPosition;
+    reduceOffset = false;
+    ballOffset = 0.0f;
+    behindBall.setUnknown();
 
     //skills
     usesSkill(_sk_goTo = new Skill_GoTo());
@@ -30,8 +27,7 @@ void Behaviour_Assistant::configure() {
     usesSkill(_sk_rotateTo = new Skill_RotateTo());
     usesSkill(_sk_pushBall = new Skill_PushBall());
 
-    //initial state
-    _state = STATE_GOTOBALL;
+    //initial skill state
     _skill = GOTO;
 
     //initial skill
@@ -58,174 +54,147 @@ void Behaviour_Assistant::configure() {
 
 void Behaviour_Assistant::run(){
 
-    //CHECKING IF SPIN STATE IS NEEDED
-    checkIfShouldSpin();
+    Position _aimPosition, ballProjection;
+    _aimPosition.setUnknown();
+    float behindBallAngle = 0;
 
-    switch(_state) {
-    case STATE_STARTSPINNING:{
-        _sk_spin->setClockWise(setSpinDirection());
-        enableTransition(STATE_SPIN);
-        break;
+    //ball position projection based on its velocity and actual position
+    if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
+        //calc vector of velocity
+        const Position vel(true, loc()->ballVelocity().x(), loc()->ballVelocity().y(), 0.0);
+
+        //calc projected position
+        Position projectedPos(true, loc()->ball().x()+vel.x(), loc()->ball().y()+vel.y(), 0.0);
+
+        if(isBehindBall(player()->position(), projectedPos)){
+            ballProjection = projectedPos;
+        }else{
+            ballProjection = loc()->ball();
+        }
+    }else{
+        ballProjection = loc()->ball();
     }
 
-    case STATE_GOTOBALL:{
-        Position _aimPosition;
-        _aimPosition.setUnknown();
-        float behindBallAngle = 0;
+    //error parameter to determine if player is looking to our goal
+    float errorAngleToOurGoal = errorAngleToSegment(loc()->ourGoalLeftPost(), loc()->ourGoalRightPost());
 
-        //error parameter to determine if player is looking to our goal
-        float errorAngleToOurGoal = errorAngleToSegment(loc()->ourGoalLeftPost(), loc()->ourGoalRightPost());
+    //error parameter to determine if player is looking to their side
+    float errorAngleToTheirSide = 0;
+    bool playerBehindBall;
+    if(loc()->theirSide().isLeft()){
+        errorAngleToTheirSide = errorAngleToSegment(loc()->fieldLeftBottomCorner(), loc()->fieldLeftTopCorner());
+        //is player behind ball? (rference: their goal)
+        playerBehindBall = isBehindBall(player()->position(), Position(true, loc()->theirGoal().x() - 0.1f, loc()->theirGoal().y(), 0.0f));
+    }else{
+        errorAngleToTheirSide = errorAngleToSegment(loc()->fieldRightTopCorner(), loc()->fieldRightBottomCorner());
+        //is player behind ball? (rference: their goal)
+        playerBehindBall = isBehindBall(player()->position(), Position(true, loc()->theirGoal().x() + 0.1f, loc()->theirGoal().y(), 0.0f));
+    }
 
-        //error parameter to determine if player is looking to their side
-        float errorAngleToTheirSide = 0;
-        if(loc()->theirSide().isLeft()){
-            errorAngleToTheirSide = errorAngleToSegment(loc()->fieldLeftBottomCorner(), loc()->fieldLeftTopCorner());
-        }else{
-            errorAngleToTheirSide = errorAngleToSegment(loc()->fieldRightTopCorner(), loc()->fieldRightBottomCorner());
-        }
+    if(playerBehindBall) _sk_goTo->setAvoidBall(false);
+    else if(player()->isLookingTo(loc()->ourGoal(), 1.1f*errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
 
-        //is player behind ball x? (reference: their goal)
-        bool playerBehindBall = isBehindBallX(player()->playerId());
-        if(playerBehindBall) _sk_goTo->setAvoidBall(false);
-        else if(player()->isLookingTo(loc()->ourGoal(), errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
-
-        /*
-         * considering angle between the ball and their goal to define the radius of a circle around the ball:
-         * if ball is near their goal and far from the middle line: increase radius
-         * the radius determine the maximum distance the player must have to the ball so he can start following its position
-        */
-        float angleBallToTheirGoal = abs(WR::Utils::getAngle(loc()->ball(), loc()->theirGoal()));
-        float aroundBall;
-        if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirSide) && playerBehindBall) aroundBall = 0.17f + 0.05f*(1.0f - angleBallToTheirGoal/Angle::pi);
-        else aroundBall = 0.05f;
-
-        //Defining ballOffset: distance from the ball to the point behindthe ball that the player must follow
-        float ballOffset = 0;
-        if(loc()->isInsideOurField(loc()->ball()) && !playerBehindBall){
-            ballOffset = 0.16f;
-            //if ball is inside our field, our player should be between our goal and the ball:
-            _aimPosition = loc()->ourGoal();
-            behindBallAngle = 0;
-        }else if(player()->isNearbyPosition(loc()->ball(), aroundBall) && playerBehindBall){
-            //if the player is behind ball x and should go to ball position
-            ballOffset = 0.02f;
-            //std::cout << "locball\n";
-        }else{
-            //std::cout << "behindball\n";
-            ballOffset = 0.16f;
-        }
-
+    if(loc()->isInsideOurField(ballProjection) && !playerBehindBall){
+        //if ball is inside our field, our player should be between our goal and the ball:
+        _aimPosition = loc()->ourGoal();
+        behindBallAngle = 0;
+    }else{
         //if ball isn't inside our field, aim position is now their goal
-        if(_aimPosition.isUnknown()){
-            behindBallAngle = GEARSystem::Angle::pi;
-            _aimPosition = loc()->theirGoal();
+        behindBallAngle = GEARSystem::Angle::pi;
+        _aimPosition = loc()->theirGoal();
+    }
+
+    //***** ballOffset definition *****
+    //if we shouldn't make our player get really close to ball
+    if(!reduceOffset){
+        /*
+             * considering distance between our player and ballProjection to define 'ballOffset' variable (which determines how distant will our player
+             * try to be positioned from ballProjection position (and behind it)
+            */
+        float distBallProjFactor = (player()->distanceTo(ballProjection)/WR::Utils::distance(Position(true,loc()->fieldMinX(), 0.0f, 0.0f), Position(true, loc()->fieldMaxX(), loc()->fieldMinY(), 0.0f)));
+        ballOffset = 0.06f+distBallProjFactor * 0.7f;
+        /*
+             * if (our player is on the line ball->theirGoal and it's behind ball's X and it's near the ball (0.25f))
+             * or (our player is near 'behindBall' position (last position he was going to) and it's behind ball's X)
+             * or (our player is near ballProjection position and it's behind ball's X)
+             * reduce offset and get closer to ball!
+            */
+        if((WR::Utils::isPointAtLine(_aimPosition, ballProjection, player()->position()) && playerBehindBall && player()->isNearbyPosition(ballProjection, 0.25f)) ||
+                (player()->isNearbyPosition(behindBall, 0.02f) && playerBehindBall) ||
+                (playerBehindBall && player()->distBall() >= 0.13f && player()->isNearbyPosition(loc()->ball(), 0.15f))){
+            reduceOffset = true;
+            if(ballOffset > 0.04f) ballOffset = 0.04f;
         }
-
-        bool shouldGoToBall = canGoToBall();
-        //calc behind ball
-        Position behindBall;
-        //if there's an ally closer to the ball or better positioned: keep some distance from ball
-        if(!shouldGoToBall){
-            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, 0.2f + ballOffset, behindBallAngle);
-        }else{
-            behindBall = WR::Utils::threePoints(loc()->ball(), _aimPosition, ballOffset, behindBallAngle);
+        //if we should make our player get closer to ball
+    }else{
+        //if our player is too far from ballProjection: stop reducing offset
+        if(player()->distanceTo(loc()->ball()) > 0.5f || (!playerBehindBall || (playerBehindBall && player()->distBall() < 0.032f))){
+            reduceOffset = false;
         }
-        //ball position projection based on its velocity and actual position
-        if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
-            //calc unitary vector of velocity
-            const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
+        //if ballOffset is bigger than 0.035 and our player is very close to ballProjection: go to ball
+        else if(ballOffset > 0.035f && player()->distanceTo(ballProjection) < 0.045f){
+            ballOffset = 0.01f;
+        }
+        //if our player is no longer very close to ball: increase a little bit ballOffset
+        else if(player()->distanceTo(ballProjection) > 0.065f && ballOffset < 0.035f){
+            ballOffset = 0.04f;
+        }
+    }
 
-            //calc velocity factor
-            float factor = BALLPREVISION_VELOCITY_FACTOR*loc()->ballVelocity().abs();
-            WR::Utils::limitValue(&factor, 0.0f, BALLPREVISION_FACTOR_LIMIT);
+    bool shouldGoToBall = canGoToBall();
+    //if there's an ally closer to the ball or better positioned: keep some distance from ball
+    if(!shouldGoToBall){
+        behindBall = WR::Utils::threePoints(ballProjection, _aimPosition, 0.2f + ballOffset, behindBallAngle);
+    }else{
+        behindBall = WR::Utils::threePoints(ballProjection, _aimPosition, ballOffset, behindBallAngle);
+    }
 
-            //calc projected position
-            const Position delta(true, factor*velUni.x(), factor*velUni.y(), 0.0);
-            Position projectedPos(true, loc()->ball().x()+delta.x(), loc()->ball().y()+delta.y(), 0.0);
+    //setting skill goTo position
+    bool avoidOurArea = true, avoidTheirArea = allyInTheirArea();
+    _sk_goTo->setAvoidOurGoalArea(avoidOurArea);
+    _sk_goTo->setAvoidTheirGoalArea(avoidTheirArea);
+    behindBall = projectPosOutsideGoalArea(behindBall, avoidOurArea, avoidTheirArea);
+    _sk_goTo->setGoToPos(behindBall);
 
-            if(isBehindBall(projectedPos)){
-                //if there's an ally closer to the ball: keep some distance from ball
-                if(!shouldGoToBall){
-                    behindBall = WR::Utils::threePoints(projectedPos, _aimPosition, 0.2f + ballOffset, behindBallAngle);
-                }else{
-                    behindBall = WR::Utils::threePoints(projectedPos, _aimPosition, ballOffset, behindBallAngle);
-                }
+    //setting skill goTo velocity factor
+    // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
+    float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
+    //if(velocityNeeded/2 < 5.0f) _sk_goTo->setVelocityNeeded(5.0f);
+    //else _sk_goTo->setVelocityNeeded(velocityNeeded/2);
+
+    _sk_goTo->setGoToVelocityFactor(1.5f);
+    //setting skill rotateTo
+    _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
+
+    //error parameter to determine if player is looking to their goal
+    float errorAngleToTheirGoal = 0.9f * errorAngleToSegment(loc()->theirGoalLeftPost(), loc()->theirGoalRightPost());
+
+    //transitions
+    if(_skill == PUSH){
+        //std::cout << "PUSH" << std::endl;
+        if(!playerBehindBall || !player()->isNearbyPosition(loc()->ball(), 0.15f) || !localIsLookingTo(loc()->theirGoal(), 1.2f*errorAngleToTheirGoal)){
+            //ROTATE
+            if(player()->isNearbyPosition(behindBall, 0.07f) && !localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && localIsLookingTo(loc()->ball(), 0.3f)){
+                enableTransition(STATE_ROTATE);
+                _skill = ROT;
+            }
+            //GOTO
+            else{
+                enableTransition(STATE_GOTO);
+                _skill = GOTO;
             }
         }
-
-        //setting skill goTo position
-        bool avoidOurArea = true, avoidTheirArea = allyInTheirArea();
-        _sk_goTo->setAvoidOurGoalArea(avoidOurArea);
-        _sk_goTo->setAvoidTheirGoalArea(avoidTheirArea);
-        behindBall = projectPosOutsideGoalArea(behindBall, avoidOurArea, avoidTheirArea);
-        _sk_goTo->setGoToPos(behindBall);
-
-        //setting skill goTo velocity factor
-        // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
-        float distFac = 1.0f - player()->distanceTo(behindBall)/WR::Utils::distance(loc()->fieldLeftTopCorner(), loc()->fieldRightBottomCorner());
-        float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
-        if(velocityNeeded > ((1.0f+distFac)*4.0f)){
-            _sk_goTo->setVelocityNeeded(1.5f*velocityNeeded);
-        }else{
-            _sk_goTo->setVelocityNeeded((1.0f+distFac)*4.0f);
+        //SPIN
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+            _sk_spin->setClockWise(!setSpinDirection());
+            enableTransition(STATE_SPIN);
+            _skill = SPIN;
         }
-
-        //setting skill rotateTo
-        _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
-
-        //error parameter to determine if player is looking to their goal
-        float errorAngleToTheirGoal = 0.9f * errorAngleToSegment(loc()->theirGoalLeftPost(), loc()->theirGoalRightPost());
-
-        //transitions
-        if(_skill == PUSH){
-            //std::cout << "PUSH" << std::endl;
-            if(!playerBehindBall || !player()->isNearbyPosition(loc()->ball(), 0.15f) || !localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
-                //ROTATE
-                if(player()->isNearbyPosition(behindBall, 0.07f) && !localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && localIsLookingTo(loc()->ball(), 0.3f)){
-                    enableTransition(STATE_ROTATE);
-                    _skill = ROT;
-                }
-                //GOTO
-                else{
-                    enableTransition(STATE_GOTO);
-                    _skill = GOTO;
-                }
-            }
-            //SPIN
-            if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
-                _sk_spin->setClockWise(!setSpinDirection());
-                enableTransition(STATE_SPIN);
-                _skill = SPIN;
-            }
-        }else if(_skill == ROT){
-            //std::cout << "ROTATE" << std::endl;
-            if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) || !localIsLookingTo(loc()->ball(), 0.4f)){
-                //PUSH
-                if(localIsLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
-                    if(!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
-                        _sk_pushBall->setSpeedAndOmega(-1.5, 0.0);
-                    }else{
-                        _sk_pushBall->setSpeedAndOmega(1.5, 0.0);
-                    }
-                    enableTransition(STATE_PUSH);
-                    _skill = PUSH;
-                }
-                //GOTO
-                else{
-                    enableTransition(STATE_GOTO);
-                    _skill = GOTO;
-                }
-            }
-            //SPIN
-            if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
-                _sk_spin->setClockWise(!setSpinDirection());
-                enableTransition(STATE_SPIN);
-                _skill = SPIN;
-            }
-        }else if(_skill == GOTO){
-            //std::cout << "GOTO" << std::endl;
+    }else if(_skill == ROT){
+        //std::cout << "ROTATE" << std::endl;
+        if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) || !localIsLookingTo(loc()->ball(), 0.4f)){
             //PUSH
-            if(localIsLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+            if(localIsLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), 1.2f*errorAngleToTheirGoal)){
                 if(!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
                     _sk_pushBall->setSpeedAndOmega(-1.5, 0.0);
                 }else{
@@ -234,28 +203,47 @@ void Behaviour_Assistant::run(){
                 enableTransition(STATE_PUSH);
                 _skill = PUSH;
             }
-            //ROTATE
-            else if(player()->isNearbyPosition(behindBall, 0.03f) && !localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && localIsLookingTo(loc()->ball(), 0.3f)){
-                enableTransition(STATE_ROTATE);
-                _skill = ROT;
-            }
-            //SPIN
-            if((!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
-                _sk_spin->setClockWise(!setSpinDirection());
-                enableTransition(STATE_SPIN);
-                _skill = SPIN;
-            }
-        }
-        if(_skill == SPIN){
-            if(!(!player()->isLookingTo(loc()->theirGoal(), 0.8f*errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+            //GOTO
+            else{
                 enableTransition(STATE_GOTO);
                 _skill = GOTO;
             }
         }
-
-        break;
+        //SPIN
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+            _sk_spin->setClockWise(!setSpinDirection());
+            enableTransition(STATE_SPIN);
+            _skill = SPIN;
+        }
+    }else if(_skill == GOTO){
+        //std::cout << "GOTO" << std::endl;
+        //PUSH
+        if(localIsLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+            if(!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
+                _sk_pushBall->setSpeedAndOmega(-1.5, 0.0);
+            }else{
+                _sk_pushBall->setSpeedAndOmega(1.5, 0.0);
+            }
+            enableTransition(STATE_PUSH);
+            _skill = PUSH;
+        }
+        //ROTATE
+        else if(player()->isNearbyPosition(behindBall, 0.03f) && !localIsLookingTo(loc()->theirGoal(), 1.2f*errorAngleToTheirGoal) && localIsLookingTo(loc()->ball(), 0.3f)){
+            enableTransition(STATE_ROTATE);
+            _skill = ROT;
+        }
+        //SPIN
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+            _sk_spin->setClockWise(!setSpinDirection());
+            enableTransition(STATE_SPIN);
+            _skill = SPIN;
+        }
     }
-
+    if(_skill == SPIN){
+        if(!(!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
+            enableTransition(STATE_GOTO);
+            _skill = GOTO;
+        }
     }
 }
 
@@ -263,21 +251,6 @@ float Behaviour_Assistant::errorAngleToSegment(Position leftPoint, Position righ
     float angLeft = (WR::Utils::getAngle(player()->position(), leftPoint));
     float angRight = (WR::Utils::getAngle(player()->position(), rightPoint));
     return abs(angRight - angLeft)/2;
-}
-
-bool Behaviour_Assistant::isBehindBallX(quint8 id){
-    //is player behind ball x? (reference: their goal)
-    bool playerBehindBall = false;
-    if(loc()->ourSide().isRight()){
-        if(PlayerBus::ourPlayer(id)->position().x() > loc()->ball().x()){
-            playerBehindBall = true;
-        }
-    }else{
-        if(PlayerBus::ourPlayer(id)->position().x() < loc()->ball().x()){
-            playerBehindBall = true;
-        }
-    }
-    return playerBehindBall;
 }
 
 bool Behaviour_Assistant::allyInTheirArea(){
@@ -403,7 +376,7 @@ bool Behaviour_Assistant::canGoToBall(){
         //if there's an ally closer to the ball and he's moving: keep some distance from ball
         if(PlayerBus::ourPlayer(id)->distBall() < player()->distBall() && PlayerBus::ourPlayer(id)->velocity().abs() > BALLPREVISION_MINVELOCITY){
             //if the closest ally to ball isn't behind it, and this player is: we can go to ball
-            if(!isBehindBallX(id) && isBehindBallX(player()->playerId())) return true;
+            if(!isBehindBall(PlayerBus::ourPlayer(id)->position(), loc()->theirGoal()) && isBehindBall(player()->position(), loc()->theirGoal())) return true;
             else return false;
         }else{
             return true;
@@ -413,9 +386,8 @@ bool Behaviour_Assistant::canGoToBall(){
     }
 }
 
-bool Behaviour_Assistant::isBehindBall(Position posObjective){
+bool Behaviour_Assistant::isBehindBall(Position posPlayer, Position posObjective){
     Position posBall = loc()->ball();
-    Position posPlayer = player()->position();
     float anglePlayer = WR::Utils::getAngle(posBall, posPlayer);
     float angleDest = WR::Utils::getAngle(posBall, posObjective);
     float diff = WR::Utils::angleDiff(anglePlayer, angleDest);
@@ -429,72 +401,4 @@ bool Behaviour_Assistant::setSpinDirection(){
         return true;
     else
         return false;
-}
-
-bool Behaviour_Assistant::checkIfShouldSpin(){
-    //update actual player and ball positions (if they're valid)
-    if(player()->position().isValid()) playerPos = player()->position();
-    if(loc()->ball().isValid()) ballPos = loc()->ball();
-
-    //find nearest opponent
-    Position oppPos(false, 1000, 0, 0);
-    float minorDist = 10000.0;
-    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
-        if(PlayerBus::theirPlayerAvailable(x) && PlayerBus::theirPlayer(x)->position().isValid()){
-            if(PlayerBus::theirPlayer(x)->distanceTo(playerPos) < minorDist){
-                oppPos = PlayerBus::theirPlayer(x)->position();
-                minorDist = PlayerBus::theirPlayer(x)->distanceTo(playerPos);
-            }
-        }
-    }
-
-    bool isNearBall, isNearOpp, returnBool = false;
-
-    //if last loop's position is valid and player is near both ball position and last position: increment variable
-    isNearBall = (lastPlayerPosition.isValid() && (WR::Utils::distance(playerPos, lastPlayerPosition) <= 0.01f) && (WR::Utils::distance(playerPos, ballPos) <= 0.07f));
-    //if last loop's position is valid and player is very close to the closest opponent: increment variable
-    isNearOpp = (lastPlayerPosition.isValid() && oppPos.isValid() && (WR::Utils::distance(playerPos, oppPos) <= 0.1f));
-
-    //setting _state variable according to isNearBall and isNearOpp
-    if(isNearBall || isNearOpp){
-        if(isNearBall){
-            loopsInSameRegionWithBall++;
-            //if isNearBall is true along multiple cycles
-            if(loopsInSameRegionWithBall >= 300 && loopsInSameRegionWithBall <= 600){
-                //std::cout << "SPINNING BALL" << std::endl;
-                _state = STATE_STARTSPINNING;
-                returnBool = true;
-            }else{
-                _state = STATE_GOTOBALL;
-                returnBool = false;
-                loopsInSameRegionWithBall = 0;
-            }
-        }else{
-            loopsInSameRegionWithBall = 0;
-        }
-
-        if(isNearOpp){
-            loopsInSameRegionWithOpp++;
-            //in case isNearBall = true and isNearOpp = true so they won't overwrite _state variable
-            if(!isNearBall){
-                //if isNearBall is true along multiple cycles
-                if(loopsInSameRegionWithOpp >= 300 && loopsInSameRegionWithOpp <= 600){
-                    //std::cout << "SPINNING OPP" << std::endl;
-                    _state = STATE_STARTSPINNING;
-                    returnBool = true;
-                }else{
-                    _state = STATE_GOTOBALL;
-                    returnBool = false;
-                    loopsInSameRegionWithOpp = 0;
-                }
-            }
-        }else{
-            loopsInSameRegionWithOpp = 0;
-        }
-    }else{
-        lastPlayerPosition = playerPos;
-        _state = STATE_GOTOBALL;
-        returnBool = false;
-    }
-    return returnBool;
 }

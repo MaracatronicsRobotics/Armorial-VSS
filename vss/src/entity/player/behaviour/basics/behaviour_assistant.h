@@ -10,13 +10,6 @@ private:
     void configure();
     void run();
 
-    //Machine State
-    int _state;
-    enum{
-        STATE_GOTOBALL,
-        STATE_STARTSPINNING
-    };
-
     //States
     enum{
         STATE_GOTO,
@@ -31,9 +24,6 @@ private:
     Skill_RotateTo *_sk_rotateTo;
     Skill_PushBall *_sk_pushBall;
 
-    long int loopsInSameRegionWithBall, loopsInSameRegionWithOpp; //initialize with 0
-    Position lastPlayerPosition, ballPos, playerPos;
-
     //skill
     int _skill;
     enum{
@@ -43,19 +33,20 @@ private:
         SPIN
     };
 
-public:
-    Behaviour_Assistant();
-    QString name();
-
-    bool isBehindBall(Position posObjective);
+    bool isBehindBall(Position posPlayer, Position posObjective);
     bool setSpinDirection();
-    bool checkIfShouldSpin();
     bool canGoToBall();
     Position projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea);
     bool localIsLookingTo(const Position &pos, float error);
     bool allyInTheirArea();
-    bool isBehindBallX(quint8 id);
     float errorAngleToSegment(Position pos1, Position pos2);
+    bool reduceOffset;
+    Position behindBall;
+    float ballOffset;
+
+public:
+    Behaviour_Assistant();
+    QString name();
 };
 
 #endif // BEHAVIOUR_ASSISTANT_H
