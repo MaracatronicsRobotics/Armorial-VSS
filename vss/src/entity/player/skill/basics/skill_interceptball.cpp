@@ -52,10 +52,11 @@ void Skill_InterceptBall::run() {
         _objectivePos = WR::Utils::projectPointAtSegment(_firstLimitationPoint, _secondLimitationPoint, _objectivePos);
     }
 
-    //if (_velocityNeeded == 0.0f) {
+    // Condição de definição da velocidade usada para interceptar, onde a skill calcula, caso o Behaviour não selecione
+    if (_velocityNeeded == 0.0f) {
         // Vx/Dx = Vy/Dy (V = velocidade/ D = distância)
         _velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(_objectivePos)) / (WR::Utils::distance(loc()->ball(), _objectivePos));
-    //}
+    }
 
     player()->goTo(_objectivePos, _velocityNeeded);
 }
