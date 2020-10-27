@@ -34,23 +34,23 @@ Strategy_Halt::Strategy_Halt() {
 }
 
 void Strategy_Halt::configure(int numOurPlayers) {
-    usesPlaybook(_pb_halt = new Playbook_Halt());
-    //usesPlaybook(_pb_defensive = new Playbook_Defensive());
-    //usesPlaybook(_pb_offensive = new Playbook_Offensive());
+    //usesPlaybook(_pb_halt = new Playbook_Halt());
+    usesPlaybook(_pb_defensive = new Playbook_Defensive());
+    usesPlaybook(_pb_offensive = new Playbook_Offensive());
     //usesPlaybook(_pb_balance = new Playbook_Balance());
 }
 
 void Strategy_Halt::run(int numOurPlayers) {
-    /*quint8 goalier = dist()->getPlayer();
+    quint8 goalier = dist()->getPlayer();
     if(PlayerBus::ourPlayerAvailable(goalier)){
         _pb_defensive->addPlayer(goalier);
         _pb_defensive->setGoalierId(goalier);
-    }*/
+    }
 
     QList<quint8> allPlayers = dist()->getAllPlayers();
     if(!allPlayers.isEmpty()){
-        //_pb_offensive->addPlayers(allPlayers);
+        _pb_offensive->addPlayers(allPlayers);
         //_pb_balance->addPlayers(allPlayers);
-        _pb_halt->addPlayers(allPlayers);
+        //_pb_halt->addPlayers(allPlayers);
     }
 }

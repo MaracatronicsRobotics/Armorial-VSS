@@ -46,12 +46,13 @@ void Playbook_Offensive::run(int numPlayers) {
     static quint8 supporterId = dist()->getPlayer();
 
     //Se num alcance de 0.5m da bola, o Supporter estiver dentro do alcance e o Striker estiver fora, as Roles se trocam
-    if (PlayerBus::ourPlayer(supporterId)->distBall() < 0.5f && PlayerBus::ourPlayer(strikerId)->distBall() > 0.5f) {
+    if (0 && PlayerBus::ourPlayer(supporterId)->distBall() < 0.5f && PlayerBus::ourPlayer(strikerId)->distBall() > 0.5f) {
         quint8 id = strikerId;
         strikerId = supporterId;
         supporterId = id;
     }
 
     setPlayerRole(strikerId, _rl_def);
+    _rl_sup->_positioning = 1;
     setPlayerRole(supporterId, _rl_sup);
 }

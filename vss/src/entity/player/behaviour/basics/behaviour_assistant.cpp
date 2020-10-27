@@ -162,7 +162,9 @@ void Behaviour_Assistant::run(){
     //if(velocityNeeded/2 < 5.0f) _sk_goTo->setVelocityNeeded(5.0f);
     //else _sk_goTo->setVelocityNeeded(velocityNeeded/2);
 
-    _sk_goTo->setGoToVelocityFactor(1.5f);
+    _sk_goTo->setGoToVelocityFactor(2.0f);
+    _sk_goTo->setAvoidOpponents(true);
+    _sk_goTo->setAvoidTeammates(true);
     //setting skill rotateTo
     _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
 

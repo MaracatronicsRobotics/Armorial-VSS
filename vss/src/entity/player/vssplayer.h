@@ -29,7 +29,7 @@
 
 class VSSPlayer : public Entity
 {
-public:  
+public:
     VSSPlayer(quint8 playerId, VSSTeam *playerTeam, Controller *ctr, Role *defaultRole, PID *vwPID, NavigationAlgorithm *navAlg);
     ~VSSPlayer();
 
