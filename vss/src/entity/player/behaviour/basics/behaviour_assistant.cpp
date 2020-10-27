@@ -159,10 +159,10 @@ void Behaviour_Assistant::run(){
     //setting skill goTo velocity factor
     // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
     float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
-    //if(velocityNeeded/2 < 5.0f) _sk_goTo->setVelocityNeeded(5.0f);
-    //else _sk_goTo->setVelocityNeeded(velocityNeeded/2);
+    if(velocityNeeded < 10.0f) _sk_goTo->setGoToVelocityFactor(10.0f);
+    else _sk_goTo->setGoToVelocityFactor(velocityNeeded);
 
-    _sk_goTo->setGoToVelocityFactor(1.5f);
+    //_sk_goTo->setGoToVelocityFactor(1.5f);
     //setting skill rotateTo
     _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
 
