@@ -34,7 +34,7 @@ void Role_Goalkeeper::initializeBehaviours(){
 }
 
 void Role_Goalkeeper::configure(){
-
+    isGK(true);
 }
 
 void Role_Goalkeeper::run(){

@@ -58,6 +58,9 @@ public:
     // PlayerAcess
     PlayerAccess* player();
 
+    // The goalkeeper setter
+    void isGK(bool isGK) { _isGK = isGK; }
+
     // Global behaviours
     Behaviour_GoBack *_bh_gb;
     bool _retreated;
@@ -96,6 +99,7 @@ private:
 
     //Check Collision
     bool canMove();
+    bool _isGK;
     Timer _timer;
     bool _retBefore;
     bool _wall;

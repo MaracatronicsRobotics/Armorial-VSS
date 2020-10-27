@@ -33,6 +33,7 @@ Role::Role() {
     _configureEnabled = true; // for set behaviours
     _actualBehaviour = -1;
     _wall = false;
+    _isGK = false;
 }
 
 Role::~Role() {
@@ -148,6 +149,7 @@ bool Role::canMove(){
     }
     //Avalia a proximidade com as paredes paralelas ao eixo y
     if(abs(player()->position().x()) > 0.7f){
+        if (player()->position().y() >= -0.2f && player()->position().y() <= 0.2f && _isGK) return true;
         if (abs(player()->orientation().value() - GEARSystem::Angle::pi) < 0.18f ||
                 abs(player()->orientation().value()) < 0.18f) {
             _wall = true;
@@ -160,7 +162,7 @@ bool Role::canMove(){
         Position obstPos = PlayerBus::theirPlayer(i)->position();
         float dist = WR::Utils::distance(player()->position(), obstPos);
 
-        if(dist < 0.105f && (player()->velocity().x() < 0.1 && player()->velocity().y() < 0.1f)){
+        if(dist < 0.105f && (player()->velocity().x() < 0.1 && player()->velocity().y() < 0.1f) && !_isGK){
             return false;
         }
     }

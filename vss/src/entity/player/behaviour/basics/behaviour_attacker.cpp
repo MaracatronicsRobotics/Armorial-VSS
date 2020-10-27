@@ -54,7 +54,7 @@ void Behaviour_Attacker::configure() {
 
 void Behaviour_Attacker::run() {
     Position behindBall = WR::Utils::threePoints(loc()->ball(), loc()->theirGoal(), 0.09f, GEARSystem::Angle::pi);
-    Position ballPrevision(true, behindBall.x() + loc()->ballVelocity().x() / 2, behindBall.y() + loc()->ballVelocity().y() / 2, 0.0);
+    Position ballPrevision(true, behindBall.x() + loc()->ballVelocity().x() * 2, behindBall.y() + loc()->ballVelocity().y() * 2, 0.0);
 
     _sk_goTo->setAvoidBall(true);
     //_sk_goTo->setGoToVelocityFactor(5.0);
