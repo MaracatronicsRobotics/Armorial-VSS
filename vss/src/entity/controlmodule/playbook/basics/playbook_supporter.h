@@ -37,7 +37,9 @@ private:
     quint8 _barrierId;
     quint8 _goalkeeperId;
     int timer;
+
     bool changedAssistBarrier;
+    bool takeFirstIds;
 
 public:
     Playbook_Supporter();

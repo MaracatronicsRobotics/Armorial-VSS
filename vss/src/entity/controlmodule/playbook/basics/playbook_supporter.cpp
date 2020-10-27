@@ -26,6 +26,11 @@ QString Playbook_Supporter::name() {
 }
 
 Playbook_Supporter::Playbook_Supporter() {
+    _assistantId = DIST_INVALID_ID;
+    _barrierId = DIST_INVALID_ID;
+    _goalkeeperId = DIST_INVALID_ID;
+
+    takeFirstIds = false;
 }
 
 int Playbook_Supporter::maxNumPlayer() {
@@ -43,52 +48,62 @@ void Playbook_Supporter::configure(int numPlayers) {
         _rl_supporter.push_back(rl_supporter);
         _rl_goalkeeper.push_back(rl_goalkeeper);
 
-        _assistantId = dist()->getPlayer();
-        _barrierId = dist()->getPlayer();
-        _goalkeeperId = dist()->getPlayer();
+        _assistantId = DIST_INVALID_ID;
+        _barrierId = DIST_INVALID_ID;
+        _goalkeeperId = DIST_INVALID_ID;
+
+        takeFirstIds = false;
 
         timer = 0;
         changedAssistBarrier = false;
     }
+
+    // Connect every supporter with this playbook
+    for(int i = 0; i < numPlayers; i++){
+        connect(_rl_supporter.at(i), SIGNAL(sendSignal()), this, SLOT(receiveSignal()), Qt::DirectConnection);
+    }
 }
 
 void Playbook_Supporter::run(int numPlayers) {
+    // Take first ids (first it)
+    if(!takeFirstIds){
+        _goalkeeperId = dist()->getOneKNN(loc()->ourGoal());
+        _assistantId = dist()->getPlayer();
+        _barrierId = dist()->getPlayer();
 
-    mutex.lock();
+        takeFirstIds = true;
+    }
+
+    // Check if signal has been received
     if(changedAssistBarrier){
-        timer ++;
+        timer++;
         if(timer >= 300){
             changedAssistBarrier = false;
             timer = 0;
         }
     }
-    mutex.unlock();
 
-    mutex.lock();
+    // Setting supporter
     _rl_supporter.at(_assistantId)->_positioning = 1;
     setPlayerRole(_assistantId, _rl_supporter.at(_assistantId));
 
+    // Setting barrier
     _rl_supporter.at(_barrierId)->_positioning = 0;
     setPlayerRole(_barrierId, _rl_supporter.at(_barrierId));
 
+    // Setting GK
     setPlayerRole(_goalkeeperId, _rl_goalkeeper.at(_goalkeeperId));
-    mutex.unlock();
-
-    mutex.lock();
-    connect(_rl_supporter.at(_assistantId), SIGNAL(sendSignal()), this, SLOT(receiveSignal()), Qt::DirectConnection);
-    mutex.unlock();
-    mutex.lock();
-    connect(_rl_supporter.at(_barrierId), SIGNAL(sendSignal()), this, SLOT(receiveSignal()), Qt::DirectConnection);
-    mutex.unlock();
 }
 
 void Playbook_Supporter::receiveSignal(){
     mutex.lock();
+
     if(!changedAssistBarrier){
         changedAssistBarrier = true;
         quint8 assist = _assistantId;
         _assistantId = _barrierId;
         _barrierId = assist;
     }
+
     mutex.unlock();
 }
