@@ -56,7 +56,7 @@ private:
     bool isBehindBall(Position posObjective);
     bool isInsideAreaBehindBall(Position behindBall);
     bool lookAtGoal();
-    bool isInsideDashArea(bool isBig);
+    bool isInsideDashArea(Position reference, bool isBig);
     float rotateToBall();
 
     void CheckIfAttack();

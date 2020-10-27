@@ -53,28 +53,32 @@ void Behaviour_Attacker::configure() {
 };
 
 void Behaviour_Attacker::run() {
-    Position behindBall = WR::Utils::threePoints(loc()->ball(), loc()->theirGoal(), 0.09f, GEARSystem::Angle::pi);
-    Position ballPrevision(true, behindBall.x() + loc()->ballVelocity().x() * 2, behindBall.y() + loc()->ballVelocity().y() * 2, 0.0);
+    Position ballPrevision(true, loc()->ball().x() + loc()->ballVelocity().x() * 2, loc()->ball().y() + loc()->ballVelocity().y() * 2, 0.0);
+    Position behindBall = WR::Utils::threePoints(ballPrevision, loc()->theirGoal(), 0.13f, GEARSystem::Angle::pi);
 
     _sk_goTo->setAvoidBall(true);
     //_sk_goTo->setGoToVelocityFactor(5.0);
 
     _sk_rotateTo->setDesiredPosition(loc()->ball());
+    _sk_goTo->setMinVelocity(0.5f);
+    _sk_goTo->setAvoidOurGoalArea(true);
 
     switch(_state){
     case STATE_PUSHBALL: {
         std::cout << "Fonzinho\n";
-        if (!isInsideDashArea(true)) {
+        if (!isInsideDashArea(loc()->ball(), false) && player()->distBall() > 0.5f) {
             _state = STATE_GOTO;
             break;
         } else {
-            if ((abs(rotateToBall()) > 1.5f)) {
+            if (((abs(rotateToBall()) > 0.7f && player()->distBall() < 0.11f) || (abs(rotateToBall()) > 1.5f))) {
                 _state = STATE_ROTATETO;
                 enableTransition(STATE_ROTATETO);
                 break;
             } else {
                 // Relação: velocidade linear / velocidade angular = raio de giro
-                float chord = player()->distanceTo(ballPrevision);
+                float chord;
+                if (player()->distanceTo(behindBall) <= 0.07f) chord = player()->distanceTo(ballPrevision);
+                else chord = player()->distanceTo(behindBall);
                 float internalAngle = Angle::pi / 2 - rotateToBall();
                 float spinRadius = chord / (2 * cosf(internalAngle));
 
@@ -82,7 +86,7 @@ void Behaviour_Attacker::run() {
                 float angularSpeed = std::max(0.5f, abs(rotateToBall()));
                 float angularSignal = rotateToBall() / abs(rotateToBall());
 
-                if (player()->isNearbyPosition(loc()->ball(), 0.13f)) {
+                if (player()->isNearbyPosition(loc()->ball(), 0.11f)) {
                     // O robô avançará diretamente ao gol
                     if (player()->isLookingTo(loc()->ball(), Angle::pi / 2)) {
                         _sk_pushBall->setSpeedAndOmega(1.5f, 0.0f);
@@ -92,9 +96,9 @@ void Behaviour_Attacker::run() {
                 } else {
                     // O robô se desloca até o ponto desejado, baseado no raio de giro
                     if (player()->isLookingTo(loc()->ball(), Angle::pi / 2)) {
-                        _sk_pushBall->setSpeedAndOmega(0.5f, angularSignal * 0.5f / spinRadius);
+                        _sk_pushBall->setSpeedAndOmega(1.0f, angularSignal * 1.0f / spinRadius);
                     } else {
-                        _sk_pushBall->setSpeedAndOmega(-0.5f, angularSignal * 0.5f / spinRadius);
+                        _sk_pushBall->setSpeedAndOmega(-1.0f, angularSignal * 1.0f / spinRadius);
                     }
                 }
                 enableTransition(STATE_PUSHBALL);
@@ -104,7 +108,7 @@ void Behaviour_Attacker::run() {
         break;
     case STATE_ROTATETO: {
         std::cout << "Fon\n";
-        if (!isInsideDashArea(true)) {
+        if (!isInsideDashArea(ballPrevision, false)) {
             _state = STATE_GOTO;
             break;
         }
@@ -118,7 +122,7 @@ void Behaviour_Attacker::run() {
         bool playerBehindBall = false;
         if(loc()->ourSide().isRight()){
             if(player()->position().x() > loc()->ball().x()) {
-                _sk_goTo->setGoToPos(ballPrevision);
+                _sk_goTo->setGoToPos(behindBall);
                 playerBehindBall = true;
             } else {
                 _sk_goTo->setGoToPos(loc()->ourGoal());
@@ -126,7 +130,7 @@ void Behaviour_Attacker::run() {
             }
         }else{
             if(player()->position().x() < loc()->ball().x()) {
-                _sk_goTo->setGoToPos(ballPrevision);
+                _sk_goTo->setGoToPos(behindBall);
                 playerBehindBall = true;
             } else {
                 _sk_goTo->setGoToPos(loc()->ourGoal());
@@ -134,11 +138,11 @@ void Behaviour_Attacker::run() {
             }
         }
         enableTransition(STATE_GOTO);
-        if (isInsideDashArea(false)) {
+        if (isInsideDashArea(ballPrevision, false)) {
             std::cout << "SAMBA\n";
-            if (player()->isNearbyPosition(ballPrevision, 0.15f)) {
+            if (player()->isNearbyPosition(behindBall, 0.15f)) {
                 std::cout << "RECIFE\n";
-                if (abs(rotateToBall()) < 1.2f) {
+                if (abs(rotateToBall()) < 0.8f) {
                     _state = STATE_PUSHBALL;
                 } else {
                     _state = STATE_ROTATETO;
@@ -210,22 +214,22 @@ bool Behaviour_Attacker::lookAtGoal(){
     return player()->isLookingTo(loc()->theirGoal() , 0.23f);
 }
 
-bool Behaviour_Attacker::isInsideDashArea(bool isBig){
+bool Behaviour_Attacker::isInsideDashArea(Position reference, bool isBig){
     float leftPostAngle;
     float rightPostAngle;
 
     //Definição dos ângulos dos coeficientes angulares
     if (isBig) {
-        leftPostAngle = WR::Utils::getAngle(loc()->ball() , loc()->theirGoalLeftPost());
-        rightPostAngle = WR::Utils::getAngle(loc()->ball() , loc()->theirGoalRightPost());
+        leftPostAngle = WR::Utils::getAngle(reference , loc()->theirGoalLeftPost());
+        rightPostAngle = WR::Utils::getAngle(reference , loc()->theirGoalRightPost());
     } else {
-        leftPostAngle = WR::Utils::getAngle(loc()->ball() , loc()->theirGoalLeftMidPost());
-        rightPostAngle = WR::Utils::getAngle(loc()->ball() , loc()->theirGoalRightMidPost());
+        leftPostAngle = WR::Utils::getAngle(reference , loc()->theirGoalLeftMidPost());
+        rightPostAngle = WR::Utils::getAngle(reference , loc()->theirGoalRightMidPost());
     }
 
     //Definição dos coeficientes lineares
-    float leftPost_b = loc()->ball().y() - tan(leftPostAngle)*loc()->ball().x();
-    float rightPost_b = loc()->ball().y() - tan(rightPostAngle)*loc()->ball().x();
+    float leftPost_b = reference.y() - tan(leftPostAngle)*reference.x();
+    float rightPost_b = reference.y() - tan(rightPostAngle)*reference.x();
 
     //Definição dos limites verticais de posicionamento do jogador
     float leftPost_y = tan(leftPostAngle) * player()->position().x() + leftPost_b;
