@@ -52,6 +52,9 @@ public:
     int _positioning;
     int _bhv;
     bool BySideOfGoal();
+
+signals:
+    void sendSignal();
 };
 
 #endif // ROLE_SUPPORTER_H

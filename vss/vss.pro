@@ -44,6 +44,7 @@ SOURCES += \
         src/entity/controlmodule/playbook/basics/playbook_defensive.cpp \
         src/entity/controlmodule/playbook/basics/playbook_halt.cpp \
         src/entity/controlmodule/playbook/basics/playbook_offensive.cpp \
+    src/entity/controlmodule/playbook/basics/playbook_supporter.cpp \
         src/entity/controlmodule/playbook/playbook.cpp \
         src/entity/controlmodule/strategy/basics/strategy_halt.cpp \
         src/entity/controlmodule/strategy/essentials/mrcstrategy.cpp \
@@ -132,6 +133,7 @@ HEADERS += \
     src/entity/controlmodule/playbook/basics/playbook_defensive.h \
     src/entity/controlmodule/playbook/basics/playbook_halt.h \
     src/entity/controlmodule/playbook/basics/playbook_offensive.h \
+    src/entity/controlmodule/playbook/basics/playbook_supporter.h \
     src/entity/controlmodule/playbook/playbook.h \
     src/entity/controlmodule/playbook/vssplaybooks.h \
     src/entity/controlmodule/strategy/basics/strategy_halt.h \

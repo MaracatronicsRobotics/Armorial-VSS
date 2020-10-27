@@ -45,16 +45,8 @@ void Role_Supporter::run(){
         break;
     }
     case(BARRIER_PREDOMINANT):{
-        if(_bhv == BHV_BARRIER){
-            if(!EnemyInOurField() && player()->isNearbyPosition(loc()->ball(), 0.1f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f) && !BySideOfGoal() && (player()->distOurGoal() < WR::Utils::distance(loc()->ball(), loc()->ourGoal()))){
-                setBehaviour(BHV_ASSISTANT);
-                _bhv = BHV_ASSISTANT;
-            }
-        }else if(_bhv == BHV_ASSISTANT){
-            if(EnemyInOurField() || !player()->isNearbyPosition(loc()->ball(), 0.25f)){
-                setBehaviour(BHV_BARRIER);
-                _bhv = BHV_BARRIER;
-            }
+        if(!EnemyInOurField() && player()->isNearbyPosition(loc()->ball(), 0.1f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f) && !BySideOfGoal() && (player()->distOurGoal() < WR::Utils::distance(loc()->ball(), loc()->ourGoal()))){
+            emit sendSignal();
         }
         break;
     }
@@ -82,3 +74,5 @@ bool Role_Supporter::BySideOfGoal(){
         return false;
     }
 }
+
+void Role_Supporter::sendSignal(){}
