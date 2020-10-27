@@ -74,5 +74,3 @@ bool Role_Supporter::BySideOfGoal(){
         return false;
     }
 }
-
-void Role_Supporter::sendSignal(){}

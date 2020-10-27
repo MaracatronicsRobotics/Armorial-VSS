@@ -6,6 +6,7 @@
 
 class Role_Supporter : public Role
 {
+    Q_OBJECT
 private:
     // Behaviours
 
