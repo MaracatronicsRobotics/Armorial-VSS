@@ -62,6 +62,7 @@ void Playbook_Supporter::configure(int numPlayers) {
     for(int i = 0; i < numPlayers; i++){
         connect(_rl_supporter.at(i), SIGNAL(sendSignal()), this, SLOT(receiveSignal()), Qt::DirectConnection);
     }
+
 }
 
 void Playbook_Supporter::run(int numPlayers) {

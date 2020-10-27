@@ -26,6 +26,7 @@
 #include <src/entity/player/role/vssroles.h>
 
 class Playbook_Supporter : public Playbook {
+    Q_OBJECT
 private:
     // Roles
     QList<Role_Supporter*> _rl_supporter;
