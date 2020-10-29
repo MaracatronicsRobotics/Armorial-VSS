@@ -55,8 +55,9 @@ void Behaviour_Assistant::configure() {
 void Behaviour_Assistant::run(){
 
     Position _aimPosition, ballProjection;
-    _aimPosition.setUnknown();
-    float behindBallAngle = 0;
+    //aim position is their goal and player shoul be behind it and behind the ball
+    float behindBallAngle = GEARSystem::Angle::pi;
+    _aimPosition = loc()->theirGoal();
 
     //ball position projection based on its velocity and actual position
     if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
@@ -93,16 +94,6 @@ void Behaviour_Assistant::run(){
 
     if(playerBehindBall) _sk_goTo->setAvoidBall(false);
     else if(player()->isLookingTo(loc()->ourGoal(), 1.1f*errorAngleToOurGoal)) _sk_goTo->setAvoidBall(true);
-
-    if(loc()->isInsideOurField(ballProjection) && !playerBehindBall){
-        //if ball is inside our field, our player should be between our goal and the ball:
-        _aimPosition = loc()->ourGoal();
-        behindBallAngle = 0;
-    }else{
-        //if ball isn't inside our field, aim position is now their goal
-        behindBallAngle = GEARSystem::Angle::pi;
-        _aimPosition = loc()->theirGoal();
-    }
 
     //***** ballOffset definition *****
     //if we shouldn't make our player get really close to ball
@@ -161,8 +152,8 @@ void Behaviour_Assistant::run(){
 
     float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
     if(!isnanf(velocityNeeded)){
-        if(0.8f*velocityNeeded < 10.0f) _sk_goTo->setGoToVelocityFactor(10.0f);
-        else _sk_goTo->setGoToVelocityFactor(0.8f*velocityNeeded);
+        if(1.2f*velocityNeeded < 10.0f) _sk_goTo->setGoToVelocityFactor(10.0f);
+        else _sk_goTo->setGoToVelocityFactor(1.2f*velocityNeeded);
     }else{
         _sk_goTo->setGoToVelocityFactor(10.0f);
     }
