@@ -31,7 +31,7 @@ public:
     virtual ~Strategy();
 
     bool isInitialized() { return _initialized; }
-    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils);
+    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, VSSReferee *referee);
 
     // Coach loop
     virtual void runStrategy() = 0;
@@ -53,6 +53,9 @@ private:
     // Teams
     VSSTeam *_ourTeam;
     VSSTeam *_theirTeam;
+
+    // Referee
+    VSSReferee *_referee;
 
     // Player distribution
     // here goes things like kickerId, ref last state and playerdistribution itself

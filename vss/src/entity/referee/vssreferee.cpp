@@ -14,36 +14,68 @@ VSSReferee::VSSReferee(VSSTeam *ourTeam) : Entity(ENT_REFEREE)
     _ourTeam = ourTeam;
 }
 
-int VSSReferee::connect(){
+bool VSSReferee::connect(){
+    /// Replacer Socket
+    // Creating replacer socket
+    _replacerSocket = new QUdpSocket();
+
     // Performing connection to send replacer commands
     if(_replacerSocket->isOpen()){
         _replacerSocket->close();
     }
 
-    _replacerSocket->connectToHost(VSSConstants::refereeAddress(), VSSConstants::replacerPort(), QIODevice::WriteOnly, QAbstractSocket::IPv4Protocol);
+    _replacerSocket->connectToHost(VSSConstants::refereeAddress(), static_cast<quint16>(VSSConstants::replacerPort()), QIODevice::WriteOnly, QAbstractSocket::IPv4Protocol);
     std::cout << "[VSSReferee] Conected to REPLACER socket in port " << VSSConstants::replacerPort() << " and address " << VSSConstants::refereeAddress().toStdString() << std::endl;
 
-    // Performing connection to receive Referee foul commands
-    if(_client->open(true))
-        std::cout << "[VSSReferee] Listening to referee system on port " << VSSConstants::refereePort() << " and address = " << VSSConstants::refereeAddress().toStdString() << ".\n";
-    else{
-        std::cout << "[VSSReferee] Cannot listen to referee system on port " << VSSConstants::refereePort() << " and address = " << VSSConstants::refereeAddress().toStdString() << ".\n";
-        return 0;
+
+    /// Referee Socket
+    // Creating referee socket
+    _refereeSocket = new QUdpSocket();
+
+    // Performing connection to send receive referee data
+    if(_refereeSocket->bind(QHostAddress::AnyIPv4, static_cast<quint16>(VSSConstants::refereePort()), QUdpSocket::ShareAddress) == false){
+        std::cout << "[ERROR] VSSReferee bind error =(" << std::endl;
+        return false;
     }
 
     return 1;
 }
 
 void VSSReferee::initialization(){
-    connect();
-    std::cout << "[VSSReferee] Thread started." << std::endl;
+    if(connect())
+        std::cout << "[VSSReferee] Thread started." << std::endl;
+    else
+        return ;
 }
 
 void VSSReferee::loop(){
     VSSRef::ref_to_team::VSSRef_Command command;
 
-    if(_client->receive(command) && !isInterruptionRequested()){
-        // Saving command
+    char buffer[65535];
+    long long int len = 0;
+
+    if(_enableTimer){
+        _timer.stop();
+        // wait for 2s to pos all
+        if(_timer.timesec() >= 2.0){
+            placeReceivedPackets();
+
+            // Reseting
+            _timer.start();
+            _enableTimer = false;
+        }
+    }
+
+    while(_refereeSocket->hasPendingDatagrams()){
+        // Read
+        len = _refereeSocket->readDatagram(buffer, 65535);
+
+        // Parse protobuf structure
+        if(command.ParseFromArray(buffer, int(len)) == false){
+            std::cout << "[ERROR] Referee protubuf parsing error =(" << std::endl;
+        }
+
+        // Save in _lastCommand
         _commandMutex.lock();
         _lastCommand = command.foul();
         _commandMutex.unlock();
@@ -55,8 +87,13 @@ void VSSReferee::loop(){
         // Showing timestamp
         std::cout << "[VSSReferee] Timestamp: " << command.timestamp() << std::endl;
 
-        // Placing
-        placeByCommand(command.foul(), command.foulquadrant(), command.teamcolor());
+        // Placing if is an valid foul (not stop or game on)
+        if(!isStop() && !isGameOn()){
+            _enableTimer = true;
+            _timer.start();
+
+            emit emitFoul(command.foul(), command.foulquadrant(), command.teamcolor());
+        }
     }
 }
 
@@ -125,69 +162,29 @@ QString VSSReferee::getHalfNameById(VSSRef::Half half){
         case VSSRef::Half::NO_HALF: return "NO_HALF";
         case VSSRef::Half::FIRST_HALF: return "FIRST HALF";
         case VSSRef::Half::SECOND_HALF: return "SECOND HALF";
-        default: "NO HALF DEFINED";
+        default: return "NO HALF DEFINED";
     }
 }
 
-void VSSReferee::placeByCommand(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color team){
-    // First creating an placement command for the blue team
+void VSSReferee::placeReceivedPackets(){
+    // First creating an placement command
     VSSRef::team_to_ref::VSSRef_Placement placementCommand;
     VSSRef::Frame *placementFrame = new VSSRef::Frame();
     placementFrame->set_teamcolor((_ourTeam->teamColor() == Colors::BLUE) ? VSSRef::Color::BLUE : VSSRef::Color::YELLOW);
 
-    /* Galera do VSS, aqui o processo é o seguinte:
-     *
-     * Primeiro, você vai criar um switch que vai abranger todas as faltas
-     * Dentro de cada falta, você tem que verificar o time (caso seja necessaŕio).
-     * Essas verificações de time geralmente são para Kickoff, Penalty e Goal_Kick
-     * Para a falta de FREE_BALL vocês tem que ficar atento apenas ao quadrante!
-     *
-     * Feito essas verificações, vocês terão que fazer o posicionamento como bem entenderem!
-     * Levem sempre em consideração o *LADO* que vocês estão para poder definir essas posições,
-     * e lembrem-se sempre de se posicionarem RESPEITANDO as regras! O VSSReferee irá verificar
-     * esse tipo de ato e possivelmente pode resultar em problemas caso não respeitemos.
-     *
-     * Para o posicionamento, vocês podem seguir o seguinte modelo:
-     * for(int x = 0; x < 3; x++){
-     *      VSSRef::Robot *robot = placementFrame->add_robots();
-     *      robot->set_robot_id(x);
-     *      robot->set_x(0.5);
-     *      robot->set_y(-0.2 + (0.2 * x));
-     *      robot->set_orientation(0.0);
-     * }
-     *
-     * Explicando o que o código acima faz (lembrem-se que é um template):
-     * Vocês vão criar um robô e adicioná-lo ao frame:
-     * Vocês especificam o ID do robô de vocês
-     * Vocês especificam x, y e orientação desejadas!
-     *
-     * Lembrem-se que o código acima é um exemplo: vocês podem obter informações sobre os jogadores
-     * de vocês usando o ponteiro de VSSTeam que eu coloquei aqui no referee.
-     * Isso pode permitir a vocês pegarem dados importantes sobre quem é o goleiro (da pra acessar
-     * a role e descobrir essas coisas), o atacante e o suporte. Isso evita que vocês posicionem
-     * os caras indevidamente em campo, cuidado com isso (ou façam tratamentos pra ele arrumar as
-     * roles de acordo com o posicionamento do cara em campo, fica totalmente a critério).
-     *
-     * Feito esse posicionamento, o VSSReferee vai automaticamente tratar as colisões, então não
-     * se preocupem com eventuais problemas de teleporte =)
-     */
-
-    switch(foul){
-        // content here
-    }
-
-    if(!isGameOn() && !isStop()){
-        // Pra testarem =))
-        // Se lembrem que se o comando for game on ou stop n precisa posicionar!
-        for(int x = 0; x < 3; x++){
+    for(int i = 0; i < 5; i++){
+        _positionMutex.lockForRead();
+        if(_desiredMark[i]){
             VSSRef::Robot *robot = placementFrame->add_robots();
-            robot->set_robot_id(x);
-            robot->set_x(0.5);
-            robot->set_y(-0.2 + (0.2 * x));
-            robot->set_orientation(0.0);
-        }
-    }
+            robot->set_robot_id(static_cast<quint32>(i));
+            robot->set_x(static_cast<double>(_desiredPlacement[i].first.x()));
+            robot->set_y(static_cast<double>(_desiredPlacement[i].first.y()));
+            robot->set_orientation(static_cast<double>(_desiredPlacement[i].second.value()));
 
+            _desiredMark[i] = false;
+        }
+        _positionMutex.unlock();
+    }
 
     // Setting frame in command
     placementCommand.set_allocated_world(placementFrame);
@@ -195,7 +192,17 @@ void VSSReferee::placeByCommand(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VS
     // Sending placement command
     std::string placementMsg;
     placementCommand.SerializeToString(&placementMsg);
-    if(_replacerSocket->write(placementMsg.c_str(), placementMsg.length()) == -1){
+    if(_replacerSocket->write(placementMsg.c_str(), static_cast<qint64>(placementMsg.length())) == -1){
         std::cout << "[VSSReferee] Failed to write to replacer socket: " << _replacerSocket->errorString().toStdString() << std::endl;
     }
+}
+
+void VSSReferee::receivePosition(quint8 playerId, Position desiredPosition, Angle desiredOrientation){
+    _positionMutex.lockForWrite();
+
+    _desiredPlacement[playerId].first = desiredPosition;
+    _desiredPlacement[playerId].second = desiredOrientation;
+    _desiredMark[playerId] = true;
+
+    _positionMutex.unlock();
 }

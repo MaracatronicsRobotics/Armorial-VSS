@@ -52,10 +52,15 @@ Locations* Role::loc() {
     return _ourTeam->loc();
 }
 
-void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc){
+VSSReferee* Role::ref() {
+    return _referee;
+}
+
+void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc, VSSReferee *referee){
     _ourTeam = ourTeam;
     _theirTeam = theirTeam;
     _loc = loc;
+    _referee = referee;
 
     // Configure Role
     _configureEnabled = true;

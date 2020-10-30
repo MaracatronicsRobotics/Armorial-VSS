@@ -9,5 +9,6 @@ class StrategyState;
 class VSSTeam;
 class CoachUtils;
 class PlayersDistribution;
+class VSSReferee;
 
 #endif // BASECOACH_H

@@ -28,6 +28,9 @@ public:
     Role_Defender();
     void initializeBehaviours();
     QString name();
+
+public slots:
+    void receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor);
 };
 
 #endif // ROLE_SUPPORTER_H

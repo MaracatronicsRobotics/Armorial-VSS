@@ -81,13 +81,13 @@ void VSSPlayer::loop(){
        _mutexRole.lock();
        if(_role != NULL){
            if(_role->isInitialized() == false){
-               _role->initialize(_playerTeam, _playerTeam->opTeam(), _playerTeam->loc());
+               _role->initialize(_playerTeam, _playerTeam->opTeam(), _playerTeam->loc(), _playerTeam->ref());
            }
            _role->setPlayer(this, _playerAccessSelf);
            _role->runRole();
        }else if(_defaultRole != NULL){
            if(_defaultRole->isInitialized() == false){
-               _defaultRole->initialize(_playerTeam, _playerTeam->opTeam(), _playerTeam->loc());
+               _defaultRole->initialize(_playerTeam, _playerTeam->opTeam(), _playerTeam->loc(), _playerTeam->ref());
            }
            _defaultRole->setPlayer(this, _playerAccessSelf);
            _defaultRole->runRole();

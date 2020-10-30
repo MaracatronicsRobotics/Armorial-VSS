@@ -22,10 +22,11 @@
 #include "vssteam.h"
 #include <src/entity/locations.h>
 
-VSSTeam::VSSTeam(quint8 teamId, WorldMap *wm)
+VSSTeam::VSSTeam(quint8 teamId, WorldMap *wm, VSSReferee *referee)
 {
     _teamId = teamId;
     _wm = wm;
+    _referee = referee;
 
     _loc = new Locations(this);
 }

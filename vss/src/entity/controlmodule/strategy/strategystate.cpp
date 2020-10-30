@@ -44,12 +44,13 @@ Locations* StrategyState::loc() const {
     return _ourTeam->loc();
 }
 
-void StrategyState::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, PlayersDistribution *dist, qint8 *kickerId) {
+void StrategyState::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, PlayersDistribution *dist, qint8 *kickerId, VSSReferee *referee) {
     _ourTeam = ourTeam;
     _theirTeam = theirTeam;
     _utils = utils;
     _dist = dist;
     _kickerId = kickerId;
+    _referee = referee;
     _initialized = true;
 }
 
@@ -72,7 +73,7 @@ void StrategyState::runStrategyState() {
         // Initialize playbooks (initialized before run() because it modifies
         // players in playbook and already needs it with available players lists)
         if(playbook->isInitialized()==false)
-            playbook->initialize(_ourTeam, _theirTeam, _utils, _kickerId);
+            playbook->initialize(_ourTeam, _theirTeam, _utils, _kickerId, _referee);
         // Clear old players added
         playbook->clearPlayers();
     }

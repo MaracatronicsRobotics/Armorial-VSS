@@ -47,6 +47,10 @@ bool VSS::start(){
     // Create World
     _world = new World(_ctr, new Fields::VSSField());
 
+    // Setup Referee
+    _ref = new VSSReferee(_ourTeam);
+    _world->addEntity(_ref, 3);
+
     // Setup teams in world
     setupTeams(opTeamId, opTeamColor, opTeamSide);
     _world->setTeams(_ourTeam, _opTeam);
@@ -63,14 +67,11 @@ bool VSS::start(){
     Strategy *strategy = NULL;
     strategy = new MRCStrategy();
     _coach->setStrategy(strategy);
+    _coach->setReferee(_ref);
 
     // Setup GUI
     _gui = new VSSGui(_ourTeam, _opTeam);
     _world->addEntity(_gui, 3);
-
-    // Setup Referee
-    //_ref = new VSSReferee(_ourTeam);
-    //_world->addEntity(_ref, 3);
 
     // Start world
     _world->start();
@@ -100,8 +101,8 @@ void VSS::stop(){
 
 void VSS::setupTeams(quint8 opTeamId, Colors::Color opTeamColor, FieldSide opTeamSide){
     // Create teams
-    _ourTeam = new VSSTeam(_teamId, _world->getWorldMap());
-    _opTeam = new VSSTeam(opTeamId, _world->getWorldMap());
+    _ourTeam = new VSSTeam(_teamId, _world->getWorldMap(), _ref);
+    _opTeam = new VSSTeam(opTeamId, _world->getWorldMap(), _ref);
 
     // Set opponent teams
     _ourTeam->setOpponentTeam(_opTeam);

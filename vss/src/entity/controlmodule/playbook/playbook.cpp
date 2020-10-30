@@ -41,11 +41,12 @@ Locations* Playbook::loc() const {
     return _ourTeam->loc();
 }
 
-void Playbook::initialize(VSSTeam *ourTeam, VSSTeam *opTeam, CoachUtils *utils, qint8 *kickerId) {
+void Playbook::initialize(VSSTeam *ourTeam, VSSTeam *opTeam, CoachUtils *utils, qint8 *kickerId, VSSReferee *referee) {
     _ourTeam = ourTeam;
     _opTeam = opTeam;
     _utils = utils;
     _dist = new PlayersDistribution(_ourTeam, kickerId);
+    _referee = referee;
     _initialized = true;
 }
 
@@ -63,6 +64,18 @@ void Playbook::runPlaybook(QString strategyState) {
         configure(_lastNumPlayers);
         _configureEnabled = false;
     }
+
+    // Connect roles with ref
+    for(int i = 0; i < _rolesList.size(); i++){
+        qRegisterMetaType< VSSRef::Foul >("VSSRef::Foul");
+        qRegisterMetaType< VSSRef::Quadrant >("VSSRef::Quadrant");
+        qRegisterMetaType< VSSRef::Color >("VSSRef::Color");
+        qRegisterMetaType< Position >("Position");
+        qRegisterMetaType< Angle >("Angle");
+        connect(_referee, SIGNAL(emitFoul(VSSRef::Foul, VSSRef::Quadrant, VSSRef::Color)), _rolesList.at(i), SLOT(receiveFoul(VSSRef::Foul, VSSRef::Quadrant, VSSRef::Color)), Qt::DirectConnection);
+        connect(_rolesList.at(i), SIGNAL(emitPosition(quint8, Position, Angle)), _referee, SLOT(receivePosition(quint8, Position, Angle)));
+    }
+
     // Ensure assignment table has only assignments of players that are in this playbook
     QList<quint8> ids = _assignmentTable.keys();
     for(int i=0; i<ids.size(); i++) {

@@ -25,6 +25,7 @@
 #include <src/entity/player/playerbus.h>
 #include <src/entity/controlmodule/coach/coachutils.h>
 #include <src/entity/controlmodule/strategy/strategy.h>
+#include <src/entity/referee/vssreferee.h>
 
 QString Coach::name(){
     return "VSSCoach";
@@ -43,6 +44,9 @@ Coach::Coach(VSSTeam *ourTeam, VSSTeam *theirTeam)
 
     // null strat
     _strat = NULL;
+
+    // null ref
+    _referee = NULL;
 }
 
 Coach::~Coach(){
@@ -50,6 +54,10 @@ Coach::~Coach(){
         delete _strat;
 
     delete _utils;
+}
+
+void Coach::setReferee(VSSReferee *referee){
+    _referee = referee;
 }
 
 StrategyState* Coach::getStrategyState(){
@@ -68,7 +76,7 @@ void Coach::run(){
     // run strategy
     if(strat != NULL){
         if(strat->isInitialized() == false){
-            strat->initialize(_ourTeam, _theirTeam, _utils);
+            strat->initialize(_ourTeam, _theirTeam, _utils, _referee);
         }
         strat->runStrategy();
     }

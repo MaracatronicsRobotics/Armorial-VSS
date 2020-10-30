@@ -36,6 +36,7 @@ public:
 
     QString getAgressivity();
     void setStrategy(Strategy *strat);
+    void setReferee(VSSReferee *referee);
 
     StrategyState* getStrategyState();
 private:
@@ -48,6 +49,9 @@ private:
     // Teams
     VSSTeam *_ourTeam;
     VSSTeam *_theirTeam;
+
+    // Referee
+    VSSReferee *_referee;
 
     // Strategy
     QMutex _mutexStrategy;

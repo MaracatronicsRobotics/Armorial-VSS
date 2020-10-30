@@ -27,20 +27,21 @@
 //#include <src/entity/player/playerbus.h>
 //#include <src/entity/controlmodule/vssteam.h>
 //#include <src/entity/controlmodule/coach/playersdistribution.h>
+#include <src/entity/referee/vssreferee.h>
 #include <src/entity/player/behaviour/vssbehaviours.h>
 #include <QObject>
 
 #define STRIKER_INTERCEPT_MINVEL 0.5f
 
 class Role : public QObject {
-        Q_OBJECT
+    Q_OBJECT
 public:
     Role();
     virtual ~Role();
 
     // Initialization
     bool isInitialized() { return _initialized; }
-    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc);
+    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc, VSSReferee *referee);
     void setPlayer(VSSPlayer *player, PlayerAccess *playerAccess);
 
     // Called in Playbook loop
@@ -75,6 +76,8 @@ protected:
     // Utils, loc and player access
     Locations* loc();
 
+    // Referee
+    VSSReferee* ref();
 private:
     // Implemented by role children
     virtual void run() = 0;
@@ -91,6 +94,7 @@ private:
     VSSTeam *_ourTeam;
     VSSTeam *_theirTeam;
     CoachUtils *_utils;
+    VSSReferee *_referee;
 
     // Behaviours list
     QHash<int, Behaviour*> _behaviourList;
@@ -103,6 +107,12 @@ private:
     Timer _timer;
     bool _retBefore;
     bool _wall;
+
+public slots:
+    virtual void receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor) = 0;
+
+signals:
+    void emitPosition(quint8 playerId, Position desiredPosition, Angle desiredOrientation);
 };
 
 #endif // ROLE_H

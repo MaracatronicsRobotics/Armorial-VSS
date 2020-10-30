@@ -30,7 +30,7 @@
 class VSSTeam
 {
 public:
-    VSSTeam(quint8 teamId, WorldMap *wm);
+    VSSTeam(quint8 teamId, WorldMap *wm, VSSReferee *referee);
     ~VSSTeam();
 
     // Getters
@@ -59,6 +59,7 @@ public:
     WorldMap *wm() { return _wm; }
     Position ballPosition();
     Locations* loc() { return _loc; }
+    VSSReferee *ref() { return _referee; }
 
 private:
     // Team info
@@ -79,6 +80,9 @@ private:
 
     // WorldMap
     WorldMap *_wm;
+
+    // Referee
+    VSSReferee *_referee;
 };
 
 #endif // VSSTEAM_H

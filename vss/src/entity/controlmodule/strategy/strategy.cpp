@@ -49,10 +49,11 @@ Strategy::~Strategy(){
         delete _dist;
 }
 
-void Strategy::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils){
+void Strategy::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, VSSReferee *referee){
     _ourTeam = ourTeam;
     _theirTeam = theirTeam;
     _utils = utils;
+    _referee = referee;
 
     _dist = new PlayersDistribution(_ourTeam, &_kickerId);
 
@@ -68,7 +69,7 @@ void Strategy::runStrategy(int gameState) {
     StrategyState *strategyState = getStrategyState(gameState);
     if(strategyState!=NULL) {
         if(strategyState->isInitialized()==false)
-            strategyState->initialize(_ourTeam, _theirTeam, _utils, _dist, &_kickerId);
+            strategyState->initialize(_ourTeam, _theirTeam, _utils, _dist, &_kickerId, _referee);
 
         _lastStrategy = strategyState;
         strategyState->runStrategyState();

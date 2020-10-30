@@ -36,7 +36,7 @@ public:
 
     // Called one time before run is first called
     bool isInitialized() { return _initialized; }
-    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, qint8 *kickerId);
+    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, qint8 *kickerId, VSSReferee *referee);
 
     // Called in StrategyState loop
     void runPlaybook(QString strategyState);
@@ -66,6 +66,7 @@ protected:
     Locations* loc() const;
     PlayersDistribution* dist() { return _dist; }
     VSSTeam* team() { return _ourTeam; }
+    VSSReferee* ref() { return _referee; }
 private:
     // Implemented by children
     virtual void run(int numPlayers) = 0;
@@ -84,6 +85,7 @@ private:
     // Game info
     VSSTeam *_ourTeam;
     VSSTeam *_opTeam;
+    VSSReferee *_referee;
     CoachUtils *_utils;
 
     // Players in this playbook list

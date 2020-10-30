@@ -9,6 +9,7 @@
 
 class VSSReferee : public Entity
 {
+    Q_OBJECT
 public:
     VSSReferee(VSSTeam *ourTeam);
 
@@ -30,11 +31,8 @@ private:
     QString getQuadrantNameById(VSSRef::Quadrant quadrant);
     QString getHalfNameById(VSSRef::Half half);
 
-    // Processing placement
-    void placeByCommand(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color team);
-
     // Connect
-    int connect();
+    bool connect();
 
     // Referee last command
     QMutex _commandMutex;
@@ -43,9 +41,24 @@ private:
     // Team
     VSSTeam *_ourTeam;
 
+    // Processing placement
+    void placeReceivedPackets();
+
+    std::pair<Position, Angle> _desiredPlacement[5];
+    Timer _timer;
+    QReadWriteLock _positionMutex;
+    bool _enableTimer;
+    bool _desiredMark[5];
+
     // Socket
     QUdpSocket *_replacerSocket;
     VSSClient *_client;
+    QUdpSocket *_refereeSocket;
+
+signals:
+    void emitFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color team);
+public slots:
+    void receivePosition(quint8 playerId, Position desiredPosition, Angle desiredOrientation);
 };
 
 #endif // VSSREFEREE_H

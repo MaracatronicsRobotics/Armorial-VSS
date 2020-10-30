@@ -51,6 +51,9 @@ public:
     Role_Halt();
     void initializeBehaviours();
     QString name();
+
+public slots:
+    void receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor);
 };
 
 #endif // ROLE_HALT_H

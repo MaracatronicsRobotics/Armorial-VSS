@@ -40,3 +40,8 @@ void Role_Goalkeeper::configure(){
 void Role_Goalkeeper::run(){
     setBehaviour(BHV_GK);
 }
+
+void Role_Goalkeeper::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor){
+    if(isInitialized())
+        emit emitPosition(player()->playerId(), Position(true, 0.0, 0.0, 0.0), Angle(true, 0.0));
+}

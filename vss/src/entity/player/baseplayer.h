@@ -34,5 +34,6 @@ class Role;
 class CoachUtils;
 class Navigation;
 class NavigationAlgorithm;
+class VSSReferee;
 
 #endif // BASEPLAYER_H

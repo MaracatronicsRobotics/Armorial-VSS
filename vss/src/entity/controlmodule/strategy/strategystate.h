@@ -32,7 +32,7 @@ public:
 
     // Called one time before run is first called
     bool isInitialized() { return _initialized; }
-    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, PlayersDistribution *dist, qint8 *kickerId);
+    void initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, CoachUtils *utils, PlayersDistribution *dist, qint8 *kickerId, VSSReferee *referee);
 
     // Called in Coach -> Strategy loop
     void runStrategyState();
@@ -49,6 +49,7 @@ protected:
     CoachUtils* utils() { return _utils; }
     Locations* loc() const;
     PlayersDistribution* dist() { return _dist; }
+    VSSReferee* ref() { return _referee; }
 private:
     // Implemented by children
     virtual void configure(int numOurPlayers) = 0;
@@ -63,6 +64,7 @@ private:
     // Game info
     VSSTeam *_ourTeam;
     VSSTeam *_theirTeam;
+    VSSReferee *_referee;
     CoachUtils *_utils;
 
     // Playbook list
