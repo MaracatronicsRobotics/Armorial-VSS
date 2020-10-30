@@ -109,6 +109,10 @@ private:
     bool _retBefore;
     bool _wall;
 
+    //timer
+    int counter;
+    bool canGoBack;
+
 public slots:
     virtual void receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor) = 0;
 

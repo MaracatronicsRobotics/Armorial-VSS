@@ -75,6 +75,9 @@ void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc, VSSR
 
     // Initialize
     _initialized = true;
+
+    counter = 0;
+    canGoBack = true;
 }
 
 void Role::setPlayer(VSSPlayer *player, PlayerAccess *playerAccess){
@@ -88,6 +91,13 @@ void Role::runRole(){
         return ;
     }
 
+    if(!canGoBack){
+        counter++;
+        if(counter >= 400){
+            counter = 0;
+            canGoBack = true;
+        }
+    }
     if(!ref()->isGameOn()){
         if(_bh_dn->isInitialized() == false)
             _bh_dn->initialize(_loc);
