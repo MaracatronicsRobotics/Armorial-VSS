@@ -53,20 +53,20 @@ void Behaviour_Attacker::configure() {
 };
 
 void Behaviour_Attacker::run() {
-    Position ballPrevision(true, loc()->ball().x() + loc()->ballVelocity().x() * 2, loc()->ball().y() + loc()->ballVelocity().y() * 2, 0.0);
+    Position ballPrevision(true, loc()->ball().x() + loc()->ballVelocity().x() * 2 * player()->distBall(), loc()->ball().y() + loc()->ballVelocity().y() * 2 * player()->distBall(), 0.0);
     Position behindBall = WR::Utils::threePoints(ballPrevision, loc()->theirGoal(), 0.13f, GEARSystem::Angle::pi);
 
     _sk_goTo->setAvoidBall(true);
-    //_sk_goTo->setGoToVelocityFactor(5.0);
+    _sk_goTo->setGoToVelocityFactor(1.3);
 
     _sk_rotateTo->setDesiredPosition(loc()->ball());
-    _sk_goTo->setMinVelocity(0.5f);
+    _sk_goTo->setMinVelocity(0.7f);
     _sk_goTo->setAvoidOurGoalArea(true);
 
     switch(_state){
     case STATE_PUSHBALL: {
-        std::cout << "Fonzinho\n";
-        if (!isInsideDashArea(loc()->ball(), false) && player()->distBall() > 0.5f) {
+        //std::cout << "Fonzinho\n";
+        if (!isInsideDashArea(loc()->ball(), false) && player()->distBall() > 0.5f || abs(ballPrevision.y()) > 0.6f || abs(ballPrevision.x()) > 0.7f) {
             _state = STATE_GOTO;
             break;
         } else {
@@ -107,7 +107,7 @@ void Behaviour_Attacker::run() {
     }
         break;
     case STATE_ROTATETO: {
-        std::cout << "Fon\n";
+        //std::cout << "Fon\n";
         if (!isInsideDashArea(ballPrevision, false)) {
             _state = STATE_GOTO;
             break;
@@ -139,9 +139,9 @@ void Behaviour_Attacker::run() {
         }
         enableTransition(STATE_GOTO);
         if (isInsideDashArea(ballPrevision, false)) {
-            std::cout << "SAMBA\n";
+            //std::cout << "SAMBA\n";
             if (player()->isNearbyPosition(behindBall, 0.15f)) {
-                std::cout << "RECIFE\n";
+                //std::cout << "RECIFE\n";
                 if (abs(rotateToBall()) < 0.8f) {
                     _state = STATE_PUSHBALL;
                 } else {
