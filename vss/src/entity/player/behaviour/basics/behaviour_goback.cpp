@@ -19,7 +19,7 @@ void Behaviour_GoBack::configure() {
 
     //initial state
     _state = STATE_GOBACK;
-    _start = true;
+    _start = false;
 
     //initial skill
     setInitialSkill(_sk_goTo);

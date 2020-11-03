@@ -44,7 +44,7 @@ void Role_Halt::configure(){
 void Role_Halt::run(){
     //setBehaviour(BHV_ATTACKER);
     //setBehaviour(BHV_ASSISTANT);
-    //setBehaviour(BHV_DONOTHING);
+    setBehaviour(BHV_DONOTHING);
     //setBehaviour(BHV_PUSHBALL);
     setBehaviour(BHV_GK);
 }

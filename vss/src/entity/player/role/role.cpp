@@ -77,7 +77,7 @@ void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc, VSSR
     _initialized = true;
 
     counter = 0;
-    canGoBack = true;
+    canGoBack = false;
 }
 
 void Role::setPlayer(VSSPlayer *player, PlayerAccess *playerAccess){
@@ -93,7 +93,7 @@ void Role::runRole(){
 
     if(!canGoBack){
         counter++;
-        if(counter >= 400){
+        if(counter >= 200){
             counter = 0;
             canGoBack = true;
         }
@@ -106,7 +106,7 @@ void Role::runRole(){
         _bh_dn->runBehaviour();
     }
     else{
-        if(!canMove() || !_retreated){
+    if((!canMove() || !_retreated) && _goBack){
             if(_bh_gb->isInitialized() == false)
                 _bh_gb->initialize(_loc);
 
@@ -116,10 +116,11 @@ void Role::runRole(){
             _bh_gb->setPlayer(_player, _playerAccess);
             _bh_gb->runBehaviour();
 
-            if(_retreated){
-                _bh_gb->setStart(true);
-            }
-            _retreated = _bh_gb->getDone();
+        if(_retreated && canGoBack){
+            canGoBack = false;
+            _bh_gb->setStart(true);
+        }
+        _retreated = _bh_gb->getDone();
 
         } else if (_retreated){
             // Run role (child)
@@ -181,7 +182,7 @@ bool Role::canMove(){
             return false;
         } else _wall = false;
     }
-
+    /*
     //Avalia a proximidade com os jogadores adversarios
     for(quint8 i = 0; i < _ourTeam->opTeam()->avPlayersSize(); i++){
         Position obstPos = PlayerBus::theirPlayer(i)->position();
@@ -191,6 +192,7 @@ bool Role::canMove(){
             return false;
         }
     }
+    */
     return true;
 }
 
