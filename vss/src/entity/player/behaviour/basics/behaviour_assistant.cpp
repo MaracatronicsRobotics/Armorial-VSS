@@ -62,7 +62,7 @@ void Behaviour_Assistant::run(){
     //ball position projection based on its velocity and actual position
     if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
         //calc vector of velocity
-        const Position vel(true, loc()->ballVelocity().x(), loc()->ballVelocity().y(), 0.0);
+        const Position vel(true, 0.8f*loc()->ballVelocity().x(), 0.8f*loc()->ballVelocity().y(), 0.0);
 
         //calc projected position
         Position projectedPos(true, loc()->ball().x()+vel.x(), loc()->ball().y()+vel.y(), 0.0);
@@ -103,7 +103,7 @@ void Behaviour_Assistant::run(){
              * try to be positioned from ballProjection position (and behind it)
             */
         float distBallProjFactor = (player()->distanceTo(ballProjection)/WR::Utils::distance(Position(true,loc()->fieldMinX(), 0.0f, 0.0f), Position(true, loc()->fieldMaxX(), loc()->fieldMinY(), 0.0f)));
-        ballOffset = 0.06f+distBallProjFactor * 0.7f;
+        ballOffset = 0.1f+distBallProjFactor * 0.7f;
         /*
              * if (our player is on the line ball->theirGoal and it's behind ball's X and it's near the ball (0.25f))
              * or (our player is near 'behindBall' position (last position he was going to) and it's behind ball's X)
@@ -112,14 +112,15 @@ void Behaviour_Assistant::run(){
             */
         if((WR::Utils::isPointAtLine(_aimPosition, ballProjection, player()->position()) && playerBehindBall && player()->isNearbyPosition(ballProjection, 0.25f)) ||
                 (player()->isNearbyPosition(behindBall, 0.02f) && playerBehindBall) ||
-                (playerBehindBall && player()->distBall() >= 0.13f && player()->isNearbyPosition(loc()->ball(), 0.15f))){
+                (playerBehindBall && player()->distBall() >= 0.16f && player()->isNearbyPosition(loc()->ball(), 0.18f)) ||
+                (ballPlayerInterceptTheirGoal() && playerBehindBall && player()->distBall() >= 0.1f && player()->isNearbyPosition(loc()->ball(), 0.2f))){
             reduceOffset = true;
             if(ballOffset > 0.04f) ballOffset = 0.04f;
         }
         //if we should make our player get closer to ball
     }else{
         //if our player is too far from ballProjection: stop reducing offset
-        if(player()->distanceTo(loc()->ball()) > 0.5f || (!playerBehindBall || (playerBehindBall && player()->distBall() < 0.032f))){
+        if(player()->distanceTo(loc()->ball()) > 0.5f || (!playerBehindBall || (playerBehindBall && player()->distBall() < 0.032f && !ballPlayerInterceptTheirGoal()))){
             reduceOffset = false;
         }
         //if ballOffset is bigger than 0.035 and our player is very close to ballProjection: go to ball
@@ -149,14 +150,16 @@ void Behaviour_Assistant::run(){
 
     //setting skill goTo velocity factor
     // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
-
-    float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
+    float ballVel = loc()->ballVelocity().abs();
+    WR::Utils::limitValue(&ballVel, 0.4f, 3.0f);
+    float velocityNeeded = 1.2f*(ballVel * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
+    WR::Utils::limitValue(&velocityNeeded, 2.0f, 2.4f);
     if(!isnanf(velocityNeeded)){
-        if(1.2f*velocityNeeded < 10.0f) _sk_goTo->setGoToVelocityFactor(10.0f);
-        else _sk_goTo->setGoToVelocityFactor(1.2f*velocityNeeded);
+        _sk_goTo->setGoToVelocityFactor(velocityNeeded);
     }else{
-        _sk_goTo->setGoToVelocityFactor(10.0f);
+        _sk_goTo->setGoToVelocityFactor(2.0f);
     }
+    //_sk_goTo->setGoToVelocityFactor(2.0f);
 
     //_sk_goTo->setGoToVelocityFactor(1.5f);
     //setting skill rotateTo
@@ -181,8 +184,13 @@ void Behaviour_Assistant::run(){
             }
         }
         //SPIN
-        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
-            _sk_spin->setClockWise(!setSpinDirection());
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && ballPlayerInterceptTheirGoal())){
+            bool spinDirection = setSpinDirection();
+            if((fabs(player()->position().y()) > fabs(loc()->ball().y()))){
+                _sk_spin->setClockWise(!spinDirection);
+            }else{
+                _sk_spin->setClockWise(spinDirection);
+            }
             enableTransition(STATE_SPIN);
             _skill = SPIN;
         }
@@ -206,8 +214,13 @@ void Behaviour_Assistant::run(){
             }
         }
         //SPIN
-        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
-            _sk_spin->setClockWise(!setSpinDirection());
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && ballPlayerInterceptTheirGoal())){
+            bool spinDirection = setSpinDirection();
+            if((fabs(player()->position().y()) > fabs(loc()->ball().y()))){
+                _sk_spin->setClockWise(!spinDirection);
+            }else{
+                _sk_spin->setClockWise(spinDirection);
+            }
             enableTransition(STATE_SPIN);
             _skill = SPIN;
         }
@@ -229,8 +242,13 @@ void Behaviour_Assistant::run(){
             _skill = ROT;
         }
         //SPIN
-        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f))){
-            _sk_spin->setClockWise(!setSpinDirection());
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && ballPlayerInterceptTheirGoal())){
+            bool spinDirection = setSpinDirection();
+            if((fabs(player()->position().y()) > fabs(loc()->ball().y()))){
+                _sk_spin->setClockWise(!spinDirection);
+            }else{
+                _sk_spin->setClockWise(spinDirection);
+            }
             enableTransition(STATE_SPIN);
             _skill = SPIN;
         }
@@ -241,6 +259,12 @@ void Behaviour_Assistant::run(){
             _skill = GOTO;
         }
     }
+}
+
+bool Behaviour_Assistant::ballPlayerInterceptTheirGoal(){
+    Position interceptionPoint = WR::Utils::hasInterceptionSegments(player()->position(), loc()->ball(), loc()->theirGoalLeftPost(), loc()->theirGoalRightPost());
+    if(fabs(interceptionPoint.y()) <= fabs(loc()->theirGoalLeftPost().y())) return true;
+    else return false;
 }
 
 float Behaviour_Assistant::errorAngleToSegment(Position leftPoint, Position rightPoint){
@@ -273,14 +297,31 @@ bool Behaviour_Assistant::localIsLookingTo(const Position &pos, float error){
 Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea){
     Position L1, L2, R1, R2;
     bool shouldProjectPos = false, isOurArea = false;
-    float smallMargin = 0.05f;
+    float smallMargin = 0.05f, distFromWall = 0.07f;
 
     //if position is beyond field's walls
-    if(pos.y() < loc()->fieldMinY()) pos.setPosition(pos.x(), loc()->fieldMinY(), pos.z());
-    else if(pos.y() > loc()->fieldMaxY()) pos.setPosition(pos.x(), loc()->fieldMaxY(), pos.z());
+    if(pos.y() < loc()->fieldMinY()){
+        if(fabs(pos.x()) <= fabs(loc()->fieldMaxX())){
+            pos.setPosition(pos.x(), loc()->fieldMinY() + distFromWall, pos.z());
+        }
+    }
+    else if(pos.y() > loc()->fieldMaxY()){
+        if(fabs(pos.x()) <= fabs(loc()->fieldMaxX())){
+            pos.setPosition(pos.x(), loc()->fieldMaxY() - distFromWall, pos.z());
+        }
+    }
 
-    if(pos.x() < loc()->fieldMinX()) pos.setPosition(loc()->fieldMinX(), pos.y(), pos.z());
-    else if(pos.x() > loc()->fieldMaxX()) pos.setPosition(loc()->fieldMaxX(), pos.y(), pos.z());
+    if(pos.x() < loc()->fieldMinX()){
+        if(fabs(pos.y()) <= loc()->fieldMaxY()){
+            pos.setPosition(loc()->fieldMinX() + distFromWall, pos.y(), pos.z());
+        }
+    }
+
+    else if(pos.x() > loc()->fieldMaxX()){
+        if(fabs(pos.y()) <= loc()->fieldMaxY()){
+            pos.setPosition(loc()->fieldMaxX() - distFromWall, pos.y(), pos.z());
+        }
+    }
 
     if(abs(pos.x()) > (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && abs(pos.y()) < loc()->fieldDefenseLength()/2){
         shouldProjectPos = true;
