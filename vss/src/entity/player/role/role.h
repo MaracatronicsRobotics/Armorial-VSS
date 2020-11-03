@@ -67,6 +67,9 @@ public:
     Behaviour_DoNothing *_bh_dn;
     bool _retreated;
 
+    //setar goBack
+    void setGoBack(bool goBack){_goBack = goBack;}
+
 protected:
     // Behaviour list functions
     void usesBehaviour(int id, Behaviour *behaviour);
@@ -108,6 +111,9 @@ private:
     Timer _timer;
     bool _retBefore;
     bool _wall;
+
+    //flag goBack
+    bool _goBack;
 
     //timer
     int counter;
