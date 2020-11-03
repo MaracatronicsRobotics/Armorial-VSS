@@ -94,13 +94,14 @@ void Behaviour_Barrier::run(){
     //setting goto
     _sk_goto->setGoToPos(desiredPosition);
     _sk_goto->setAvoidOurGoalArea(true);
+    _sk_goto->setGoToVelocityFactor(2.0f);
     //adjusting velocity factor according to: ball distance to our goal and ball velocity
-    float velFacDist = 1 - (loc()->distBallOurGoal()/WR::Utils::distance(loc()->fieldLeftTopCorner(), Position(true, loc()->fieldMaxX(), 0.0f, 0.0f)));
+    /*float velFacDist = 1 - (loc()->distBallOurGoal()/WR::Utils::distance(loc()->fieldLeftTopCorner(), Position(true, loc()->fieldMaxX(), 0.0f, 0.0f)));
     float velFacVel = (loc()->ballVelocity().abs())/15.0f;
     float velFac = (velFacDist + velFacVel) * 16.0f;
     if(velFac < 4.0f) velFac = 4.0f;
     if(!isnanf(velFac)) _sk_goto->setGoToVelocityFactor(velFac);
-    else _sk_goto->setGoToVelocityFactor(10.0f);
+    else _sk_goto->setGoToVelocityFactor(10.0f);*/
 
     //setting intercept
     float multFactor = 1.0;
