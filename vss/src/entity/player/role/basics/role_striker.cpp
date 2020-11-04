@@ -37,3 +37,8 @@ void Role_Striker::configure(){
 void Role_Striker::run(){
     setBehaviour(BHV_AT);
 }
+
+void Role_Striker::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor){
+    if(isInitialized())
+        emit emitPosition(player()->playerId(), Position(true, 0.0, 0.0, 0.0), Angle(true, 0.0));
+}

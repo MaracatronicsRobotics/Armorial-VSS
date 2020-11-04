@@ -20,6 +20,8 @@ public:
     Role_Striker();
     QString name();
     void initializeBehaviours();
+public slots:
+    void receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor);
 };
 
 #endif // ROLE_STRIKER_H
