@@ -129,9 +129,9 @@ void VSSPlayer::idle(){
     setSpeed(0.0, 0.0);
 }
 
-void VSSPlayer::setSpeed(float vx, float omega){
+void VSSPlayer::setSpeed(float wl, float wr){
     if(_ctr != NULL){ // avoid to send packet for the other team
-        _ctr->setSpeed(teamId(), playerId(), vx, omega, 0.0);
+        _ctr->setSpeed(teamId(), playerId(), wl, wr, 0.0);
     }
 }
 
@@ -222,7 +222,33 @@ void VSSPlayer::rotateTo(Position targetPosition, bool rot, float angleTarget){
         float angleRobotToTarget = getRotateAngle(targetPosition);
         speed = getRotateSpeed(angleRobotToTarget);
     }
-    setSpeed(0.0, speed);
+
+    // rotate (tem q tratar)
+    // x = vx desejada
+    // y = angular desejada
+
+    // equações pra transformar em vr e vl
+    /*
+     * Onde:
+     * L       = distancia entre as rodas
+     * r       = raio da roda
+     * VLinear = vx desejada
+     * w       = velocidade angular desejada
+     *
+     * (2 * VLinear)/r = Wr + Wl
+     * (w * L)/r       = Wr - Wl
+     * Wr              = (2 * Vlin + w * L)/(2 * r)
+     * Wl              = Wr - (w * L) / r
+    */
+
+    float L = 0.075f;
+    float r = 0.0325f;
+    float velLinear = 0.0f;
+    float velAngular = speed;
+    float wr = ((2.0f * velLinear) + (L * velAngular)) / (2.0f * r);
+    float wl = wr - ((L * velAngular) / r);
+
+    setSpeed(wl, wr);
 }
 
 std::pair<Angle,float> VSSPlayer::getNavDirectionDistance(const Position &destination, const Angle &positionToLook, bool avoidTeammates, bool avoidOpponents, bool avoidBall, bool avoidOurGoalArea, bool avoidTheirGoalArea) {
@@ -278,12 +304,8 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
     if(swapSpeed) vel *= -1;
 
     float dist = WR::Utils::distance(position(), targetPosition);
-    float Vel_teste = velocityFactor;
-    float Fr_factor = ((2.75f/2.0f)*Vel_teste);
-    //std::cout << vel << std::endl;
-    //Fr_factor = ((2.5f/2.0f)*Vel_teste);
-    float k = 1;
-    if(swapSpeed)k=-1;
+
+    /*
     //Vel_teste = 1.0f;
     if ( abs(help) > GEARSystem::Angle::toRadians(80)) {
         setSpeed(0.0, rotateSpeed);
@@ -310,6 +332,33 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
             }
         }
     }
+    */
+
+    // x = vx desejada
+    // y = angular desejada
+
+    // equações pra transformar em vr e vl
+    /*
+     * Onde:
+     * L       = distancia entre as rodas
+     * r       = raio da roda
+     * VLinear = vx desejada
+     * w       = velocidade angular desejada
+     *
+     * (2 * VLinear)/r = Wr + Wl
+     * (w * L)/r       = Wr - Wl
+     * Wr              = (2 * Vlin + w * L)/(2 * r)
+     * Wl              = Wr - (w * L) / r
+    */
+
+    float L = 0.075f;
+    float r = 0.0325f;
+    float velLinear = velocityFactor * vel;
+    float velAngular = rotateSpeed;
+    float wr = ((2.0f * velLinear) + (L * velAngular)) / (2.0f * r);
+    float wl = wr - ((L * velAngular) / r);
+
+    setSpeed(wl, wr);
 }
 
 /* Player info methods */

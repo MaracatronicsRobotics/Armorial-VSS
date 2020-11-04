@@ -73,7 +73,7 @@ public:
 
     // Control functions
     void idle();
-    void setSpeed(float vx, float omega);
+    void setSpeed(float wl, float wr);
     float getRotateAngle(Position targetPosition);
     float getRotateSpeed(float angleRobotToTarget);
     float getVxToTarget(Position targetPosition);
