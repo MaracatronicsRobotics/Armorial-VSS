@@ -27,10 +27,11 @@ QString Strategy_Halt::name() {
 }
 
 Strategy_Halt::Strategy_Halt() {
-    _pb_halt = nullptr;
+    //_pb_halt = nullptr;
     //_pb_defensive = nullptr;
     //_pb_offensive = nullptr;
     //_pb_balance = nullptr;
+    _pb_supporter = nullptr;
 }
 
 void Strategy_Halt::configure(int numOurPlayers) {
