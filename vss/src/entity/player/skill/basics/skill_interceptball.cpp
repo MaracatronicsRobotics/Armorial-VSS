@@ -30,33 +30,40 @@ Skill_InterceptBall::Skill_InterceptBall() {
     _secondLimitationPoint = Position(false, 0.0, 0.0, 0.0);
     _objectivePos = Position(false, 0.0, 0.0, 0.0);
     _velocityNeeded = 0.0f;
+    _velocityFactor = 1.0f;
+    _activateVelocityNeeded = false;
 }
 
 void Skill_InterceptBall::run() {
     Position unitaryBallVelocity = Position(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
 
     // Check ball speed (maybe a error)
-    if(loc()->ballVelocity().abs() <= 0.05f) {
+    if(loc()->ballVelocity().abs() <= 0.0000001f) {
         _objectivePos = player()->position(); // keep actual position
-    }
-    else{
+    } else {
         // Now ball velocity line (pos + uni_velocity vector)
         Position ballVelocityLine = Position(true, loc()->ball().x()+unitaryBallVelocity.x(), loc()->ball().y()+unitaryBallVelocity.y(), 0.0);
 
         // Call utils to get projection
-        _objectivePos = WR::Utils::projectPointAtLine(loc()->ball(), ballVelocityLine, player()->position()); //Intercepta em 90 graus
+        Position inicialReference = WR::Utils::projectPointAtLine(loc()->ball(), ballVelocityLine, player()->position()); //Intercepta em 90 graus
 
         if (_firstLimitationPoint.isUnknown()) _firstLimitationPoint = loc()->ball();
-        if (_secondLimitationPoint.isUnknown()) _secondLimitationPoint = _objectivePos;
+        if (_secondLimitationPoint.isUnknown()) _secondLimitationPoint = inicialReference;
 
-        _objectivePos = WR::Utils::projectPointAtSegment(_firstLimitationPoint, _secondLimitationPoint, _objectivePos);
+        Position finalReference = WR::Utils::projectPointAtSegment(_firstLimitationPoint, _secondLimitationPoint, inicialReference);
+        float adiction = powf(WR::Utils::distance(finalReference,inicialReference), 2.0) / player()->distanceTo(finalReference);
+        if (finalReference.y() < player()->position().y()) {
+            _objectivePos = Position(true, finalReference.x(), finalReference.y() - adiction, 0.0f);
+        } else {
+            _objectivePos = Position(true, finalReference.x(), finalReference.y() + adiction, 0.0f);
+        }
     }
 
     // Condição de definição da velocidade usada para interceptar, onde a skill calcula, caso o Behaviour não selecione
-    if (_velocityNeeded == 0.0f) {
+    if (!_activateVelocityNeeded) {
         // Vx/Dx = Vy/Dy (V = velocidade/ D = distância)
         _velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(_objectivePos)) / (WR::Utils::distance(loc()->ball(), _objectivePos));
     }
 
-    player()->goTo(_objectivePos, _velocityNeeded);
+    player()->goTo(_objectivePos, _velocityFactor * _velocityNeeded, 1.0, 0.0, false, false, false, false, false, false);
 }
