@@ -33,6 +33,8 @@ private:
     Position _secondLimitationPoint;
     Position _objectivePos; // Position where the player should be
     float _velocityNeeded;
+    float _velocityFactor;
+    bool _activateVelocityNeeded;
 
 public:
     Skill_InterceptBall();
@@ -40,6 +42,8 @@ public:
 
     void setInterceptSegment(Position firstPoint, Position secondPoint) { _firstLimitationPoint = firstPoint; _secondLimitationPoint = secondPoint; }
     void setDesiredVelocity(float velocityNeeded) { _velocityNeeded = velocityNeeded; }
+    void setVelocityFactor(float velocityFActor) { _velocityFactor = velocityFActor; }
+    bool selectVelocityNeeded(bool activateVelocityNeeded) { _activateVelocityNeeded = activateVelocityNeeded; }
     Position getIntercetPosition() { return _objectivePos; }
 };
 

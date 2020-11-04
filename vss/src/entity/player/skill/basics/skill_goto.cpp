@@ -27,10 +27,17 @@ QString Skill_GoTo::name(){
 
 Skill_GoTo::Skill_GoTo(){
     _goToPos = Position(true, 0.0, 0.0, 0.0);
-    _goToVelocityFactor = 1.0;
     _velocityNeeded = 0.0f;
+    _goToVelocityFactor = 1.0;
+    _minVelocity = 0.0;
+    _avoidTeammates = false;
+    _avoidOpponents = false;
+    _avoidBall = false;
+    _avoidOurGoalArea = false;
+    _avoidTheirGoalArea = false;
+    _pathActivated = false;
 }
 
 void Skill_GoTo::run(){
-    player()->goTo(_goToPos, _velocityNeeded, _goToVelocityFactor, _minVelocity, _avoidTeammates, _avoidOpponents, _avoidBall, _avoidOurGoalArea, _avoidTheirGoalArea);
+    player()->goTo(_goToPos, _velocityNeeded, _goToVelocityFactor, _minVelocity, _avoidTeammates, _avoidOpponents, _avoidBall, _avoidOurGoalArea, _avoidTheirGoalArea, _pathActivated);
 }

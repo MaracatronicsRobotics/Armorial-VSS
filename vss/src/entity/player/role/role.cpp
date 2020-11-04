@@ -82,7 +82,7 @@ void Role::runRole(){
         return ;
     }
 
-    if(!canMove() || !_retreated){
+    /*if(!canMove() || !_retreated){
         if(_bh_gb->isInitialized() == false)
             _bh_gb->initialize(_loc);
 
@@ -97,7 +97,7 @@ void Role::runRole(){
         }
         _retreated = _bh_gb->getDone();
 
-    } else if (_retreated){
+    } else {*/
         // Run role (child)
         run();
 
@@ -107,7 +107,7 @@ void Role::runRole(){
         }
         _behaviour->setPlayer(_player, _playerAccess);
         _behaviour->runBehaviour();
-    }
+    //}
 }
 
 bool Role::canMove(){

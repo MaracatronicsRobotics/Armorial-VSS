@@ -57,7 +57,9 @@ private:
     bool isInsideAreaBehindBall(Position behindBall);
     bool lookAtGoal();
     bool isInsideDashArea(Position reference, bool isBig);
-    float rotateToBall();
+    float rotateToBall(Position reference);
+    bool allyInTheirArea();
+    Position projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea);
 
     void CheckIfAttack();
 

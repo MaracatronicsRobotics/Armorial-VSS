@@ -3,7 +3,6 @@
 
 #include <src/entity/player/behaviour/behaviour.h>
 #include <src/entity/player/skill/vssskills.h>
-#include <src/const/constants.h>
 
 class Behaviour_Assistant : public Behaviour{
 private:
