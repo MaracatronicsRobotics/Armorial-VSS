@@ -61,15 +61,24 @@ void Behaviour_Goalkeeper::run() {
     Position secondInterceptPoint(true, initialPosition.x(), 0.35f, 0.0f);
 
     // GoTo setup
-    _sk_goto->setGoToPos(initialPosition);
+
 
     // InterceptBall setup
     _sk_intercept->setInterceptSegment(firstInterceptPoint, secondInterceptPoint);
-    _sk_intercept->setDesiredVelocity(4.0f);
+    _sk_intercept->selectVelocityNeeded(false);
+    _sk_intercept->setVelocityFactor(1.2f);
+    _sk_intercept->setDesiredVelocity(1.0f);
 
     if (!loc()->isInsideOurArea(player()->position()) || loc()->isInsideTheirField(loc()->ball())) {
+        _sk_goto->setGoToPos(initialPosition);
         enableTransition(STATE_GOTO);
-    } else {
+    }
+    else if (loc()->isInsideOurArea(loc()->ball()) && loc()->ballVelocity().abs() < 0.0001f) {
+        _sk_goto->setGoToPos(loc()->ball());
+        _sk_goto->setMinVelocity(1.0f);
+        enableTransition(STATE_GOTO);
+    }
+    else {
         Position interceptPosition = _sk_intercept->getIntercetPosition();
         if (player()->distanceTo(interceptPosition) < 0.05f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.1f) {
             bool spinDirection = setSpinDirection();

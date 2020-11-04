@@ -25,6 +25,7 @@
 #include <src/entity/player/baseplayer.h>
 #include <src/entity/player/playeraccess.h>
 #include <src/entity/player/playerbus.h>
+#include <src/const/constants.h>
 #include <QObject>
 
 class Behaviour : public QObject {

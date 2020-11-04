@@ -53,24 +53,38 @@ void Behaviour_Attacker::configure() {
 };
 
 void Behaviour_Attacker::run() {
-    Position ballPrevision(true, loc()->ball().x() + loc()->ballVelocity().x() * 2 * player()->distBall(), loc()->ball().y() + loc()->ballVelocity().y() * 2 * player()->distBall(), 0.0);
-    Position behindBall = WR::Utils::threePoints(ballPrevision, loc()->theirGoal(), 0.13f, GEARSystem::Angle::pi);
+    bool avoidTheirArea = allyInTheirArea();
+    Position ballPrevision(true, loc()->ball().x() + loc()->ballVelocity().x(), loc()->ball().y() + loc()->ballVelocity().y(), 0.0);
+    Position behindBall;
+    if (loc()->ourSide().isRight() && loc()->ballVelocity().x() > 0 && player()->position().x() > loc()->ball().x()) {
+        behindBall = WR::Utils::threePoints(loc()->ball(), loc()->theirGoal(), 0.13f, GEARSystem::Angle::pi);
+    }
+    else if (loc()->ourSide().isLeft() && loc()->ballVelocity().x() < 0 && player()->position().x() < loc()->ball().x()) {
+        behindBall = WR::Utils::threePoints(loc()->ball(), loc()->theirGoal(), 0.13f, GEARSystem::Angle::pi);
+    }
+    else {
+        behindBall = WR::Utils::threePoints(ballPrevision, loc()->theirGoal(), 0.13f, GEARSystem::Angle::pi);
+    }
+    behindBall = projectPosOutsideGoalArea(behindBall, true, avoidTheirArea);
+    float velocityNeeded;
+    if (rotateToBall(behindBall) < 0.25f) velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), behindBall));
+    else velocityNeeded = 0.0f;
 
-    _sk_goTo->setAvoidBall(true);
-    _sk_goTo->setGoToVelocityFactor(1.3);
-
-    _sk_rotateTo->setDesiredPosition(loc()->ball());
+    _sk_goTo->setVelocityNeeded(velocityNeeded);
+    _sk_goTo->setGoToVelocityFactor(1.3f);
     _sk_goTo->setMinVelocity(0.7f);
     _sk_goTo->setAvoidOurGoalArea(true);
+    _sk_goTo->setAvoidTheirGoalArea(avoidTheirArea);
+
+    _sk_rotateTo->setDesiredPosition(loc()->ball());
 
     switch(_state){
     case STATE_PUSHBALL: {
-        //std::cout << "Fonzinho\n";
-        if (!isInsideDashArea(loc()->ball(), false) && player()->distBall() > 0.5f || abs(ballPrevision.y()) > 0.6f || abs(ballPrevision.x()) > 0.7f) {
+        if ((!isInsideDashArea(loc()->ball(), false) && player()->distBall() > 0.5f) || abs(loc()->ball().y()) > 0.6f || abs(loc()->ball().x()) > 0.7f) {
             _state = STATE_GOTO;
             break;
         } else {
-            if (((abs(rotateToBall()) > 0.7f && player()->distBall() < 0.11f) || (abs(rotateToBall()) > 1.5f))) {
+            if (((abs(rotateToBall(loc()->ball())) > 0.7f && player()->distBall() < 0.11f) || (abs(rotateToBall(loc()->ball())) > 1.5f))) {
                 _state = STATE_ROTATETO;
                 enableTransition(STATE_ROTATETO);
                 break;
@@ -79,12 +93,12 @@ void Behaviour_Attacker::run() {
                 float chord;
                 if (player()->distanceTo(behindBall) <= 0.07f) chord = player()->distanceTo(ballPrevision);
                 else chord = player()->distanceTo(behindBall);
-                float internalAngle = Angle::pi / 2 - rotateToBall();
+                float internalAngle = Angle::pi / 2 - rotateToBall(loc()->ball());
                 float spinRadius = chord / (2 * cosf(internalAngle));
 
                 // Configurações de velocidade linear mínima, pois a velocidade linear estará em função dela
-                float angularSpeed = std::max(0.5f, abs(rotateToBall()));
-                float angularSignal = rotateToBall() / abs(rotateToBall());
+                float angularSpeed = std::max(0.5f, abs(rotateToBall(loc()->ball())));
+                float angularSignal = rotateToBall(loc()->ball()) / abs(rotateToBall(loc()->ball()));
 
                 if (player()->isNearbyPosition(loc()->ball(), 0.11f)) {
                     // O robô avançará diretamente ao gol
@@ -107,42 +121,45 @@ void Behaviour_Attacker::run() {
     }
         break;
     case STATE_ROTATETO: {
-        //std::cout << "Fon\n";
         if (!isInsideDashArea(ballPrevision, false)) {
             _state = STATE_GOTO;
             break;
         }
-        if (abs(rotateToBall()) < 0.7f) {
+        if (abs(rotateToBall(loc()->ball())) < 0.7f) {
             _state = STATE_PUSHBALL;
             break;
         }
     }
         break;
     case STATE_GOTO: {
-        bool playerBehindBall = false;
-        if(loc()->ourSide().isRight()){
-            if(player()->position().x() > loc()->ball().x()) {
-                _sk_goTo->setGoToPos(behindBall);
-                playerBehindBall = true;
-            } else {
-                _sk_goTo->setGoToPos(loc()->ourGoal());
-                playerBehindBall = false;
-            }
-        }else{
-            if(player()->position().x() < loc()->ball().x()) {
-                _sk_goTo->setGoToPos(behindBall);
-                playerBehindBall = true;
-            } else {
-                _sk_goTo->setGoToPos(loc()->ourGoal());
-                playerBehindBall = false;
+        if (abs(ballPrevision.y()) > 0.6f || abs(ballPrevision.x()) > 0.7f) {
+            _sk_goTo->setAvoidBall(false);
+            _sk_goTo->setGoToPos(loc()->ball());
+        } else {
+            _sk_goTo->setAvoidBall(true);
+            bool playerBehindBall = false;
+            if(loc()->ourSide().isRight()){
+                if(player()->position().x() > behindBall.x()) {
+                    _sk_goTo->setGoToPos(behindBall);
+                    playerBehindBall = true;
+                } else {
+                    _sk_goTo->setGoToPos(loc()->ourGoal());
+                    playerBehindBall = false;
+                }
+            }else{
+                if(player()->position().x() < behindBall.x()) {
+                    _sk_goTo->setGoToPos(behindBall);
+                    playerBehindBall = true;
+                } else {
+                    _sk_goTo->setGoToPos(loc()->ourGoal());
+                    playerBehindBall = false;
+                }
             }
         }
         enableTransition(STATE_GOTO);
         if (isInsideDashArea(ballPrevision, false)) {
-            //std::cout << "SAMBA\n";
             if (player()->isNearbyPosition(behindBall, 0.15f)) {
-                //std::cout << "RECIFE\n";
-                if (abs(rotateToBall()) < 0.8f) {
+                if (abs(rotateToBall(loc()->ball())) < 0.8f) {
                     _state = STATE_PUSHBALL;
                 } else {
                     _state = STATE_ROTATETO;
@@ -152,31 +169,6 @@ void Behaviour_Attacker::run() {
         }
     }
     }
-
-    /*if (isInsideDashArea()) {
-        if (lookingToBall().first) {
-            float angLeft = (WR::Utils::getAngle(player()->position(), loc()->theirGoalLeftPost()));
-            float angRight = (WR::Utils::getAngle(player()->position(), loc()->theirGoalRightPost()));
-            float errorAngleToTheirGoal = 0.9f*abs(angRight - angLeft)/2.0f;
-            if (!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)) {
-                std::cout << "FOGO\n";
-                _sk_pushBall->setSpeedAndOmega(-1.0, 0.0);
-                std::cout << "FOGO\n";
-                enableTransition(STATE_PUSHBALL);
-            } else {
-                std::cout << "ÁGUA\n";
-                _sk_pushBall->setSpeedAndOmega(1.0, 0.0);
-                std::cout << "ÁGUA\n";
-                enableTransition(STATE_PUSHBALL);
-            }
-        } else {
-            std::cout << "AR\n";
-            enableTransition(STATE_ROTATETO);
-        }
-    } else {
-        std::cout << "TERRA\n";
-        enableTransition(STATE_GOTO);
-    }*/
 }
 
 void Behaviour_Attacker::CheckIfAttack(){
@@ -244,8 +236,8 @@ bool Behaviour_Attacker::isInsideDashArea(Position reference, bool isBig){
     return false;
 }
 
-float Behaviour_Attacker::rotateToBall() {
-    float rotateAngle = WR::Utils::getAngle(player()->position(), loc()->ball()) - player()->orientation().value();
+float Behaviour_Attacker::rotateToBall(Position reference) {
+    float rotateAngle = WR::Utils::getAngle(player()->position(), reference) - player()->orientation().value();
 
     if(rotateAngle > float(M_PI)) rotateAngle -= 2.0f * float(M_PI);
     if(rotateAngle < float(-M_PI)) rotateAngle += 2.0f * float(M_PI);
@@ -256,3 +248,99 @@ float Behaviour_Attacker::rotateToBall() {
     return rotateAngle;
 }
 
+bool Behaviour_Attacker::allyInTheirArea(){
+    //find out if there's an ally inside their area
+    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+        if(PlayerBus::ourPlayerAvailable(x) && PlayerBus::ourPlayer(x)->playerId() != player()->playerId()){
+            if(loc()->isInsideTheirArea(PlayerBus::ourPlayer(x)->position())){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+Position Behaviour_Attacker::projectPosOutsideGoalArea(Position pos, bool avoidOurArea, bool avoidTheirArea){
+    Position L1, L2, R1, R2;
+    bool shouldProjectPos = false, isOurArea = false;
+    float smallMargin = 0.05f;
+
+    //if position is beyond field's walls
+    if(pos.y() < loc()->fieldMinY()) pos.setPosition(pos.x(), loc()->fieldMinY(), pos.z());
+    else if(pos.y() > loc()->fieldMaxY()) pos.setPosition(pos.x(), loc()->fieldMaxY(), pos.z());
+
+    if(pos.x() < loc()->fieldMinX()) pos.setPosition(loc()->fieldMinX(), pos.y(), pos.z());
+    else if(pos.x() > loc()->fieldMaxX()) pos.setPosition(loc()->fieldMaxX(), pos.y(), pos.z());
+
+    if(abs(pos.x()) > (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && abs(pos.y()) < loc()->fieldDefenseLength()/2){
+        shouldProjectPos = true;
+        //check if desiredPosition is inside our defense area and if we should avoid it
+        if(loc()->isInsideOurField(pos) && avoidOurArea){
+            shouldProjectPos = true;
+            isOurArea = true;
+        }
+        //check if desiredPosition is inside their defense area and if we should avoid it
+        else if(loc()->isInsideTheirField(pos) && avoidTheirArea){
+            shouldProjectPos = true;
+            isOurArea = false;
+        }else{
+            shouldProjectPos = false;
+        }
+    }
+    //if should project position outside a defense area
+    if(shouldProjectPos){
+        //multiplying factor changes if area's team is the left team or the right team
+        float mult = -1.0;
+        if(isOurArea){
+            if(loc()->ourSide().isLeft()) mult = 1.0;
+        }else{
+            if(loc()->theirSide().isLeft()) mult = 1.0;
+        }
+        //getting segments
+
+        //left segment points (defense area)
+        L1 = Position(true, -mult*loc()->fieldMaxX(), loc()->fieldDefenseLength()/2 + smallMargin, 0.0f);
+        L2 = Position(true, L1.x() + mult * (loc()->fieldDefenseWidth() + smallMargin), L1.y(), 0.0f);
+        //right segment points (defense area)
+        R1 = Position(true, -mult*loc()->fieldMaxX(), -(loc()->fieldDefenseLength()/2 + smallMargin), 0.0f);
+        R2 = Position(true, R1.x() + mult * (loc()->fieldDefenseWidth() + smallMargin), R1.y(), 0.0f);
+        //front segment is composed by L2 and R2 (defense area)
+
+        //projecting position on segments L1->L2, R1->R2, L2->R2
+        Position pointProjLeft = WR::Utils::projectPointAtSegment(L1, L2, pos);
+        Position pointProjRight = WR::Utils::projectPointAtSegment(R1, R2, pos);
+        Position pointProjFront = WR::Utils::projectPointAtSegment(L2, R2, pos);
+
+        //interception points between the segment playerPos->pos and defense area segments (L1->L2, R1->R2, L2->R2)
+        Position left = WR::Utils::hasInterceptionSegments(L1, L2, player()->position(), pos);
+        Position right = WR::Utils::hasInterceptionSegments(R1, R2, player()->position(), pos);
+        Position front = WR::Utils::hasInterceptionSegments(L2, R2, player()->position(), pos);
+
+        //if there is an interception between playerPos->pos and L1->L2 on L1->L2
+        if(left.isValid() && abs(left.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && abs(left.x()) <= loc()->fieldMaxX()){
+            //if initial position isn't between goal post and defense area post
+            if(abs(pos.y()) < abs(loc()->ourGoalLeftPost().y())){
+                return pointProjFront;
+            }else{
+                return pointProjLeft;
+            }
+        }
+        //if there is an interception between playerPos->pos and R1->R2 on R1->R2
+        else if(right.isValid() && abs(right.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && abs(right.x()) <= loc()->fieldMaxX()){
+            //if initial position isn't between goal post and defense area post
+            if(abs(pos.y()) < abs(loc()->ourGoalLeftPost().y())){
+                return pointProjFront;
+            }else{
+                return pointProjRight;
+            }
+        }
+        //if there is an interception between playerPos->pos and L2->R2 on L2->R2
+        else if(front.isValid() && abs(front.x()) >= (loc()->fieldMaxX() - (loc()->fieldDefenseWidth()+smallMargin)) && abs(front.x()) <= loc()->fieldMaxX()){
+            return pointProjFront;
+        }else{
+            return pos;
+        }
+    }else{
+        return pos;
+    }
+}
