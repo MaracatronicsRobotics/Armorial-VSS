@@ -62,7 +62,7 @@ void Behaviour_Assistant::run(){
     //ball position projection based on its velocity and actual position
     if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
         //calc vector of velocity
-        const Position vel(true, 0.8f*loc()->ballVelocity().x(), 0.8f*loc()->ballVelocity().y(), 0.0);
+        const Position vel(true, loc()->ballVelocity().x(), loc()->ballVelocity().y(), 0.0);
 
         //calc projected position
         Position projectedPos(true, loc()->ball().x()+vel.x(), loc()->ball().y()+vel.y(), 0.0);
@@ -149,19 +149,15 @@ void Behaviour_Assistant::run(){
     _sk_goTo->setGoToPos(behindBall);
 
     //setting skill goTo velocity factor
-    // Vx/Dx = Vy/Dy (V = velocity/ D = distance)
-    float ballVel = loc()->ballVelocity().abs();
-    WR::Utils::limitValue(&ballVel, 0.4f, 3.0f);
-    float velocityNeeded = 1.2f*(ballVel * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
-    WR::Utils::limitValue(&velocityNeeded, 2.0f, 2.4f);
+    _sk_goTo->setMinVelocity(0.7f);
+    float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
+    WR::Utils::limitValue(&velocityNeeded, 2.0f, 5.0f);
     if(!isnanf(velocityNeeded)){
         _sk_goTo->setGoToVelocityFactor(velocityNeeded);
     }else{
         _sk_goTo->setGoToVelocityFactor(2.0f);
     }
-    //_sk_goTo->setGoToVelocityFactor(2.0f);
 
-    //_sk_goTo->setGoToVelocityFactor(1.5f);
     //setting skill rotateTo
     _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
 
