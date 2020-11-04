@@ -5,9 +5,9 @@
 //raio do gol eh 0.2
 
 //constantes a mudar ainda para as dimensoes do vsss
-#define INTERCEPT_MINBALLVELOCITY 0.1f//hyperparameter
+#define INTERCEPT_MINBALLVELOCITY 0.03f//hyperparameter
 #define INTERCEPT_MINBALLDIST 0.2f //hyperparameter
-#define ERROR_GOAL_OFFSET 0.05f//hyperparameter
+#define ERROR_GOAL_OFFSET 0.02f//hyperparameter
 
 #define BALLPREVISION_MINVELOCITY 0.02f
 #define BALLPREVISION_VELOCITY_FACTOR 3.0f
@@ -50,10 +50,10 @@ void Behaviour_Barrier::configure(){
 
 void Behaviour_Barrier::run(){
     Position goalProjection;
-
+    Position projectedBall = loc()->ball();
+    goalProjection.setUnknown();
     //considering ball velocity to define player position
     if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
-        Position projectedBall;
         //calc unitary vector of velocity
         const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
 
@@ -66,15 +66,15 @@ void Behaviour_Barrier::run(){
         Position projectedPos(true, loc()->ball().x()+delta.x(), loc()->ball().y()+delta.y(), 0.0);
         projectedBall = projectedPos;
 
-        goalProjection = WR::Utils::hasInterceptionSegments(loc()->ball(), projectedBall, loc()->ourGoalRightMidPost(), loc()->ourGoalLeftMidPost());
+        goalProjection = WR::Utils::hasInterceptionSegments(loc()->ball(), projectedBall, loc()->ourGoalRightPost(), loc()->ourGoalLeftPost());
     }
     //if interception isn't inside our defense area: consider only ball position
-    if(!(abs(goalProjection.y()) < loc()->fieldDefenseLength()/2.0f) || !goalProjection.isValid()){
-        goalProjection = WR::Utils::projectPointAtSegment(loc()->ourGoalRightMidPost(), loc()->ourGoalLeftMidPost(), loc()->ball());
+    if(!(abs(goalProjection.y()) < loc()->fieldDefenseLength()/2.0f) || !goalProjection.isValid() || goalProjection.isUnknown()){
+        goalProjection = WR::Utils::projectPointAtSegment(loc()->ourGoalRightPost(), loc()->ourGoalLeftPost(), loc()->ball());
     }
 
     //Pos barrier
-    Position desiredPosition = WR::Utils::threePoints(goalProjection, loc()->ball(), _radius, 0.0f);
+    Position desiredPosition = WR::Utils::threePoints(goalProjection, projectedBall, _radius, 0.0f);
 
     // Position to look
     //Position aimPosition = WR::Utils::threePoints(loc()->ourGoal(), loc()->ball(), 1000.0f, 0.0); // high distance (always will look)
@@ -87,21 +87,22 @@ void Behaviour_Barrier::run(){
     }
 
     //if ball is inside our defense area (function isInsideOurArea doesn't consider the area inside the goal)
-    if(fabs(loc()->ball().x()) > (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && fabs(loc()->ball().y()) < loc()->fieldDefenseLength()/2.0f && loc()->isInsideOurField(loc()->ball())){
-        desiredPosition = projectPosOutsideGoalArea(loc()->ball(), true, false);
+    if(fabs(desiredPosition.x()) > (loc()->fieldMaxX() - loc()->fieldDefenseWidth()) && fabs(desiredPosition.y()) < loc()->fieldDefenseLength()/2.0f && loc()->isInsideOurField(desiredPosition)){
+        desiredPosition = projectPosOutsideGoalArea(desiredPosition, true, false);
     }
 
     //setting goto
     _sk_goto->setGoToPos(desiredPosition);
     _sk_goto->setAvoidOurGoalArea(true);
-    _sk_goto->setGoToVelocityFactor(2.0f);
-    //adjusting velocity factor according to: ball distance to our goal and ball velocity
-    /*float velFacDist = 1 - (loc()->distBallOurGoal()/WR::Utils::distance(loc()->fieldLeftTopCorner(), Position(true, loc()->fieldMaxX(), 0.0f, 0.0f)));
-    float velFacVel = (loc()->ballVelocity().abs())/15.0f;
-    float velFac = (velFacDist + velFacVel) * 16.0f;
-    if(velFac < 4.0f) velFac = 4.0f;
-    if(!isnanf(velFac)) _sk_goto->setGoToVelocityFactor(velFac);
-    else _sk_goto->setGoToVelocityFactor(10.0f);*/
+    //setting skill goTo velocity factor
+    _sk_goto->setMinVelocity(0.7f);
+    float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(desiredPosition)) / (WR::Utils::distance(loc()->ball(), projectedBall));
+    WR::Utils::limitValue(&velocityNeeded, 2.0f, 5.0f);
+    if(!isnanf(velocityNeeded)){
+        _sk_goto->setGoToVelocityFactor(velocityNeeded);
+    }else{
+        _sk_goto->setGoToVelocityFactor(2.0f);
+    }
 
     //setting intercept
     float multFactor = 1.0;
