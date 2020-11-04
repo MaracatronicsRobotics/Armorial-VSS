@@ -213,9 +213,8 @@ float VSSPlayer::getRotateSpeed(float angleRobotToTarget){
         }
     }
 
-    //float angleToTarget = angleRobotToTarget + ori;
-    float speed = 5.0f *  angleRobotToTarget;
-    //float speed = _vwPID->calculate(angleToTarget, ori);
+    float angleToTarget = angleRobotToTarget + ori;
+    float speed = _vwPID->calculate(angleToTarget, ori);
 
     return speed;
 }
