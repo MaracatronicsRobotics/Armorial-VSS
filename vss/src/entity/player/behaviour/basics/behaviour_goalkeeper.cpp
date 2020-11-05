@@ -20,7 +20,7 @@
  ***/
 
 #include "behaviour_goalkeeper.h"
-
+#define GOAL_OFFSET 0.01f
 QString Behaviour_Goalkeeper::name() {
     return "Behaviour_Goalkeeper";
 }
@@ -56,10 +56,36 @@ void Behaviour_Goalkeeper::configure() {
 }
 
 void Behaviour_Goalkeeper::run() {
+    std::cout << "Velocidade " << loc()->ballVelocity().y() << std::endl;
     const Position initialPosition = WR::Utils::threePoints(loc()->ourGoal(), loc()->fieldCenter(), 0.055f, 0.0f);
-    Position firstInterceptPoint(true, initialPosition.x(), -0.35f, 0.0f);
-    Position secondInterceptPoint(true, initialPosition.x(), 0.35f, 0.0f);
+        Position ProjectBallY;
+        if(loc()->ourSide().isLeft()){//limitar projeçao vertical as traves do gol
+            if(loc()->ball().y() <= loc()->ourGoalLeftPost().y()){
+                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() + GOAL_OFFSET , 0.0);
+            }
+            else if(loc()->ball().y() >= loc()->ourGoalRightPost().y()){
+                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() - GOAL_OFFSET, 0.0);
+            }
+            else{
+                ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
 
+            }
+        }
+        else{
+            if(loc()->ball().y() >= loc()->ourGoalLeftPost().y()){
+                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() - GOAL_OFFSET , 0.0);
+            }
+            else if(loc()->ball().y() <= loc()->ourGoalRightPost().y()){
+                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() + GOAL_OFFSET, 0.0);
+            }
+            else{
+                ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
+
+            }
+        }
+        //ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
+        Position firstInterceptPoint(true, ProjectBallY.x(), -0.35f, 0.0f);
+        Position secondInterceptPoint(true, ProjectBallY.x(), 0.35f, 0.0f);
     // GoTo setup
 
 
@@ -70,7 +96,7 @@ void Behaviour_Goalkeeper::run() {
     _sk_intercept->setDesiredVelocity(1.0f);
 
     if (!loc()->isInsideOurArea(player()->position()) || loc()->isInsideTheirField(loc()->ball())) {
-        _sk_goto->setGoToPos(initialPosition);
+        _sk_goto->setGoToPos(ProjectBallY);
         enableTransition(STATE_GOTO);
     }
     else if (loc()->isInsideOurArea(loc()->ball()) && loc()->ballVelocity().abs() < 0.0001f) {
@@ -131,8 +157,30 @@ void Behaviour_Goalkeeper::run() {
 
 bool Behaviour_Goalkeeper::setSpinDirection() {
     // true if clockwise, false otherwise
-    if (loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())
+    //caso original
+    /*if ((loc()->distBallOurRightPost() < loc()->distBallOurLeftPost()))
         return true;
     else
-        return false;
+        return false;*/
+
+    //problema: se a bola tiver em baixo do jogador mas perto do poste esquerdo,ele gira antihorario,q faz gol contra  , e o caso inverso tb
+    //nessa implementaçao ele entra quase sempre no caso normal mas em casos de bola cruzada , inverte a rotaçao para devolver pro campo
+    if((loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())){
+        if(loc()->ball().y() >= player()->position().y()){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    else{
+        if(loc()->ball().y() < player()->position().y()){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+
 }
