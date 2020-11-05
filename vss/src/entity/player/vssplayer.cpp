@@ -279,11 +279,11 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
     if(help < float(-M_PI)) help += 2.0f * float(M_PI);
 
     bool swapSpeed = false;
-    if(help > float(M_PI) / 2.0f){
+    if(help > float(M_PI) / 2.0f && (help - float(M_PI) / 2.0f) > float(M_PI) / 18.0f){
         help -= float(M_PI);
         swapSpeed = true;
     }
-    else if(help < float(-M_PI) / 2.0f){
+    else if(help < float(-M_PI) / 2.0f && (help + float(M_PI) / 2.0f) < -float(M_PI) / 18.0f){
         help += float(M_PI);
         swapSpeed = true;
     }
@@ -303,7 +303,11 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
     // Se escolheu o lado de trás, inverte o vx
     if(swapSpeed) vel *= -1;
 
-    float dist = WR::Utils::distance(position(), targetPosition);
+    float chord = distanceTo(targetPosition);
+    float referenceAngle = getRotateAngle(targetPosition);
+    float internalAngle = Angle::pi / 2 - referenceAngle;
+    float angularSignal = referenceAngle / abs(help);
+    float spinRadius = chord / (2 * cosf(internalAngle));
 
     /*
     //Vel_teste = 1.0f;
@@ -354,9 +358,16 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
     float L = 0.075f;
     float r = 0.0325f;
     float velLinear = velocityFactor * vel;
-    float velAngular = rotateSpeed;
+    float velAngular = velLinear / spinRadius;
+    //if (chord < 0.01f) velLinear = 0.0f;
+    //if (chord < 0.05f) velAngular = 0.0f;
     float wr = ((2.0f * velLinear) + (L * velAngular)) / (2.0f * r);
     float wl = wr - ((L * velAngular) / r);
+    if (swapSpeed) {
+        float fon = wr;
+        wr = wl;
+        wl = fon;
+    }
 
     setSpeed(wl, wr);
 }
