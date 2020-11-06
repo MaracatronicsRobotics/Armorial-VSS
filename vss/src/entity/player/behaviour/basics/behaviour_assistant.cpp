@@ -307,13 +307,13 @@ Position Behaviour_Assistant::projectPosOutsideGoalArea(Position pos, bool avoid
         }
     }
 
-    if(pos.x() < loc()->fieldMinX()){
+    if(pos.x() < loc()->fieldMinX() && (abs(pos.y()) >= loc()->fieldDefenseLength()/2)){
         if(fabs(pos.y()) <= loc()->fieldMaxY()){
             pos.setPosition(loc()->fieldMinX() + distFromWall, pos.y(), pos.z());
         }
     }
 
-    else if(pos.x() > loc()->fieldMaxX()){
+    else if(pos.x() > loc()->fieldMaxX() && (abs(pos.y()) >= loc()->fieldDefenseLength()/2)){
         if(fabs(pos.y()) <= loc()->fieldMaxY()){
             pos.setPosition(loc()->fieldMaxX() - distFromWall, pos.y(), pos.z());
         }
