@@ -33,6 +33,25 @@ void Skill_PushBall::run(){
 }
 
 void Skill_PushBall::setSpeedAndOmega(float speed, float omega){
-    _speed = speed;
-    _omega = omega;
+    // equações pra transformar em vr e vl
+    /*
+     * Onde:
+     * L       = distancia entre as rodas
+     * r       = raio da roda
+     * VLinear = vx desejada
+     * w       = velocidade angular desejada
+     *
+     * (2 * VLinear)/r = Wr + Wl
+     * (w * L)/r       = Wr - Wl
+     * Wr              = (2 * Vlin + w * L)/(2 * r)
+     * Wl              = Wr - (w * L) / r
+    */
+    float L = 0.075f;
+    float r = 0.0325f;
+
+    float wr = ((2.0f * speed) + (L * omega)) / (2.0f * r);
+    float wl = wr - ((L * omega) / r);
+
+    _speed = wl;
+    _omega = wr;
 }

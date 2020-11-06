@@ -33,6 +33,7 @@ private:
     Behaviour_Goalkeeper *_bh_gk;
     Behaviour_Assistant *_bh_as;
     Behaviour_Attacker *_bh_at;
+    Behaviour_Barrier *_bh_bar;
 
     // Behaviours ids!
     enum{
@@ -40,7 +41,8 @@ private:
         BHV_PUSHBALL,
         BHV_GK,
         BHV_ASSISTANT,
-        BHV_ATTACKER
+        BHV_ATTACKER,
+        BHV_BARRIER
     };
 
     // Inherited functions

@@ -35,6 +35,7 @@ void Role_Halt::initializeBehaviours(){
     usesBehaviour(BHV_GK, _bh_gk = new Behaviour_Goalkeeper());
     usesBehaviour(BHV_ASSISTANT, _bh_as = new Behaviour_Assistant());
     usesBehaviour(BHV_ATTACKER, _bh_at = new Behaviour_Attacker());
+    usesBehaviour(BHV_BARRIER,_bh_bar = new Behaviour_Barrier());
 }
 
 void Role_Halt::configure(){
@@ -42,11 +43,12 @@ void Role_Halt::configure(){
 }
 
 void Role_Halt::run(){
-    //setBehaviour(BHV_ATTACKER);
+    setBehaviour(BHV_ATTACKER);
     //setBehaviour(BHV_ASSISTANT);
-    setBehaviour(BHV_DONOTHING);
+    //setBehaviour(BHV_DONOTHING);
     //setBehaviour(BHV_PUSHBALL);
     //setBehaviour(BHV_GK);
+    //setBehaviour(BHV_BARRIER);
 }
 
 void Role_Halt::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor){
