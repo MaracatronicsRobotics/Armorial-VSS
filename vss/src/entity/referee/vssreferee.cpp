@@ -32,7 +32,7 @@ bool VSSReferee::connect(){
     _refereeSocket = new QUdpSocket();
 
     // Performing connection to send receive referee data
-    if(_refereeSocket->bind(QHostAddress::AnyIPv4, static_cast<quint16>(VSSConstants::refereePort()), QUdpSocket::ShareAddress) == false){
+    if(_refereeSocket->bind(QHostAddress(VSSConstants::refereeAddress()), static_cast<quint16>(VSSConstants::refereePort()), QUdpSocket::ShareAddress) == false){
         std::cout << "[ERROR] VSSReferee bind error =(" << std::endl;
         return false;
     }
