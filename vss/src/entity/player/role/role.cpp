@@ -70,6 +70,7 @@ void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc, VSSR
 
     //Initializa Global Behaviours
    _bh_gb = new Behaviour_GoBack();
+   _bh_dn = new Behaviour_DoNothing();
    _retreated = true;
 
     // Initialize
@@ -87,31 +88,40 @@ void Role::runRole(){
         return ;
     }
 
-    if(!canMove() || !_retreated){
-        if(_bh_gb->isInitialized() == false)
-            _bh_gb->initialize(_loc);
+    if(!ref()->isGameOn()){
+        if(_bh_dn->isInitialized() == false)
+            _bh_dn->initialize(_loc);
 
-        // Configure
-        if(_wall) _bh_gb->setWall(true);
-        else _bh_gb->setWall(false);
-        _bh_gb->setPlayer(_player, _playerAccess);
-        _bh_gb->runBehaviour();
+        _bh_dn->setPlayer(_player, _playerAccess);
+        _bh_dn->runBehaviour();
+    }
+    else{
+        if(!canMove() || !_retreated){
+            if(_bh_gb->isInitialized() == false)
+                _bh_gb->initialize(_loc);
 
-        if(_retreated){
-            _bh_gb->setStart(true);
+            // Configure
+            if(_wall) _bh_gb->setWall(true);
+            else _bh_gb->setWall(false);
+            _bh_gb->setPlayer(_player, _playerAccess);
+            _bh_gb->runBehaviour();
+
+            if(_retreated){
+                _bh_gb->setStart(true);
+            }
+            _retreated = _bh_gb->getDone();
+
+        } else if (_retreated){
+            // Run role (child)
+            run();
+
+            // Run Behaviour
+            if(_behaviour->isInitialized() == false){
+                _behaviour->initialize(_loc);
+            }
+            _behaviour->setPlayer(_player, _playerAccess);
+            _behaviour->runBehaviour();
         }
-        _retreated = _bh_gb->getDone();
-
-    } else if (_retreated){
-        // Run role (child)
-        run();
-
-        // Run Behaviour
-        if(_behaviour->isInitialized() == false){
-            _behaviour->initialize(_loc);
-        }
-        _behaviour->setPlayer(_player, _playerAccess);
-        _behaviour->runBehaviour();
     }
 }
 

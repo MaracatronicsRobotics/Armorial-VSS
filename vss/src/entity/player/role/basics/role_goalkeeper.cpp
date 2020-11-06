@@ -42,6 +42,6 @@ void Role_Goalkeeper::run(){
 }
 
 void Role_Goalkeeper::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor){
-    if(isInitialized())
+    if(isInitialized() && player() != NULL)
         emit emitPosition(player()->playerId(), Position(true, 0.0, 0.0, 0.0), Angle(true, 0.0));
 }

@@ -29,7 +29,7 @@ Skill_DoNothing::Skill_DoNothing() {
 }
 
 void Skill_DoNothing::run() {
-    //player()->idle();
+    player()->idle();
     //player()->goTo(player()->position());
     //std::cout << player()->getRotateAngle(player()->position()) << std::endl;
 }

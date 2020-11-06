@@ -63,17 +63,17 @@ void Playbook::runPlaybook(QString strategyState) {
         _configureEnabled = true;
         configure(_lastNumPlayers);
         _configureEnabled = false;
-    }
 
-    // Connect roles with ref
-    for(int i = 0; i < _rolesList.size(); i++){
-        qRegisterMetaType< VSSRef::Foul >("VSSRef::Foul");
-        qRegisterMetaType< VSSRef::Quadrant >("VSSRef::Quadrant");
-        qRegisterMetaType< VSSRef::Color >("VSSRef::Color");
-        qRegisterMetaType< Position >("Position");
-        qRegisterMetaType< Angle >("Angle");
-        connect(_referee, SIGNAL(emitFoul(VSSRef::Foul, VSSRef::Quadrant, VSSRef::Color)), _rolesList.at(i), SLOT(receiveFoul(VSSRef::Foul, VSSRef::Quadrant, VSSRef::Color)), Qt::DirectConnection);
-        connect(_rolesList.at(i), SIGNAL(emitPosition(quint8, Position, Angle)), _referee, SLOT(receivePosition(quint8, Position, Angle)));
+        // Connect roles with ref
+        for(int i = 0; i < _rolesList.size(); i++){
+            qRegisterMetaType< VSSRef::Foul >("VSSRef::Foul");
+            qRegisterMetaType< VSSRef::Quadrant >("VSSRef::Quadrant");
+            qRegisterMetaType< VSSRef::Color >("VSSRef::Color");
+            qRegisterMetaType< Position >("Position");
+            qRegisterMetaType< Angle >("Angle");
+            connect(_referee, SIGNAL(emitFoul(VSSRef::Foul, VSSRef::Quadrant, VSSRef::Color)), _rolesList.at(i), SLOT(receiveFoul(VSSRef::Foul, VSSRef::Quadrant, VSSRef::Color)), Qt::DirectConnection);
+            connect(_rolesList.at(i), SIGNAL(emitPosition(quint8, Position, Angle)), _referee, SLOT(receivePosition(quint8, Position, Angle)));
+        }
     }
 
     // Ensure assignment table has only assignments of players that are in this playbook
@@ -119,8 +119,11 @@ void Playbook::updatePlayersRoles() {
 }
 
 void Playbook::setCurrRolesToOld() {
-    while(!_rolesList.isEmpty())
+    while(!_rolesList.isEmpty()){
         _oldRoles.push_back(_rolesList.takeFirst());
+    }
+
+    clearOldRoles();
 }
 
 void Playbook::clearOldRoles() {

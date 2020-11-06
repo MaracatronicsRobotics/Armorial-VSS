@@ -29,24 +29,8 @@ class Behaviour_DoNothing : public Behaviour {
 private:
     void configure();
     void run();
-    int _state;
 
-    enum {
-        STATE_GOTO ,
-        STATE_ROTATETO,
-        STATE_PUSHBALL,
-        STATE_SPIN
-    };
-
-    Skill_GoTo *_sk_goTo;
-    Skill_RotateTo *_sk_rotate;
-    Skill_InterceptBall *_sk_interceptBall;
     Skill_DoNothing *_sk_doNothing;
-    Skill_PushBall *_sk_push;
-
-    // Auxiliary Functions
-    bool isInsideDashArea();
-    float rotateToBall();
 
 public:
     Behaviour_DoNothing();

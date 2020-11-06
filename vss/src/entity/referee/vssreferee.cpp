@@ -177,7 +177,6 @@ void VSSReferee::placeReceivedPackets(){
     placementFrame->set_teamcolor((_ourTeam->teamColor() == Colors::BLUE) ? VSSRef::Color::BLUE : VSSRef::Color::YELLOW);
 
     for(int i = 0; i < 5; i++){
-        _positionMutex.lockForRead();
         if(_desiredMark[i]){
             VSSRef::Robot *robot = placementFrame->add_robots();
             robot->set_robot_id(static_cast<quint32>(i));
@@ -187,7 +186,6 @@ void VSSReferee::placeReceivedPackets(){
 
             _desiredMark[i] = false;
         }
-        _positionMutex.unlock();
     }
 
     // Setting frame in command
@@ -202,11 +200,7 @@ void VSSReferee::placeReceivedPackets(){
 }
 
 void VSSReferee::receivePosition(quint8 playerId, Position desiredPosition, Angle desiredOrientation){
-    _positionMutex.lockForWrite();
-
     _desiredPlacement[playerId].first = desiredPosition;
     _desiredPlacement[playerId].second = desiredOrientation;
     _desiredMark[playerId] = true;
-
-    _positionMutex.unlock();
 }

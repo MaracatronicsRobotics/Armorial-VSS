@@ -64,6 +64,7 @@ public:
 
     // Global behaviours
     Behaviour_GoBack *_bh_gb;
+    Behaviour_DoNothing *_bh_dn;
     bool _retreated;
 
 protected:

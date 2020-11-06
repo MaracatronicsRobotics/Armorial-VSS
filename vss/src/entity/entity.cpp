@@ -36,7 +36,7 @@ Entity::Entity(EntityType type) {
 void Entity::run() {
     initialization();
     Timer t;
-    while(isRunning())    {
+    while(isRunning()){
         t.start();
         if(isEnabled())
             loop();

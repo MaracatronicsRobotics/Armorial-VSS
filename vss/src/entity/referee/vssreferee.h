@@ -46,7 +46,6 @@ private:
 
     std::pair<Position, Angle> _desiredPlacement[5];
     Timer _timer;
-    QReadWriteLock _positionMutex;
     bool _enableTimer;
     bool _desiredMark[5];
 
