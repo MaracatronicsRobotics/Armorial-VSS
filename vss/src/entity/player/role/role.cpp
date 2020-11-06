@@ -78,6 +78,7 @@ void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc, VSSR
 
     counter = 0;
     canGoBack = false;
+    _goBack = false;
 }
 
 void Role::setPlayer(VSSPlayer *player, PlayerAccess *playerAccess){
@@ -122,9 +123,9 @@ void Role::runRole(){
         }
         _retreated = _bh_gb->getDone();
 
-        } else if (_retreated){
-            // Run role (child)
-            run();
+    } else {
+        // Run role (child)
+        run();
 
             // Run Behaviour
             if(_behaviour->isInitialized() == false){

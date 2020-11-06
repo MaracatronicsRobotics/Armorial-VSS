@@ -46,7 +46,7 @@ void Role_Halt::run(){
     //setBehaviour(BHV_ASSISTANT);
     setBehaviour(BHV_DONOTHING);
     //setBehaviour(BHV_PUSHBALL);
-    setBehaviour(BHV_GK);
+    //setBehaviour(BHV_GK);
 }
 
 void Role_Halt::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor){
