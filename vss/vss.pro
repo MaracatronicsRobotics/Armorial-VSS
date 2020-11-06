@@ -63,6 +63,7 @@ SOURCES += \
         src/entity/player/behaviour/basics/behaviour_goback.cpp \
         src/entity/player/behaviour/basics/behaviour_pushball.cpp \
         src/entity/player/behaviour/basics/behaviour_stayback.cpp \
+    src/entity/player/behaviour/basics/behaviour_takefoul.cpp \
         src/entity/player/behaviour/behaviour.cpp \
         src/entity/player/control/pid.cpp \
         src/entity/player/navigation/fana.cpp \
@@ -155,6 +156,7 @@ HEADERS += \
     src/entity/player/behaviour/basics/behaviour_goback.h \
     src/entity/player/behaviour/basics/behaviour_pushball.h \
     src/entity/player/behaviour/basics/behaviour_stayback.h \
+    src/entity/player/behaviour/basics/behaviour_takefoul.h \
     src/entity/player/behaviour/behaviour.h \
     src/entity/player/behaviour/vssbehaviours.h \
     src/entity/player/control/pid.h \

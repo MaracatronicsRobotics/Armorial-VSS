@@ -85,11 +85,11 @@ void Playbook_Supporter::run(int numPlayers) {
     }
 
     // Setting supporter
-    _rl_supporter.at(_assistantId)->_positioning = 1;
+    _rl_supporter.at(_assistantId)->setPositioning(1);
     setPlayerRole(_assistantId, _rl_supporter.at(_assistantId));
 
     // Setting barrier
-    _rl_supporter.at(_barrierId)->_positioning = 0;
+    _rl_supporter.at(_barrierId)->setPositioning(0);
     setPlayerRole(_barrierId, _rl_supporter.at(_barrierId));
 
     // Setting GK

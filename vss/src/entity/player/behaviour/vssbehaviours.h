@@ -10,5 +10,6 @@
 #include <src/entity/player/behaviour/basics/behaviour_stayback.h>
 #include <src/entity/player/behaviour/basics/behaviour_attacker.h>
 #include <src/entity/player/behaviour/basics/behaviour_goback.h>
+#include <src/entity/player/behaviour/basics/behaviour_takefoul.h>
 
 #endif // VSSBEHAVIOURS_H

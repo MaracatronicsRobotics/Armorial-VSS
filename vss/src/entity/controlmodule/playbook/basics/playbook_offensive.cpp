@@ -53,6 +53,6 @@ void Playbook_Offensive::run(int numPlayers) {
     }
 
     setPlayerRole(strikerId, _rl_str);
-    _rl_sup->_positioning = 0;
+    _rl_sup->setPositioning(0);
     setPlayerRole(supporterId, _rl_sup);
 }
