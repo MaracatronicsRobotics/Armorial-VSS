@@ -8,7 +8,6 @@ VSSReferee::VSSReferee(VSSTeam *ourTeam) : Entity(ENT_REFEREE)
 {
     // Creating and connecting to network
     _replacerSocket = new QUdpSocket();
-    _client = new VSSClient(VSSConstants::refereePort(), VSSConstants::refereeAddress().toStdString());
 
     // Setting our team
     _ourTeam = ourTeam;
@@ -116,11 +115,14 @@ bool VSSReferee::isGameOn(){
 }
 
 void VSSReferee::finalization(){
-    // Closing client and socket
-    _client->close();
+    // Closing sockets
 
     if(_replacerSocket->isOpen()){
         _replacerSocket->close();
+    }
+
+    if(_refereeSocket->isOpen()){
+        _refereeSocket->close();
     }
 
     std::cout << "[VSSReferee] Thread ended." << std::endl;

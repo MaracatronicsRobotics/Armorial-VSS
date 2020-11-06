@@ -52,7 +52,6 @@ private:
 
     // Socket
     QUdpSocket *_replacerSocket;
-    VSSClient *_client;
     QUdpSocket *_refereeSocket;
 
 signals:
