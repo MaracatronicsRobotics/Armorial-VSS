@@ -47,13 +47,13 @@ bool VSS::start(){
     // Create World
     _world = new World(_ctr, new Fields::VSSField());
 
-    // Setup Referee
-    _ref = new VSSReferee(_ourTeam);
-    _world->addEntity(_ref, 3);
-
     // Setup teams in world
     setupTeams(opTeamId, opTeamColor, opTeamSide);
     _world->setTeams(_ourTeam, _opTeam);
+
+    // Setup Referee
+    _ref = new VSSReferee(_ourTeam);
+    _world->addEntity(_ref, 3);
 
     // Setup players to team
     setupOurPlayers();
