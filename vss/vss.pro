@@ -24,6 +24,7 @@ QT += core \
 DEFINES += QT_DEPRECATED_WARNINGS
 LIBS *= -lprotobuf -lGLU -pthread -lGEARSystem -lomniORB4 -lomnithread -lQt5Core -lpthread
 
+system(echo "compiling protobuf" && cd include/protobuf/vssreferee && protoc --cpp_out=../../ *.proto && cd ../../..)
 
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.

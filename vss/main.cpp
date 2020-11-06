@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument("teamColor", "Sets the team color ('yellow' or 'blue', default='yellow').");
-    parser.addPositionalArgument("fieldSide", "Sets the field side ('right' or 'left', default='right').");
     parser.process(app);
     QStringList args = parser.positionalArguments();
 
@@ -68,6 +67,8 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
     }
+
+    /* this won't be needed for now
     // Field side
     if(args.size() >= 2) {
         bool valid;
@@ -78,8 +79,10 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
     }
+    */
 
     ourTeamId = (ourTeamColor == Colors::YELLOW) ? 0 : 1;
+    ourFieldSide = (ourTeamColor == Colors::YELLOW) ? Sides::RIGHT : Sides::LEFT;
 
     // Setup ExitHandler
     ExitHandler::setApplication(&app);

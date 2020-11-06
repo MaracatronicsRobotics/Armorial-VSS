@@ -51,6 +51,11 @@ compile_commands.json
 # QtCreator local machine specific files for imported projects
 *creator.user*
 
+# Protobuf and Qt User files
+*.user
+*.pb.h
+*.pb.cc
+
 # Dirs
 bin/
 build/
