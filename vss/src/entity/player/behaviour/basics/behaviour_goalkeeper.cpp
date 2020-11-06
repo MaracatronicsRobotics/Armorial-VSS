@@ -58,10 +58,11 @@ void Behaviour_Goalkeeper::configure() {
 }
 
 void Behaviour_Goalkeeper::run() {
-    std::cout << "Velocidade " << loc()->ballVelocity().y() << std::endl;
     const Position initialPosition = WR::Utils::threePoints(loc()->ourGoal(), loc()->fieldCenter(), 0.055f, 0.0f);
     Position ProjectBallY;
-    if(loc()->ourSide().isLeft()){//limitar projeçao vertical as traves do gol
+
+    // Permitir o acompanhamento da bola, limitando até a projeção vertical das traves do gol
+    if(loc()->ourSide().isLeft()){
         if(loc()->ball().y() <= loc()->ourGoalLeftPost().y()){
             ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() + GOAL_OFFSET , 0.0);
         }
@@ -72,8 +73,7 @@ void Behaviour_Goalkeeper::run() {
             ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
 
         }
-    }
-    else{
+    } else {
         if(loc()->ball().y() >= loc()->ourGoalLeftPost().y()){
             ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() - GOAL_OFFSET , 0.0);
         }
@@ -86,7 +86,6 @@ void Behaviour_Goalkeeper::run() {
         }
     }
 
-    //ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
     Position firstInterceptPoint(true, ProjectBallY.x(), -0.35f, 0.0f);
     Position secondInterceptPoint(true, ProjectBallY.x(), 0.35f, 0.0f);
 
