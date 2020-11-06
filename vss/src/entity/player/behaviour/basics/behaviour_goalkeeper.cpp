@@ -20,7 +20,9 @@
  ***/
 
 #include "behaviour_goalkeeper.h"
+
 #define GOAL_OFFSET 0.01f
+
 QString Behaviour_Goalkeeper::name() {
     return "Behaviour_Goalkeeper";
 }
@@ -58,36 +60,35 @@ void Behaviour_Goalkeeper::configure() {
 void Behaviour_Goalkeeper::run() {
     std::cout << "Velocidade " << loc()->ballVelocity().y() << std::endl;
     const Position initialPosition = WR::Utils::threePoints(loc()->ourGoal(), loc()->fieldCenter(), 0.055f, 0.0f);
-        Position ProjectBallY;
-        if(loc()->ourSide().isLeft()){//limitar projeçao vertical as traves do gol
-            if(loc()->ball().y() <= loc()->ourGoalLeftPost().y()){
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() + GOAL_OFFSET , 0.0);
-            }
-            else if(loc()->ball().y() >= loc()->ourGoalRightPost().y()){
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() - GOAL_OFFSET, 0.0);
-            }
-            else{
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
-
-            }
+    Position ProjectBallY;
+    if(loc()->ourSide().isLeft()){//limitar projeçao vertical as traves do gol
+        if(loc()->ball().y() <= loc()->ourGoalLeftPost().y()){
+            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() + GOAL_OFFSET , 0.0);
+        }
+        else if(loc()->ball().y() >= loc()->ourGoalRightPost().y()){
+            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() - GOAL_OFFSET, 0.0);
         }
         else{
-            if(loc()->ball().y() >= loc()->ourGoalLeftPost().y()){
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() - GOAL_OFFSET , 0.0);
-            }
-            else if(loc()->ball().y() <= loc()->ourGoalRightPost().y()){
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() + GOAL_OFFSET, 0.0);
-            }
-            else{
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
+            ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
 
-            }
         }
-        //ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
-        Position firstInterceptPoint(true, ProjectBallY.x(), -0.35f, 0.0f);
-        Position secondInterceptPoint(true, ProjectBallY.x(), 0.35f, 0.0f);
-    // GoTo setup
+    }
+    else{
+        if(loc()->ball().y() >= loc()->ourGoalLeftPost().y()){
+            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() - GOAL_OFFSET , 0.0);
+        }
+        else if(loc()->ball().y() <= loc()->ourGoalRightPost().y()){
+            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() + GOAL_OFFSET, 0.0);
+        }
+        else{
+            ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
 
+        }
+    }
+
+    //ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
+    Position firstInterceptPoint(true, ProjectBallY.x(), -0.35f, 0.0f);
+    Position secondInterceptPoint(true, ProjectBallY.x(), 0.35f, 0.0f);
 
     // InterceptBall setup
     _sk_intercept->setInterceptSegment(firstInterceptPoint, secondInterceptPoint);
@@ -114,45 +115,6 @@ void Behaviour_Goalkeeper::run() {
             enableTransition(STATE_INTERCEPT);
         }
     }
-
-    /*switch(_state) {
-    case STATE_GOTO: {
-        if (abs(player()->position().x() - initialPosition.x()) < 0.08f) {
-            enableTransition(STATE_INTERCEPT);
-            _state = STATE_INTERCEPT;
-        }
-        std::cout << "Currently using Skill GoTo\n";
-        break; }
-
-    case STATE_INTERCEPT: {
-        Position interceptPosition = _sk_intercept->getIntercetPosition();
-        if (!(loc()->isInsideOurArea(player()->position()))) {
-            enableTransition(STATE_GOTO);
-            _state = STATE_GOTO;
-        }
-        //std::cout << "FON";
-        else if (player()->distanceTo(interceptPosition) < 0.1f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.2f) {
-            bool spinDirection = setSpinDirection();
-            _sk_spin->setClockWise(spinDirection);
-            enableTransition(STATE_SPIN);
-            _state = STATE_SPIN;
-        }
-        std::cout << "Currently using Skill InterceptBall\n";
-        break; }
-
-    case STATE_SPIN: {
-        if (!(loc()->isInsideOurArea(player()->position()))) {
-            enableTransition(STATE_GOTO);
-            _state = STATE_GOTO;
-        }
-        //std::cout << "FONZÃO";
-        else if (!loc()->isInsideOurArea(loc()->ball())) {
-            enableTransition(STATE_INTERCEPT);
-            _state = STATE_INTERCEPT;
-        }
-        std::cout << "Currently using Skill Spin\n";
-        break; }
-    }*/
 }
 
 bool Behaviour_Goalkeeper::setSpinDirection() {
@@ -166,39 +128,18 @@ bool Behaviour_Goalkeeper::setSpinDirection() {
     //problema: se a bola tiver em baixo do jogador mas perto do poste esquerdo,ele gira antihorario,q faz gol contra  , e o caso inverso tb
     //nessa implementaçao ele entra quase sempre no caso normal mas em casos de bola cruzada , inverte a rotaçao para devolver pro campo
     if(loc()->ourSide().isRight()){
-        if((loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())){
-            if(loc()->ball().y() >= player()->position().y()){
-                return false;
-            }
-            else{
-                return true;
-            }
+        if(loc()->ball().y() >= player()->position().y()){
+            return false;
         }
         else{
-            if(loc()->ball().y() < player()->position().y()){
-                return true;
-            }
-            else{
-                return false;
-            }
+            return true;
         }
-    }
-    else{
-        if((loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())){
-            if(loc()->ball().y() >= player()->position().y()){
-                return true;
-            }
-            else{
-                return false;
-            }
+    } else {
+        if(loc()->ball().y() >= player()->position().y()){
+            return true;
         }
         else{
-            if(loc()->ball().y() < player()->position().y()){
-                return false;
-            }
-            else{
-                return true;
-            }
+            return false;
         }
     }
 }
