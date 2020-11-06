@@ -120,6 +120,7 @@ void Playbook::updatePlayersRoles() {
 
 void Playbook::setCurrRolesToOld() {
     while(!_rolesList.isEmpty()){
+        _rolesList.takeFirst()->setPlayer(NULL, NULL);
         _oldRoles.push_back(_rolesList.takeFirst());
     }
 
