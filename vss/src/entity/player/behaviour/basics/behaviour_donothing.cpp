@@ -30,6 +30,7 @@ Behaviour_DoNothing::Behaviour_DoNothing() {
 
 void Behaviour_DoNothing::configure() {
     usesSkill(_sk_doNothing = new Skill_DoNothing());
+    setInitialSkill(_sk_doNothing);
 };
 
 void Behaviour_DoNothing::run() {
