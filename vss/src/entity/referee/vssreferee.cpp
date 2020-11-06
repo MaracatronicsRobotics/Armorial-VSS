@@ -11,6 +11,9 @@ VSSReferee::VSSReferee(VSSTeam *ourTeam) : Entity(ENT_REFEREE)
 
     // Setting our team
     _ourTeam = ourTeam;
+
+    // Start var
+    _receivedAtLeastOne = false;
 }
 
 bool VSSReferee::connect(){
@@ -58,7 +61,7 @@ void VSSReferee::loop(){
     if(_enableTimer){
         _timer.stop();
         // wait for 2s to pos all
-        if(_timer.timesec() >= 2.0){
+        if(_timer.timesec() >= 2.0 && _receivedAtLeastOne){
             placeReceivedPackets();
 
             // Reseting
@@ -92,6 +95,7 @@ void VSSReferee::loop(){
         if(!isStop() && !isGameOn()){
             _enableTimer = true;
             _timer.start();
+            _receivedAtLeastOne = false;
 
             emit emitFoul(command.foul(), command.foulquadrant(), command.teamcolor());
         }
@@ -200,6 +204,8 @@ void VSSReferee::placeReceivedPackets(){
 }
 
 void VSSReferee::receivePosition(quint8 playerId, Position desiredPosition, Angle desiredOrientation){
+    if(!_receivedAtLeastOne) _receivedAtLeastOne = true;
+
     _desiredPlacement[playerId].first = desiredPosition;
     _desiredPlacement[playerId].second = desiredOrientation;
     _desiredMark[playerId] = true;

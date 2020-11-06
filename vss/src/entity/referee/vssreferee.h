@@ -48,6 +48,7 @@ private:
     Timer _timer;
     bool _enableTimer;
     bool _desiredMark[5];
+    bool _receivedAtLeastOne;
 
     // Socket
     QUdpSocket *_replacerSocket;
