@@ -61,6 +61,10 @@ int main(int argc, char *argv[])
     parser.addVersionOption();
     parser.addPositionalArgument("teamColor", "Sets the team color ('yellow' or 'blue', default='yellow').");
     parser.addPositionalArgument("enableGui", "Sets if the GUI will open or not ('true' or 'false', default='true'.");
+    parser.addPositionalArgument("refAddress", "Sets the referee multicast address. default = '224.5.23.2'");
+    parser.addPositionalArgument("refPort", "Sets the referee multicast port. default = '10003'");
+    parser.addPositionalArgument("repAddress", "Sets the replacer address. default = '127.0.0.1'");
+    parser.addPositionalArgument("repPort", "Sets the replacer port. default = '10004'");
     parser.process(app);
     QStringList args = parser.positionalArguments();
 
@@ -69,6 +73,12 @@ int main(int argc, char *argv[])
     Colors::Color ourTeamColor = Colors::YELLOW;
     FieldSide ourFieldSide = Sides::RIGHT;
     bool enableGUI = true;
+
+    QString refereeAddress = "224.5.23.2";
+    int refereePort = 10003;
+
+    QString replacerAddress = "127.0.0.1";
+    int replacerPort = 10004;
 
     /// Check arguments
     // Team color
@@ -91,6 +101,26 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
     }
+
+    /* parsing referee address and ports */
+    if(args.size() >= 3){
+        refereeAddress = args.at(2);
+    }
+
+    if(args.size() >= 4){
+        refereePort = args.at(3).toInt();
+    }
+
+    if(args.size() >= 5){
+        replacerAddress = args.at(4);
+    }
+
+    if(args.size() >= 6){
+        replacerPort = args.at(5).toInt();
+    }
+
+    VSSConstants::setRefereeInfo(&refereeAddress, &refereePort);
+    VSSConstants::setReplacerInfo(&replacerAddress, &replacerPort);
 
     /* this won't be needed for now
     // Field side

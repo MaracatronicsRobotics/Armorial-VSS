@@ -24,8 +24,8 @@ bool VSSReferee::connect(){
         _replacerSocket->close();
     }
 
-    _replacerSocket->connectToHost(VSSConstants::refereeAddress(), static_cast<quint16>(VSSConstants::replacerPort()), QIODevice::WriteOnly, QAbstractSocket::IPv4Protocol);
-    std::cout << "[VSSReferee] Conected to REPLACER socket in port " << VSSConstants::replacerPort() << " and address " << VSSConstants::refereeAddress().toStdString() << std::endl;
+    _replacerSocket->connectToHost(VSSConstants::replacerAddress(), static_cast<quint16>(VSSConstants::replacerPort()), QIODevice::WriteOnly, QAbstractSocket::IPv4Protocol);
+    std::cout << "[VSSReferee] Conected to REPLACER socket in port " << VSSConstants::replacerPort() << " and address " << VSSConstants::replacerAddress().toStdString() << std::endl;
 
 
     /// Referee Socket
@@ -37,6 +37,8 @@ bool VSSReferee::connect(){
         std::cout << "[ERROR] VSSReferee bind error =(" << std::endl;
         return false;
     }
+
+    std::cout << "[VSSReferee] Conected to REFEREE socket in port " << VSSConstants::refereePort() << " and address " << VSSConstants::refereeAddress().toStdString() << std::endl;
 
     return 1;
 }
