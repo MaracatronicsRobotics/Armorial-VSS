@@ -123,10 +123,10 @@ bool Role_Supporter::ourTeamShouldTake(VSSRef::Color teamColor){
 
 void Role_Supporter::penaltyKick(Position* pos, Angle* ang){
     float defenseXabs = (loc()->fieldMaxX() - 0.18f), defenseYabs = 0.165f;
-    float takeXabs = (loc()->fieldMaxX()/2 - 0.15f), takeYabs = 0;
+    float takeXabs = (loc()->fieldMaxX()/2 - 0.2f), takeYabs = 0;
     float nearMiddleXabs = 0.2f;
 
-    //update isNormalGame variable (to false if foul is different from KICKOFF, STOP or GAME_ON)
+    //update isNormalGame variable (to false if foul is different from KICKOFF, STOP, GAME_ON or GOALKICK - because this role doesn't take this foul)
     isNormalGame = false;
     //update lastFoul variable (last foul different from GAME_ON, STOP or KICK_OFF)
     lastFoul = VSSRef::PENALTY_KICK;
@@ -258,7 +258,7 @@ void Role_Supporter::freeBall(Position *pos, Angle *ang, VSSRef::Quadrant quadra
     float defenseXabs = (loc()->fieldMaxX() - 0.18f), defenseYabs = 0.165f;
     float freeBallXabs = (loc()->fieldMaxX() - 0.375), freeBallYabs = (loc()->fieldMaxY() - 0.25f), freeBallOffset = 0.2f;
 
-    //update isNormalGame variable (to false if foul is different from KICKOFF, STOP or GAME_ON)
+    //update isNormalGame variable (to false if foul is different from KICKOFF, STOP, GAME_ON or GOALKICK - because this role doesn't take this foul)
     isNormalGame = true;
     //update lastFoul variable (last foul different from GAME_ON, STOP or KICK_OFF)
     lastFoul = VSSRef::FREE_BALL;
@@ -355,6 +355,42 @@ void Role_Supporter::freeBall(Position *pos, Angle *ang, VSSRef::Quadrant quadra
     }
 }
 
+void Role_Supporter::kickOff(Position *pos, Angle *ang){
+    float barrPosOffsetX = 0.25f, assistPosOffsetX = 0.25f;
+
+    //update isNormalGame variable (to false if foul is different from KICKOFF, STOP, GAME_ON or GOALKICK - because this role doesn't take this foul)
+    if(weTake) isNormalGame = true;
+    else isNormalGame = false;
+    //update lastFoul variable (last foul different from GAME_ON, STOP or KICK_OFF)
+    lastFoul = VSSRef::KICKOFF;
+    //set behaviour doNothing so our player doesn't move from position emmited
+    setBehaviour(BHV_DONOTHING);
+
+    if(_positioning == BARRIER_PREDOMINANT){
+        //if our side is right
+        if(loc()->ourSide().isRight()){
+            //barrier near our goal (in front of it)
+            *pos = Position(true, (loc()->fieldMaxX() - barrPosOffsetX), 0, 0);
+            *ang = Angle(true, Angle::pi);
+        }else{
+            //barrier near our goal (in front of it)
+            *pos = Position(true, (loc()->fieldMinX() + barrPosOffsetX), 0, 0);
+            *ang = Angle(true, 0);
+        }
+    }else{
+        //if our side is left
+        if(loc()->ourSide().isRight()){
+            //assistant near the middle of the field
+            *pos = Position(true, assistPosOffsetX, 0, 0);
+            *ang = Angle(true, Angle::pi);
+        }else{
+            //assistant near the middle of the field
+            *pos = Position(true, -1*assistPosOffsetX, 0, 0);
+            *ang = Angle(true, 0);
+        }
+    }
+}
+
 void Role_Supporter::gameOn(){
     if(!isNormalGame){
         canGoBackToNormalGame = false;
@@ -395,6 +431,11 @@ void Role_Supporter::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, V
         //FREE BALL
         else if(foul == VSSRef::FREE_BALL){
             freeBall(&pos, &ang, quadrant);
+            emit emitPosition(player()->playerId(), pos, ang);
+        }
+        //KICK OFF
+        else if(foul == VSSRef::KICKOFF){
+            kickOff(&pos, &ang);
             emit emitPosition(player()->playerId(), pos, ang);
         }
     }

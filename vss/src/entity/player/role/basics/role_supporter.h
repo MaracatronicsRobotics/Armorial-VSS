@@ -49,6 +49,7 @@ private:
     void goalKick(Position* pos, Angle* ang);
     void gameOn();
     void freeBall(Position* pos, Angle* ang, VSSRef::Quadrant quadrant);
+    void kickOff(Position* pos, Angle* ang);
 
     int lastFoul; //it can be FREE_KICK = 0, PENALTY_KICK = 1, GOAL_KICK = 2, FREE_BALL = 3, KICKOFF = 4
     bool isNormalGame, canGoBackToNormalGame;
