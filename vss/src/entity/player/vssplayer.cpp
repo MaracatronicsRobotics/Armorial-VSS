@@ -136,27 +136,6 @@ void VSSPlayer::setSpeed(float wl, float wr){
 }
 
 float VSSPlayer::getRotateAngle(Position targetPosition){
-    /*float robot_x, robot_y, angleOriginToRobot = angle().value();
-    robot_x = position().x();
-    robot_y = position().y();
-    // Define a velocidade angular do robô para visualizar a bola
-    float vectorRobotToTargetX = (targetPosition.x() - robot_x);
-    float vectorRobotToTargetY = (targetPosition.y() - robot_y);
-    float modVectorRobotToTarget = sqrtf(powf(vectorRobotToTargetX, 2) + powf(vectorRobotToTargetY, 2));
-    if (modVectorRobotToTarget == 0.0f) return 0.0f;
-    vectorRobotToTargetX = vectorRobotToTargetX / modVectorRobotToTarget;
-    float angleOriginToTarget;   //Ângulo do robô entre o alvo e o eixo x do campo
-    float angleRobotToTarget;       //Ângulo do robô entre o alvo e o eixo x do robô
-    if(vectorRobotToTargetY < 0){ //terceiro e quarto quadrante
-        angleOriginToTarget = float(2*M_PI) - acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
-    }else{ //primeiro e segundo quadrante
-        angleOriginToTarget = acosf(vectorRobotToTargetX); //Ângulo do robô entre o alvo e o eixo x do campo
-    }
-    angleRobotToTarget = angleOriginToTarget - angleOriginToRobot;
-    if(angleRobotToTarget > float(M_PI)) angleRobotToTarget -= 2.0f * float(M_PI);
-    if(angleRobotToTarget < float(-M_PI)) angleRobotToTarget += 2.0f * float(M_PI);
-    return angleRobotToTarget;*/
-
     float rotateAngle = WR::Utils::getAngle(position(), targetPosition) - orientation().value();
 
     if(rotateAngle > float(M_PI)) rotateAngle -= 2.0f * float(M_PI);
@@ -293,7 +272,11 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
 
     //if (pathActivated) vel = a.second;
     //else vel = getVxToTarget(targetPosition);
-    vel = getVxToTarget(targetPosition);
+    if (velocityNeeded == 0.0f) {
+        vel = getVxToTarget(targetPosition);
+    } else {
+        vel = velocityNeeded;
+    }
 
     // Adjusting to minVel if lower
     if(vel <= minVel){
@@ -311,28 +294,28 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
 
     /*
     //Vel_teste = 1.0f;
-    if ( abs(help) > GEARSystem::Angle::toRadians(80)) {
+    if (abs(help) > GEARSystem::Angle::toRadians(75)) {
         setSpeed(0.0, rotateSpeed);
     } else {
         if(dist <= 0.1f){ // se estiver a 10cm ou menos do alvo
             if(abs(help) >= GEARSystem::Angle::toRadians(15)){ // se a diferença for maior que 15 deg
-                setSpeed(0.0f*k, rotateSpeed); // zera a linear e espera girar
+                setSpeed(0.0f, rotateSpeed); // zera a linear e espera girar
             }else{
-                setSpeed(Vel_teste * vel, rotateSpeed); // caso esteja de boa, gogo
+                setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
             }
         }
         else if(dist > 0.1f && dist <= 0.5f){ // se estiver entre 10cm a 50cm do alvo
             if(abs(help) >= GEARSystem::Angle::toRadians(25)){ // se a diferença for maior que 25 deg
-                setSpeed(Vel_teste * vel, Fr_factor*rotateSpeed); // linear * 0.3 e gira
+                setSpeed(0.3f * vel, rotateSpeed); // linear * 0.3 e gira
             }else{
-                setSpeed(Vel_teste * vel, rotateSpeed); // caso esteja de boa, gogo
+                setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
             }
         }
         else if(dist > 0.5f){ // se estiver a mais de 50cm do alvo
             if(abs(help) >= GEARSystem::Angle::toRadians(35)){ // se a diferença for maior que 35 deg
-                setSpeed(Vel_teste * vel, Fr_factor*rotateSpeed); // linear * 0.5 e gira
+                setSpeed(0.5f * vel, rotateSpeed); // linear * 0.5 e gira
             }else{
-                setSpeed(Vel_teste * vel, rotateSpeed); // caso esteja de boa, gogo
+                setSpeed(velocityFactor * vel, rotateSpeed); // caso esteja de boa, gogo
             }
         }
     }
