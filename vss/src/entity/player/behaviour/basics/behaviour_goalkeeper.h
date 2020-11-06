@@ -47,6 +47,7 @@ private:
 
     // Auxiliary Functions
     bool setSpinDirection();
+    float projectionToGoal();
 
 public:
     Behaviour_Goalkeeper();

@@ -56,33 +56,43 @@ void Behaviour_Goalkeeper::configure() {
 }
 
 void Behaviour_Goalkeeper::run() {
-    std::cout << "Velocidade " << loc()->ballVelocity().y() << std::endl;
+
+    float ballProj = projectionToGoal();
+
     const Position initialPosition = WR::Utils::threePoints(loc()->ourGoal(), loc()->fieldCenter(), 0.055f, 0.0f);
         Position ProjectBallY;
         if(loc()->ourSide().isLeft()){//limitar projeçao vertical as traves do gol
-            if(loc()->ball().y() <= loc()->ourGoalLeftPost().y()){
+            if(ballProj <= loc()->ourGoalLeftPost().y()){
                 ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() + GOAL_OFFSET , 0.0);
             }
-            else if(loc()->ball().y() >= loc()->ourGoalRightPost().y()){
+            else if(ballProj >= loc()->ourGoalRightPost().y()){
                 ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() - GOAL_OFFSET, 0.0);
             }
             else{
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
-
+                if(loc()->ballVelocity().x() < 0){
+                    ProjectBallY.setPosition(initialPosition.x(), ballProj, 0.0);
+                }else{
+                    ProjectBallY.setPosition(initialPosition.x(), loc()->ball().y(), 0.0);
+                }
             }
         }
         else{
-            if(loc()->ball().y() >= loc()->ourGoalLeftPost().y()){
+            if(ballProj >= loc()->ourGoalLeftPost().y()){
                 ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() - GOAL_OFFSET , 0.0);
             }
-            else if(loc()->ball().y() <= loc()->ourGoalRightPost().y()){
+            else if(ballProj <= loc()->ourGoalRightPost().y()){
                 ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() + GOAL_OFFSET, 0.0);
             }
             else{
-                ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
-
+                if(loc()->ballVelocity().x() > 0){
+                    ProjectBallY.setPosition(initialPosition.x(), ballProj, 0.0);
+                }else{
+                    ProjectBallY.setPosition(initialPosition.x(), loc()->ball().y(), 0.0);
+                }
             }
         }
+
+        std::cout << "ProjectBallY: " << ProjectBallY.y() << std::endl;
         //ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
         Position firstInterceptPoint(true, ProjectBallY.x(), -0.35f, 0.0f);
         Position secondInterceptPoint(true, ProjectBallY.x(), 0.35f, 0.0f);
@@ -106,7 +116,7 @@ void Behaviour_Goalkeeper::run() {
     }
     else {
         Position interceptPosition = _sk_intercept->getIntercetPosition();
-        if (player()->distanceTo(interceptPosition) < 0.05f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.1f) {
+        if (player()->distanceTo(interceptPosition) < 0.05f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.15f) {
             bool spinDirection = setSpinDirection();
             _sk_spin->setClockWise(spinDirection);
             enableTransition(STATE_SPIN);
@@ -153,6 +163,15 @@ void Behaviour_Goalkeeper::run() {
         std::cout << "Currently using Skill Spin\n";
         break; }
     }*/
+}
+
+float Behaviour_Goalkeeper::projectionToGoal(){
+    //y = ax + b
+    float a = loc()->ballVelocity().x()/loc()->ballVelocity().y();
+    float b = loc()->ball().y() - (a*loc()->ball().x());
+    float x = loc()->ourGoal().x();
+    float y = (a*x) + b;
+    return y;
 }
 
 bool Behaviour_Goalkeeper::setSpinDirection() {
