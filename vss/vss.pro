@@ -65,6 +65,7 @@ SOURCES += \
         src/entity/player/behaviour/basics/behaviour_stayback.cpp \
     src/entity/player/behaviour/basics/behaviour_takefoul.cpp \
         src/entity/player/behaviour/behaviour.cpp \
+    src/entity/player/control/newpid.cpp \
         src/entity/player/control/pid.cpp \
         src/entity/player/navigation/fana.cpp \
         src/entity/player/navigation/navalgorithm.cpp \
@@ -159,6 +160,7 @@ HEADERS += \
     src/entity/player/behaviour/basics/behaviour_takefoul.h \
     src/entity/player/behaviour/behaviour.h \
     src/entity/player/behaviour/vssbehaviours.h \
+    src/entity/player/control/newpid.h \
     src/entity/player/control/pid.h \
     src/entity/player/navigation/fana.h \
     src/entity/player/navigation/navalgorithm.h \
