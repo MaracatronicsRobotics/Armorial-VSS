@@ -165,22 +165,41 @@ bool Behaviour_Goalkeeper::setSpinDirection() {
 
     //problema: se a bola tiver em baixo do jogador mas perto do poste esquerdo,ele gira antihorario,q faz gol contra  , e o caso inverso tb
     //nessa implementaçao ele entra quase sempre no caso normal mas em casos de bola cruzada , inverte a rotaçao para devolver pro campo
-    if((loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())){
-        if(loc()->ball().y() >= player()->position().y()){
-            return false;
+    if(loc()->ourSide().isRight()){
+        if((loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())){
+            if(loc()->ball().y() >= player()->position().y()){
+                return false;
+            }
+            else{
+                return true;
+            }
         }
         else{
-            return true;
+            if(loc()->ball().y() < player()->position().y()){
+                return true;
+            }
+            else{
+                return false;
+            }
         }
     }
     else{
-        if(loc()->ball().y() < player()->position().y()){
-            return true;
+        if((loc()->distBallOurRightPost() < loc()->distBallOurLeftPost())){
+            if(loc()->ball().y() >= player()->position().y()){
+                return true;
+            }
+            else{
+                return false;
+            }
         }
         else{
-            return false;
+            if(loc()->ball().y() < player()->position().y()){
+                return false;
+            }
+            else{
+                return true;
+            }
         }
     }
-
-
 }
+
