@@ -4,13 +4,13 @@ QString VSSReferee::name(){
     return "VSSReferee";
 }
 
-VSSReferee::VSSReferee(VSSTeam *ourTeam) : Entity(ENT_REFEREE)
+VSSReferee::VSSReferee(Colors::Color ourColor) : Entity(ENT_REFEREE)
 {
     // Creating and connecting to network
     _replacerSocket = new QUdpSocket();
 
     // Setting our team
-    _ourTeam = ourTeam;
+    _ourColor = ourColor;
 
     // Start var
     _receivedAtLeastOne = false;
@@ -115,6 +115,8 @@ bool VSSReferee::isGameOn(){
     VSSRef::Foul command = _lastCommand;
     _commandMutex.unlock();
 
+    //std::cout << "comando: " << getFoulNameById(command).toStdString() << std::endl;
+
     return (command == VSSRef::Foul::GAME_ON);
 }
 
@@ -178,7 +180,7 @@ void VSSReferee::placeReceivedPackets(){
     // First creating an placement command
     VSSRef::team_to_ref::VSSRef_Placement placementCommand;
     VSSRef::Frame *placementFrame = new VSSRef::Frame();
-    placementFrame->set_teamcolor((_ourTeam->teamColor() == Colors::BLUE) ? VSSRef::Color::BLUE : VSSRef::Color::YELLOW);
+    placementFrame->set_teamcolor((_ourColor == Colors::BLUE) ? VSSRef::Color::BLUE : VSSRef::Color::YELLOW);
 
     for(int i = 0; i < 5; i++){
         if(_desiredMark[i]){

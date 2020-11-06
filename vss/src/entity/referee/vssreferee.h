@@ -11,7 +11,7 @@ class VSSReferee : public Entity
 {
     Q_OBJECT
 public:
-    VSSReferee(VSSTeam *ourTeam);
+    VSSReferee(Colors::Color ourColor);
 
     // Entity inherit
     QString name();
@@ -39,7 +39,7 @@ private:
     VSSRef::Foul _lastCommand;
 
     // Team
-    VSSTeam *_ourTeam;
+    Colors::Color _ourColor;
 
     // Processing placement
     void placeReceivedPackets();
