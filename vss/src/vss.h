@@ -58,7 +58,7 @@
 class VSS
 {
 public:
-    VSS(quint8 teamId, Colors::Color teamColor, FieldSide teamSide);
+    VSS(quint8 teamId, Colors::Color teamColor, FieldSide teamSide, bool enableGUI);
 
     // Start and stop methods
     bool start();
@@ -71,6 +71,7 @@ private:
     const quint8 _teamId;
     const Colors::Color _teamColor;
     const FieldSide _teamSide;
+    const bool _enableGUI;
 
     // Server connection
     QString _serverAddress;

@@ -12,7 +12,7 @@ class VSSGui : public Entity
 {
 public:
     QString name();
-    VSSGui(VSSTeam *ourTeam, VSSTeam *theirTeam);
+    VSSGui(VSSTeam *ourTeam, VSSTeam *theirTeam, bool enableGUI);
 
     static void updateTree(StrategyState *strat);
     static bool _isEnabled;
@@ -25,6 +25,7 @@ private:
     static MainWindow *_mainWindow;
     Timer _timer;
     double timeToUpdate;
+    bool _enableGUI;
 
     VSSTeam *_ourTeam;
     VSSTeam *_theirTeam;

@@ -33,6 +33,18 @@ FieldSide validateFieldSide(const QString &input, bool *valid) {
     }
 }
 
+bool validateEnableGUI(const QString &input, bool *valid) {
+    *valid = true;
+    if(input.toLower()=="true")
+        return true;
+    else if(input.toLower()=="false")
+        return false;
+    else {
+        *valid = false;
+        return true; // return default
+    }
+}
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
@@ -48,6 +60,7 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument("teamColor", "Sets the team color ('yellow' or 'blue', default='yellow').");
+    parser.addPositionalArgument("enableGui", "Sets if the GUI will open or not ('true' or 'false', default='true'.");
     parser.process(app);
     QStringList args = parser.positionalArguments();
 
@@ -55,6 +68,7 @@ int main(int argc, char *argv[])
     quint8 ourTeamId = 0;
     Colors::Color ourTeamColor = Colors::YELLOW;
     FieldSide ourFieldSide = Sides::RIGHT;
+    bool enableGUI = true;
 
     /// Check arguments
     // Team color
@@ -63,6 +77,16 @@ int main(int argc, char *argv[])
         ourTeamColor = validateTeamColor(args.at(0), &valid);
         if(valid==false) {
             std::cout << ">> Armorial VSS: Invalid team color argument '" << args.at(0).toStdString() << "'.\n>> Please check help below.\n\n";
+            parser.showHelp();
+            return EXIT_FAILURE;
+        }
+    }
+
+    if(args.size() >= 2){
+        bool valid;
+        enableGUI = validateEnableGUI(args.at(1), &valid);
+        if(valid==false) {
+            std::cout << ">> Armorial VSS: Invalid enable GUI argument '" << args.at(1).toStdString() << "'.\n>> Please check help below.\n\n";
             parser.showHelp();
             return EXIT_FAILURE;
         }
@@ -89,7 +113,7 @@ int main(int argc, char *argv[])
     ExitHandler::setup();
 
     // Create and start VSS app
-    VSS vssApp(ourTeamId, ourTeamColor, ourFieldSide);
+    VSS vssApp(ourTeamId, ourTeamColor, ourFieldSide, enableGUI);
     vssApp.start();
 
     // Block main thread

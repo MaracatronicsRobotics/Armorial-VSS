@@ -1,8 +1,8 @@
 #include "vss.h"
 #include <src/entity/player/control/pid.h>
 
-VSS::VSS(quint8 teamId, Colors::Color teamColor, FieldSide teamSide) :
-    _teamId(teamId), _teamColor(teamColor), _teamSide(teamSide)
+VSS::VSS(quint8 teamId, Colors::Color teamColor, FieldSide teamSide, bool enableGUI) :
+    _teamId(teamId), _teamColor(teamColor), _teamSide(teamSide), _enableGUI(enableGUI)
 {
     // Creating controller
     _ctr = new Controller();
@@ -70,7 +70,7 @@ bool VSS::start(){
     _coach->setReferee(_ref);
 
     // Setup GUI
-    _gui = new VSSGui(_ourTeam, _opTeam);
+    _gui = new VSSGui(_ourTeam, _opTeam, _enableGUI);
     _world->addEntity(_gui, 3);
 
     // Start world

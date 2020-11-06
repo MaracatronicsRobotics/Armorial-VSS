@@ -7,13 +7,16 @@ QString VSSGui::name(){
     return "VSSGui";
 }
 
-VSSGui::VSSGui(VSSTeam *ourTeam, VSSTeam *theirTeam) : Entity(ENT_GUI)
+VSSGui::VSSGui(VSSTeam *ourTeam, VSSTeam *theirTeam, bool enableGUI) : Entity(ENT_GUI)
 {
     _mainWindow = new MainWindow();
-    _mainWindow->show();
+
+    if(enableGUI)
+        _mainWindow->show();
 
     _ourTeam = ourTeam;
     _theirTeam = theirTeam;
+    _enableGUI = enableGUI;
 
     _timer.start();
     timeToUpdate = (1000.0/VSSConstants::threadFrequency()) / 4.0;
