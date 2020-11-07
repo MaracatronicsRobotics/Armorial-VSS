@@ -35,11 +35,11 @@ Strategy_Halt::Strategy_Halt() {
 }
 
 void Strategy_Halt::configure(int numOurPlayers) {
-    usesPlaybook(_pb_halt = new Playbook_Halt());
+    //usesPlaybook(_pb_halt = new Playbook_Halt());
     //usesPlaybook(_pb_defensive = new Playbook_Defensive());
     //usesPlaybook(_pb_offensive = new Playbook_Offensive());
     //usesPlaybook(_pb_balance = new Playbook_Balance());
-    //usesPlaybook(_pb_supporter = new Playbook_Supporter());
+    usesPlaybook(_pb_supporter = new Playbook_Supporter());
 }
 
 void Strategy_Halt::run(int numOurPlayers) {
@@ -53,7 +53,7 @@ void Strategy_Halt::run(int numOurPlayers) {
     if(!allPlayers.isEmpty()){
         //_pb_offensive->addPlayers(allPlayers);
         //_pb_balance->addPlayers(allPlayers);
-        _pb_halt->addPlayers(allPlayers);
-        //_pb_supporter->addPlayers(allPlayers);
+        //_pb_halt->addPlayers(allPlayers);
+        _pb_supporter->addPlayers(allPlayers);
     }
 }
