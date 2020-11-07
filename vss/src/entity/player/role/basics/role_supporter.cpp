@@ -136,7 +136,7 @@ bool Role_Supporter::ourTeamShouldTake(VSSRef::Color teamColor){
     }else if(player()->team()->teamColor() == Colors::Color::YELLOW){
         if(teamColor == VSSRef::Color::YELLOW) return true;
         else return false;
-    }else return false;
+    }else return weTake;
 }
 
 void Role_Supporter::penaltyKick(Position* pos, Angle* ang){
