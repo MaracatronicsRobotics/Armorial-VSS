@@ -61,11 +61,16 @@ void Behaviour_Assistant::run(){
 
     //ball position projection based on its velocity and actual position
     if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
-        //calc vector of velocity
-        const Position vel(true, loc()->ballVelocity().x(), loc()->ballVelocity().y(), 0.0);
+        //calc unitary vector of velocity
+        const Position vel(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
+
+        //calc velocity factor
+        float factor = BALLPREVISION_VELOCITY_FACTOR*loc()->ballVelocity().abs();
+        WR::Utils::limitValue(&factor, 0.0f, BALLPREVISION_FACTOR_LIMIT);
 
         //calc projected position
-        Position projectedPos(true, loc()->ball().x()+vel.x(), loc()->ball().y()+vel.y(), 0.0);
+        const Position delta(true, factor*vel.x(), factor*vel.y(), 0.0);
+        Position projectedPos(true, loc()->ball().x()+delta.x(), loc()->ball().y()+delta.y(), 0.0);
 
         if(isBehindBall(player()->position(), projectedPos)){
             ballProjection = projectedPos;
@@ -151,7 +156,7 @@ void Behaviour_Assistant::run(){
     //setting skill goTo velocity factor
     _sk_goTo->setMinVelocity(0.7f);
     float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
-    WR::Utils::limitValue(&velocityNeeded, 2.0f, 5.0f);
+    WR::Utils::limitValue(&velocityNeeded, 1.5f, 2.0f);
     if(!isnanf(velocityNeeded)){
         _sk_goTo->setGoToVelocityFactor(velocityNeeded);
     }else{
@@ -272,9 +277,11 @@ float Behaviour_Assistant::errorAngleToSegment(Position leftPoint, Position righ
 bool Behaviour_Assistant::allyInTheirArea(){
     //find out if there's an ally inside their area
     for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
-        if(PlayerBus::ourPlayerAvailable(x) && PlayerBus::ourPlayer(x)->playerId() != player()->playerId()){
-            if(loc()->isInsideTheirArea(PlayerBus::ourPlayer(x)->position())){
-                return true;
+        if(PlayerBus::ourPlayerAvailable(x)){
+            if(PlayerBus::ourPlayer(x)->playerId() != player()->playerId()){
+                if(loc()->isInsideTheirArea(PlayerBus::ourPlayer(x)->position())){
+                    return true;
+                }
             }
         }
     }
@@ -396,11 +403,12 @@ bool Behaviour_Assistant::canGoToBall(){
     float minorDistToBall = 1000;
     quint8 id = 100;
     for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
-        if(PlayerBus::ourPlayerAvailable(x) && PlayerBus::ourPlayer(x)->position().isValid() &&
-            PlayerBus::ourPlayer(x)->playerId() != player()->playerId() && !loc()->isInsideOurArea(PlayerBus::ourPlayer(x)->position())){
-            if(PlayerBus::ourPlayer(x)->distBall() < minorDistToBall){
-                id = PlayerBus::ourPlayer(x)->playerId();
-                minorDistToBall = PlayerBus::ourPlayer(x)->distBall();
+        if(PlayerBus::ourPlayerAvailable(x)){
+            if(PlayerBus::ourPlayer(x)->position().isValid() && PlayerBus::ourPlayer(x)->playerId() != player()->playerId() && !loc()->isInsideOurArea(PlayerBus::ourPlayer(x)->position())){
+                if(PlayerBus::ourPlayer(x)->distBall() < minorDistToBall){
+                    id = PlayerBus::ourPlayer(x)->playerId();
+                    minorDistToBall = PlayerBus::ourPlayer(x)->distBall();
+                }
             }
         }
     }
