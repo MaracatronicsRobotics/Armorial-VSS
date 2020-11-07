@@ -99,15 +99,15 @@ void Role::runRole(){
             canGoBack = true;
         }
     }
+
     if(!ref()->isGameOn()){
         if(_bh_dn->isInitialized() == false)
             _bh_dn->initialize(_loc);
 
         _bh_dn->setPlayer(_player, _playerAccess);
         _bh_dn->runBehaviour();
-    }
-    else{
-    if((!canMove() || !_retreated) && _goBack){
+    } else {
+        if((!canMove() || !_retreated) && _goBack){
             if(_bh_gb->isInitialized() == false)
                 _bh_gb->initialize(_loc);
 
@@ -117,15 +117,15 @@ void Role::runRole(){
             _bh_gb->setPlayer(_player, _playerAccess);
             _bh_gb->runBehaviour();
 
-        if(_retreated && canGoBack){
-            canGoBack = false;
-            _bh_gb->setStart(true);
-        }
-        _retreated = _bh_gb->getDone();
+            if(_retreated && canGoBack){
+                canGoBack = false;
+                _bh_gb->setStart(true);
+            }
+            _retreated = _bh_gb->getDone();
 
-    } else {
-        // Run role (child)
-        run();
+        } else {
+            // Run role (child)
+            run();
 
             // Run Behaviour
             if(_behaviour->isInitialized() == false){

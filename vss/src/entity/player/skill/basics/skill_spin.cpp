@@ -32,9 +32,29 @@ Skill_Spin::Skill_Spin() {
 }
 
 void Skill_Spin::run() {
-    if (_isClockWise) {
-        player()->setSpeed(0.0 , -SPIN_SPEED);
-    } else {
-        player()->setSpeed(0.0 , SPIN_SPEED);
-    }
+    // equações pra transformar em vr e vl
+    /*
+     * Onde:
+     * L       = distancia entre as rodas
+     * r       = raio da roda
+     * VLinear = vx desejada
+     * w       = velocidade angular desejada
+     *
+     * (2 * VLinear)/r = Wr + Wl
+     * (w * L)/r       = Wr - Wl
+     * Wr              = (2 * Vlin + w * L)/(2 * r)
+     * Wl              = Wr - (w * L) / r
+    */
+    float L = 0.075f;
+    float r = 0.0325f;
+    float velLinear = 0.0f;
+    float velAngular;
+
+    if (_isClockWise) velAngular = -SPIN_SPEED;
+    else velAngular = SPIN_SPEED;
+
+    float wr = ((2.0f * velLinear) + (L * velAngular)) / (2.0f * r);
+    float wl = wr - ((L * velAngular) / r);
+
+    player()->setSpeed(wl, wr);
 }

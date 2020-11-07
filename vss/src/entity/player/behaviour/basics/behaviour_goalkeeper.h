@@ -32,12 +32,14 @@ private:
 
     // Skills
     Skill_GoTo *_sk_goto;
+    Skill_RotateTo *_sk_rotate;
     Skill_InterceptBall *_sk_intercept;
     Skill_Spin *_sk_spin;
 
     // Transitions
     enum {
         STATE_GOTO,
+        STATE_ROTATE,
         STATE_INTERCEPT,
         STATE_SPIN
     };
@@ -46,6 +48,7 @@ private:
     int _state;
 
     // Auxiliary Functions
+    bool isBallComing();
     bool setSpinDirection();
 
 public:

@@ -39,15 +39,15 @@ void Role_Halt::initializeBehaviours(){
 }
 
 void Role_Halt::configure(){
-    isGK(false);
+    isGK(true);
 }
 
 void Role_Halt::run(){
-    setBehaviour(BHV_ATTACKER);
+    //setBehaviour(BHV_ATTACKER);
     //setBehaviour(BHV_ASSISTANT);
     //setBehaviour(BHV_DONOTHING);
     //setBehaviour(BHV_PUSHBALL);
-    //setBehaviour(BHV_GK);
+    setBehaviour(BHV_GK);
     //setBehaviour(BHV_BARRIER);
 }
 

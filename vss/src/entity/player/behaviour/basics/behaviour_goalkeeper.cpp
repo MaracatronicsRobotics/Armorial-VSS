@@ -29,12 +29,14 @@ QString Behaviour_Goalkeeper::name() {
 
 Behaviour_Goalkeeper::Behaviour_Goalkeeper() {
     _sk_goto = nullptr;
+    _sk_rotate = nullptr;
     _sk_intercept = nullptr;
     _sk_spin = nullptr;
 }
 
 void Behaviour_Goalkeeper::configure() {
     usesSkill(_sk_goto = new Skill_GoTo());
+    usesSkill(_sk_rotate = new Skill_RotateTo());
     usesSkill(_sk_intercept = new Skill_InterceptBall());
     usesSkill(_sk_spin = new Skill_Spin());
 
@@ -43,8 +45,11 @@ void Behaviour_Goalkeeper::configure() {
 
     // Transitions:
     // Skill GoTo active
+    addTransition(STATE_GOTO, _sk_rotate, _sk_goto);
     addTransition(STATE_GOTO, _sk_intercept, _sk_goto);
     addTransition(STATE_GOTO, _sk_spin, _sk_goto);
+
+    addTransition(STATE_ROTATE, _sk_goto, _sk_rotate);
 
     // Skill InterceptBall active
     addTransition(STATE_INTERCEPT, _sk_goto, _sk_intercept);
@@ -92,27 +97,44 @@ void Behaviour_Goalkeeper::run() {
     // InterceptBall setup
     _sk_intercept->setInterceptSegment(firstInterceptPoint, secondInterceptPoint);
     _sk_intercept->selectVelocityNeeded(false);
-    _sk_intercept->setVelocityFactor(1.2f);
+    _sk_intercept->setVelocityFactor(1.0f);
     _sk_intercept->setDesiredVelocity(1.0f);
 
     if (!loc()->isInsideOurArea(player()->position()) || loc()->isInsideTheirField(loc()->ball())) {
-        _sk_goto->setGoToPos(ProjectBallY);
-        enableTransition(STATE_GOTO);
+        Position upReference(true, initialPosition.x(), 0.65f, 0.0);
+        Position bottomReference(true, initialPosition.x(), -0.65f, 0.0);
+        /*if (loc()->isInsideOurArea(player()->position()) && (player()->isLookingTo(upReference, float(M_PI) / 36.0f)
+                || player()->isLookingTo(bottomReference,  float(M_PI) / 36.0f))) {
+            _sk_rotate->setDesiredPosition(upReference);
+            enableTransition(STATE_ROTATE);
+        } else {*/
+            _sk_goto->setGoToPos(ProjectBallY);
+            enableTransition(STATE_GOTO);
+        //}
     }
     else if (loc()->isInsideOurArea(loc()->ball()) && loc()->ballVelocity().abs() < 0.0001f) {
         _sk_goto->setGoToPos(loc()->ball());
-        //_sk_goto->setMinVelocity(1.0f);
         enableTransition(STATE_GOTO);
     }
     else {
         Position interceptPosition = _sk_intercept->getIntercetPosition();
-        if (player()->distanceTo(interceptPosition) < 0.05f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.1f) {
+        if (player()->distanceTo(interceptPosition) < 0.05f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.12f) {
             bool spinDirection = setSpinDirection();
             _sk_spin->setClockWise(spinDirection);
             enableTransition(STATE_SPIN);
         } else {
             enableTransition(STATE_INTERCEPT);
         }
+    }
+}
+
+bool Behaviour_Goalkeeper::isBallComing() {
+    if (loc()->ourSide().isRight()) {
+        if (loc()->ballVelocity().x() < 0.0f) return true;
+        else return false;
+    } else {
+        if (loc()->ballVelocity().x() > 0.0f) return true;
+        else return false;
     }
 }
 
