@@ -96,8 +96,16 @@ void Behaviour_Goalkeeper::run() {
     _sk_intercept->setDesiredVelocity(1.0f);
 
     if (!loc()->isInsideOurArea(player()->position()) || loc()->isInsideTheirField(loc()->ball())) {
-        _sk_goto->setGoToPos(ProjectBallY);
-        enableTransition(STATE_GOTO);
+        Position upReference(true, initialPosition.x(), 0.65f, 0.0);
+        Position bottomReference(true, initialPosition.x(), -0.65f, 0.0);
+        //if (loc()->isInsideOurArea(player()->position()) && (player()->isLookingTo(upReference, float(M_PI) / 36.0f)
+        //        || player()->isLookingTo(bottomReference,  float(M_PI) / 36.0f))) {
+        //    _sk_rotate->setDesiredPosition(upReference);
+        //    enableTransition(STATE_ROTATE);
+        //} else {
+            _sk_goto->setGoToPos(ProjectBallY);
+            enableTransition(STATE_GOTO);
+        //}
     }
     else if (loc()->isInsideOurArea(loc()->ball()) && loc()->ballVelocity().abs() < 0.0001f) {
         _sk_goto->setGoToPos(loc()->ball());

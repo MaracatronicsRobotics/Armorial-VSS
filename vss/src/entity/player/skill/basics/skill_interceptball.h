@@ -43,7 +43,7 @@ public:
     void setInterceptSegment(Position firstPoint, Position secondPoint) { _firstLimitationPoint = firstPoint; _secondLimitationPoint = secondPoint; }
     void setDesiredVelocity(float velocityNeeded) { _velocityNeeded = velocityNeeded; }
     void setVelocityFactor(float velocityFActor) { _velocityFactor = velocityFActor; }
-    bool selectVelocityNeeded(bool activateVelocityNeeded) { _activateVelocityNeeded = activateVelocityNeeded; }
+    void selectVelocityNeeded(bool activateVelocityNeeded) { _activateVelocityNeeded = activateVelocityNeeded; }
     Position getIntercetPosition() { return _objectivePos; }
 };
 
