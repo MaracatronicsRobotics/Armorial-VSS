@@ -101,7 +101,7 @@ void Behaviour_Goalkeeper::run() {
     }
     else if (loc()->isInsideOurArea(loc()->ball()) && loc()->ballVelocity().abs() < 0.0001f) {
         _sk_goto->setGoToPos(loc()->ball());
-        _sk_goto->setMinVelocity(1.0f);
+        //_sk_goto->setMinVelocity(1.0f);
         enableTransition(STATE_GOTO);
     }
     else {

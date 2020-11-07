@@ -340,10 +340,16 @@ void VSSPlayer::goTo(Position targetPosition, float velocityNeeded, float veloci
 
     float L = 0.075f;
     float r = 0.0325f;
-    float velLinear = velocityFactor * vel;
+    float velLinear;
     float velAngular;
-    if (chord < 0.05f) velAngular = rotateSpeed;
-    else velAngular = velLinear / spinRadius;
+    if (abs(abs(referenceAngle) - float(M_PI_2)) < float(M_PI) / 18.0f && chord > 0.5f) {
+        velLinear = 0.0;
+        velAngular = rotateSpeed;
+    } else {
+        velLinear = velocityFactor * vel;
+        if (chord < 0.1f) velAngular = rotateSpeed;
+        else velAngular = velLinear / spinRadius;
+    }
     //if (chord < 0.01f && referenceAngle < float(M_PI) / 60.0f) velAngular = 0.0f;
     //if (chord < 0.01f) velLinear = 0.0f;
     float wr = ((2.0f * velLinear) + (L * velAngular)) / (2.0f * r);
