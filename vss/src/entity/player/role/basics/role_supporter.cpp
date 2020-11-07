@@ -48,7 +48,7 @@ void Role_Supporter::run(){
     case(FREE):{
         if(canGoBackToNormalGame){
             float enemyInOurFieldFactor = 0;
-            if(EnemyInOurField()) enemyInOurFieldFactor = 0.75f;
+            if(EnemyNear(0.2f)) enemyInOurFieldFactor = 0.75f;
             float distBallFactor = 1.0f - loc()->distBallOurGoal()/WR::Utils::distance(loc()->fieldLeftTopCorner(), Position(true, loc()->fieldMaxX(), 0.0f, 0.0f));
             float distPlayerFactor = 1.0f - player()->distOurGoal()/WR::Utils::distance(loc()->fieldLeftTopCorner(), Position(true, loc()->fieldMaxX(), 0.0f, 0.0f));
             float ballVelFactor = loc()->ballVelocity().abs()/1.2f;
@@ -67,7 +67,8 @@ void Role_Supporter::run(){
     case(BARRIER_PREDOMINANT):{
         if(canGoBackToNormalGame){
             setBehaviour(BHV_BARRIER);
-            if(!EnemyInOurField() && player()->isNearbyPosition(loc()->ball(), 0.15f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f) && !BySideOfGoal() && (player()->distOurGoal() < WR::Utils::distance(loc()->ball(), loc()->ourGoal()))){
+            if((!EnemyNear(0.2f) && player()->isNearbyPosition(loc()->ball(), 0.15f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f) && !BySideOfGoal() && (player()->distOurGoal() < WR::Utils::distance(loc()->ball(), loc()->ourGoal())))
+                    || (!EnemyNear(player()->distBall() + 0.1f) && player()->distBall() < distAllyToBall())){
                 emit sendSignal();
             }
         }
@@ -82,10 +83,27 @@ void Role_Supporter::run(){
     }
 }
 
-bool Role_Supporter::EnemyInOurField(){
+float Role_Supporter::distAllyToBall(){
+    quint8 gkId = 100, allyId = 100;
+    float minDist = 100;
+    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+        if(PlayerBus::ourPlayerAvailable(x)){
+            if(PlayerBus::ourPlayer(x)->distOurGoal() < minDist && PlayerBus::ourPlayer(x)->playerId() != player()->playerId()){
+                allyId = gkId;
+                gkId = PlayerBus::ourPlayer(x)->playerId();
+                minDist = PlayerBus::ourPlayer(x)->distOurGoal();
+            }else{
+                allyId = PlayerBus::ourPlayer(x)->playerId();
+            }
+        }
+    }
+    return PlayerBus::ourPlayer(allyId)->distBall();
+}
+
+bool Role_Supporter::EnemyNear(float minDist){
     for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
         if(PlayerBus::theirPlayerAvailable(x)){
-            if(loc()->isInsideOurField(PlayerBus::theirPlayer(x)->position()) && PlayerBus::theirPlayer(x)->isNearbyPosition(loc()->ball(), 0.2f)){
+            if(PlayerBus::theirPlayer(x)->isNearbyPosition(loc()->ball(), minDist)){
                 return true;
             }
         }

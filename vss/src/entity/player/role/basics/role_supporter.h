@@ -40,7 +40,8 @@ private:
     void configure();
     void run();
 
-    bool EnemyInOurField();
+    bool EnemyNear(float minDist);
+    float distAllyToBall();
     int _positioning;
     int _bhv;
     bool BySideOfGoal();
