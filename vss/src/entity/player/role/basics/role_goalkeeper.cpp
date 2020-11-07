@@ -48,8 +48,7 @@ void Role_Goalkeeper::configure(){
 
 void Role_Goalkeeper::run(){
     //if counter/timer is over or the goalkeeper has got out of our defense area
-    if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.2f)){
-        counter = 0;
+    if(canGoBackToNormalGame){
         setBehaviour(BHV_GK);
     }else{
         if(counter >= 300){
@@ -170,7 +169,9 @@ bool Role_Goalkeeper::ourTeamShouldTake(VSSRef::Color teamColor){
     }else if(player()->team()->teamColor() == Colors::Color::YELLOW){
         if(teamColor == VSSRef::Color::YELLOW) return true;
         else return false;
-    }else return false;
+    }else{
+        return weTake;
+    }
 }
 
 void Role_Goalkeeper::gameOn(){
