@@ -96,9 +96,9 @@ void VSSReferee::loop(){
             _enableTimer = true;
             _timer.start();
             _receivedAtLeastOne = false;
-
-            emit emitFoul(command.foul(), command.foulquadrant(), command.teamcolor());
         }
+
+        emit emitFoul(command.foul(), command.foulquadrant(), command.teamcolor());
     }
 }
 

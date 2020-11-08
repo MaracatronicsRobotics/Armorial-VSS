@@ -43,7 +43,9 @@ void Role_Supporter::run(){
         }else{
             counter++;
         }
+        return;
     }
+
     switch(_positioning){
     case(FREE):{
         if(canGoBackToNormalGame){
@@ -132,11 +134,15 @@ void Role_Supporter::setPositioning(int positioning){
 bool Role_Supporter::ourTeamShouldTake(VSSRef::Color teamColor){
     if(player()->team()->teamColor() == Colors::Color::BLUE){
         if(teamColor == VSSRef::Color::BLUE) return true;
-        else return false;
+        else if(teamColor == VSSRef::Color::YELLOW) return false;
+        else return true;
     }else if(player()->team()->teamColor() == Colors::Color::YELLOW){
         if(teamColor == VSSRef::Color::YELLOW) return true;
-        else return false;
-    }else return weTake;
+        else if(teamColor == VSSRef::Color::BLUE) return false;
+        else return true;
+    }else{
+        return true;
+    }
 }
 
 void Role_Supporter::penaltyKick(Position* pos, Angle* ang){

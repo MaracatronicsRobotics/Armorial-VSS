@@ -35,6 +35,7 @@ void Role_Goalkeeper::initializeBehaviours(){
     usesBehaviour(BHV_GK, _bh_gk = new Behaviour_Goalkeeper());
     usesBehaviour(BHV_DONOTHING, _bh_dn = new Behaviour_DoNothing());
     usesBehaviour(BHV_TAKEFOUL, _bh_tf = new Behaviour_TakeFoul());
+
 }
 
 void Role_Goalkeeper::configure(){
@@ -165,12 +166,14 @@ void Role_Goalkeeper::freeBall(Position *pos, Angle *ang, VSSRef::Quadrant quadr
 bool Role_Goalkeeper::ourTeamShouldTake(VSSRef::Color teamColor){
     if(player()->team()->teamColor() == Colors::Color::BLUE){
         if(teamColor == VSSRef::Color::BLUE) return true;
-        else return false;
+        else if(teamColor == VSSRef::Color::YELLOW) return false;
+        else return true;
     }else if(player()->team()->teamColor() == Colors::Color::YELLOW){
         if(teamColor == VSSRef::Color::YELLOW) return true;
-        else return false;
+        else if(teamColor == VSSRef::Color::BLUE) return false;
+        else return true;
     }else{
-        return weTake;
+        return true;
     }
 }
 
@@ -190,6 +193,7 @@ void Role_Goalkeeper::gameOn(){
 void Role_Goalkeeper::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor){
     if(isInitialized() && player() != NULL){
         weTake = ourTeamShouldTake(teamColor);
+        std::cout << "recebemos: " << foul << " entao weTake = " << weTake << std::endl;
         Position pos;
         Angle ang;
         //PENALTY
