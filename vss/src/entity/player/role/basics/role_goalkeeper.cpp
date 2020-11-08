@@ -193,7 +193,6 @@ void Role_Goalkeeper::gameOn(){
 void Role_Goalkeeper::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor){
     if(isInitialized() && player() != NULL){
         weTake = ourTeamShouldTake(teamColor);
-        std::cout << "recebemos: " << foul << " entao weTake = " << weTake << std::endl;
         Position pos;
         Angle ang;
         //PENALTY

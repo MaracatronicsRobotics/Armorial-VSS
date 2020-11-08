@@ -188,7 +188,8 @@ void VSSReferee::placeReceivedPackets(){
             robot->set_robot_id(static_cast<quint32>(i));
             robot->set_x(static_cast<double>(_desiredPlacement[i].first.x()));
             robot->set_y(static_cast<double>(_desiredPlacement[i].first.y()));
-            robot->set_orientation(static_cast<double>(_desiredPlacement[i].second.value()));
+            float angle = Angle::toDegrees(_desiredPlacement[i].second.value());
+            robot->set_orientation(static_cast<double>(angle));
 
             _desiredMark[i] = false;
         }
