@@ -49,7 +49,7 @@ void Role_Goalkeeper::configure(){
 
 void Role_Goalkeeper::run(){
     //if counter/timer is over or the goalkeeper has got out of our defense area
-    if(canGoBackToNormalGame){
+    if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
         setBehaviour(BHV_GK);
     }else{
         if(counter >= 300){

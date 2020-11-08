@@ -145,10 +145,28 @@ bool Role_Supporter::ourTeamShouldTake(VSSRef::Color teamColor){
     }
 }
 
+bool Role_Supporter::isReallyInsideTheirArea(quint8 id){
+    if(loc()->theirSide().isRight()){
+        if((PlayerBus::theirPlayer(id)->position().x() >= (loc()->fieldMaxX() - 0.15f)) && (abs(PlayerBus::theirPlayer(id)->position().y()) <= loc()->fieldDefenseLength()/2)){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        if((PlayerBus::theirPlayer(id)->position().x() <= -1*(loc()->fieldMaxX() - 0.15f)) && (abs(PlayerBus::theirPlayer(id)->position().y()) <= loc()->fieldDefenseLength()/2)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
+
 void Role_Supporter::penaltyKick(Position* pos, Angle* ang){
     float defenseXabs = (loc()->fieldMaxX() - 0.18f), defenseYabs = 0.165f;
     float takeXabs = (loc()->fieldMaxX()/2 - 0.2f), takeYabs = 0;
     float nearMiddleXabs = 0.2f;
+    float midmidGoal = fabs(loc()->theirGoalLeftMidPost().y());
+    Position penaltyRightMark(true, 0.375, 0, 0), penaltyLeftMark(true, -0.375, 0, 0);
 
     //update isNormalGame variable (to false if foul is different from KICKOFF, STOP, GAME_ON or GOALKICK - because this role doesn't take this foul)
     isNormalGame = false;
@@ -157,19 +175,47 @@ void Role_Supporter::penaltyKick(Position* pos, Angle* ang){
     //set behaviour doNothing so our player doesn't move from position emmited
     setBehaviour(BHV_DONOTHING);
 
+    //find their goalkeeper
+    Position gkPos;
+    quint8 gkid = 100;
+    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+        if(PlayerBus::theirPlayerAvailable(x)){
+            if(isReallyInsideTheirArea(x)){
+                gkid = x;
+                break;
+            }
+        }
+    }
+    if(!PlayerBus::theirPlayerAvailable(gkid)) gkPos = loc()->theirGoal();
+    else gkPos = PlayerBus::theirPlayer(gkid)->position();
+
     //if we should take the penalty kick foul
     if(weTake){
         //if this player is playing as assistant: put it in the penalty kick position and looking to their goal
         if(_positioning == ASSIST_PREDOMINANT){
             //if our side is right
             if(loc()->ourSide().isRight()){
-                *pos = Position(true, -1*takeXabs, takeYabs, 0);
-                *ang = Angle(true, Angle::pi);
+                Position ourPos;
+                if(gkPos.y()>0){
+                    ourPos = WR::Utils::threePoints(penaltyLeftMark, loc()->theirGoalLeftMidPost(), 0.1f, Angle::pi);
+                    *pos = ourPos;
+                }else{
+                    ourPos = WR::Utils::threePoints(penaltyLeftMark, loc()->theirGoalRightMidPost(), 0.1f, Angle::pi);
+                    *pos = ourPos;
+                }
+                *ang = WR::Utils::getAngle(ourPos, penaltyLeftMark);
             }
             //if our side is left
             else{
-                *pos = Position(true, takeXabs, takeYabs, 0);
-                *ang = Angle(true, 0);
+                Position ourPos;
+                if(gkPos.y()>0){
+                    ourPos = WR::Utils::threePoints(penaltyRightMark, loc()->theirGoalRightMidPost(), 0.1f, Angle::pi);
+                    *pos = ourPos;
+                }else{
+                    ourPos = WR::Utils::threePoints(penaltyRightMark, loc()->theirGoalLeftMidPost(), 0.1f, Angle::pi);
+                    *pos = ourPos;
+                }
+                *ang = WR::Utils::getAngle(ourPos, penaltyRightMark);
             }
         }
         //if this player isn't playing as assistant: put it in our field in front of our goal

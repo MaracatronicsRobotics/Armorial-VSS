@@ -11,12 +11,8 @@ private:
     void configure();
     void run();
 
-    bool _isBehindball, _isLookingToBall, _pushed;
     int _skill;
     bool localIsLookingTo(const Position &pos, float error);
-    bool isReallyInsideTheirArea(quint8 id);
-    bool canChangePosToLook;
-    int counter;
 
     //Skills
     enum{
