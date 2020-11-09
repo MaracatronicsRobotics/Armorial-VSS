@@ -47,6 +47,7 @@ private:
 
     // Auxiliary Functions
     bool setSpinDirection();
+    bool isBallComingToGoal();
 
 public:
     Behaviour_Goalkeeper();

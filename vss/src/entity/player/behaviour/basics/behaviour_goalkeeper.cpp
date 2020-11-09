@@ -23,6 +23,10 @@
 
 #define GOAL_OFFSET 0.01f
 
+#define BALLPREVISION_MINVELOCITY 0.03f
+#define BALLPREVISION_VELOCITY_FACTOR 3.0f
+#define BALLPREVISION_FACTOR_LIMIT 0.15f
+
 QString Behaviour_Goalkeeper::name() {
     return "Behaviour_Goalkeeper";
 }
@@ -58,69 +62,53 @@ void Behaviour_Goalkeeper::configure() {
 }
 
 void Behaviour_Goalkeeper::run() {
-    const Position initialPosition = WR::Utils::threePoints(loc()->ourGoal(), loc()->fieldCenter(), 0.055f, 0.0f);
-    Position ProjectBallY;
-
-    // Permitir o acompanhamento da bola, limitando até a projeção vertical das traves do gol
+    float xPos;
     if(loc()->ourSide().isLeft()){
-        if(loc()->ball().y() <= loc()->ourGoalLeftPost().y()){
-            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() + GOAL_OFFSET , 0.0);
-        }
-        else if(loc()->ball().y() >= loc()->ourGoalRightPost().y()){
-            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() - GOAL_OFFSET, 0.0);
-        }
-        else{
-            ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
+        xPos = loc()->fieldMinX() + 0.07f;
+    }else{
+        xPos = loc()->fieldMaxX() - 0.07f;
+    }
+    Position firstInterceptPoint(true, xPos, -0.35f, 0.0f);
+    Position secondInterceptPoint(true, xPos, 0.35f, 0.0f);
 
-        }
-    } else {
-        if(loc()->ball().y() >= loc()->ourGoalLeftPost().y()){
-            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalLeftPost().y() - GOAL_OFFSET , 0.0);
-        }
-        else if(loc()->ball().y() <= loc()->ourGoalRightPost().y()){
-            ProjectBallY.setPosition(initialPosition.x() , loc()->ourGoalRightPost().y() + GOAL_OFFSET, 0.0);
-        }
-        else{
-            ProjectBallY.setPosition(initialPosition.x() , loc()->ball().y() , 0.0);
+    Position goalProjection;
+    Position projectedBall = loc()->ball();
+    goalProjection.setUnknown();
+    //considering ball velocity to define player position
+    if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
+        //calc unitary vector of velocity
+        const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
 
+        //calc velocity factor
+        float factor = BALLPREVISION_VELOCITY_FACTOR*loc()->ballVelocity().abs();
+        WR::Utils::limitValue(&factor, 0.0f, BALLPREVISION_FACTOR_LIMIT);
+
+        //calc projected position
+        const Position delta(true, factor*velUni.x(), factor*velUni.y(), 0.0);
+        Position projectedPos(true, loc()->ball().x()+delta.x(), loc()->ball().y()+delta.y(), 0.0);
+        projectedBall = projectedPos;
+
+        goalProjection = WR::Utils::hasInterceptionSegments(loc()->ball(), projectedBall, firstInterceptPoint, secondInterceptPoint);
+    }else{
+        if(loc()->isInsideOurArea(loc()->ball())){
+            goalProjection = loc()->ball();
         }
     }
-
-    Position firstInterceptPoint(true, ProjectBallY.x(), -0.35f, 0.0f);
-    Position secondInterceptPoint(true, ProjectBallY.x(), 0.35f, 0.0f);
-
-    // InterceptBall setup
-    _sk_intercept->setInterceptSegment(firstInterceptPoint, secondInterceptPoint);
-    _sk_intercept->selectVelocityNeeded(false);
-    _sk_intercept->setVelocityFactor(1.2f);
-    _sk_intercept->setDesiredVelocity(1.0f);
-
-    if (!loc()->isInsideOurArea(player()->position()) || loc()->isInsideTheirField(loc()->ball())) {
-        Position upReference(true, initialPosition.x(), 0.65f, 0.0);
-        Position bottomReference(true, initialPosition.x(), -0.65f, 0.0);
-        //if (loc()->isInsideOurArea(player()->position()) && (player()->isLookingTo(upReference, float(M_PI) / 36.0f)
-        //        || player()->isLookingTo(bottomReference,  float(M_PI) / 36.0f))) {
-        //    _sk_rotate->setDesiredPosition(upReference);
-        //    enableTransition(STATE_ROTATE);
-        //} else {
-            _sk_goto->setGoToPos(ProjectBallY);
-            enableTransition(STATE_GOTO);
-        //}
+    //if interception isn't inside our defense area: consider only ball position
+    if(!(abs(goalProjection.y()) < loc()->fieldDefenseLength()/2.0f) || !goalProjection.isValid() || goalProjection.isUnknown()){
+        goalProjection = WR::Utils::projectPointAtSegment(firstInterceptPoint, secondInterceptPoint, loc()->ball());
     }
-    else if (loc()->isInsideOurArea(loc()->ball()) && loc()->ballVelocity().abs() < 0.0001f) {
-        _sk_goto->setGoToPos(loc()->ball());
-        _sk_goto->setMinVelocity(1.0f);
+
+    //transitions
+    if (player()->distanceTo(goalProjection) < 0.05f && WR::Utils::distance(goalProjection, loc()->ball()) < 0.1f) {
+        bool spinDirection = setSpinDirection();
+        _sk_spin->setClockWise(spinDirection);
+        enableTransition(STATE_SPIN);
+    }else{
+        _sk_goto->setGoToPos(goalProjection);
+        _sk_goto->setGoToVelocityFactor(1.2f);
+        _sk_goto->setMinVelocity(0.5f);
         enableTransition(STATE_GOTO);
-    }
-    else {
-        Position interceptPosition = _sk_intercept->getIntercetPosition();
-        if (player()->distanceTo(interceptPosition) < 0.05f && WR::Utils::distance(interceptPosition, loc()->ball()) < 0.1f) {
-            bool spinDirection = setSpinDirection();
-            _sk_spin->setClockWise(spinDirection);
-            enableTransition(STATE_SPIN);
-        } else {
-            enableTransition(STATE_INTERCEPT);
-        }
     }
 }
 
