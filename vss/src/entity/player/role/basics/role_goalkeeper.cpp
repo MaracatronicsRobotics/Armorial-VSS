@@ -69,12 +69,12 @@ void Role_Goalkeeper::penaltyKick(Position* pos, Angle* ang){
     //put our goalkeeper in the middle of the goal
     //if our side is right
     if(loc()->ourSide().isRight()){
-        *pos = Position(true, loc()->fieldMaxX(), 0, 0);
+        *pos = Position(true, loc()->fieldMaxX() - 0.05f, 0, 0);
         *ang = Angle(true, float(M_PI_2));
     }
     //if our side is left
     else{
-        *pos = Position(true, loc()->fieldMinX(), 0, 0);
+        *pos = Position(true, loc()->fieldMinX() + 0.05f, 0, 0);
         *ang = Angle(true, float(M_PI_2));
     }
 }
@@ -111,12 +111,12 @@ void Role_Goalkeeper::kickOff(Position* pos, Angle* ang){
     //put our goalkeeper in the middle of the goal
     //if our side is right
     if(loc()->ourSide().isRight()){
-        *pos = Position(true, loc()->fieldMaxX(), 0, 0);
+        *pos = Position(true, loc()->fieldMaxX() - 0.05f, 0, 0);
         *ang = Angle(true, float(M_PI_2));
     }
     //if our side is left
     else{
-        *pos = Position(true, loc()->fieldMinX(), 0, 0);
+        *pos = Position(true, loc()->fieldMinX() + 0.05f, 0, 0);
         *ang = Angle(true, float(M_PI_2));
     }
 }
@@ -135,26 +135,26 @@ void Role_Goalkeeper::freeBall(Position *pos, Angle *ang, VSSRef::Quadrant quadr
     //if our side is right
     if(loc()->ourSide().isRight()){
         if(quadrant == VSSRef::QUADRANT_1){
-            *pos = Position(true, loc()->fieldMaxX(), -1*gkYabs, 0);
+            *pos = Position(true, loc()->fieldMaxX() - 0.05f, -1*gkYabs, 0);
             *ang = Angle(true, float(M_PI_2));
         }else if(quadrant == VSSRef::QUADRANT_4){
-            *pos = Position(true, loc()->fieldMaxX(), gkYabs, 0);
+            *pos = Position(true, loc()->fieldMaxX() - 0.05f, gkYabs, 0);
             *ang = Angle(true, float(M_PI_2));
         }else{
-            *pos = Position(true, loc()->fieldMaxX(), 0, 0);
+            *pos = Position(true, loc()->fieldMaxX() - 0.05f, 0, 0);
             *ang = Angle(true, float(M_PI_2));
         }
     }
     //if our side is left
     else{
         if(quadrant == VSSRef::QUADRANT_2){
-            *pos = Position(true, loc()->fieldMinX(), -1*gkYabs, 0);
+            *pos = Position(true, loc()->fieldMinX() + 0.05f, -1*gkYabs, 0);
             *ang = Angle(true, float(M_PI_2));
         }else if(quadrant == VSSRef::QUADRANT_3){
-            *pos = Position(true, loc()->fieldMinX(), gkYabs, 0);
+            *pos = Position(true, loc()->fieldMinX() + 0.05f, gkYabs, 0);
             *ang = Angle(true, float(M_PI_2));
         }else{
-            *pos = Position(true, loc()->fieldMinX(), 0, 0);
+            *pos = Position(true, loc()->fieldMinX() + 0.05f, 0, 0);
             *ang = Angle(true, float(M_PI_2));
         }
     }
