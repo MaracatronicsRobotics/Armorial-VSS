@@ -42,7 +42,7 @@ private:
     bool reduceOffset;
     Position behindBall;
     float ballOffset;
-    bool ballPlayerInterceptTheirGoal();
+    bool posPlayerInterceptTheirGoal(Position pos);
 
 public:
     Behaviour_Assistant();

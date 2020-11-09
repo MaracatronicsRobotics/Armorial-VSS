@@ -2,7 +2,7 @@
 
 #define BALLPREVISION_MINVELOCITY 0.02f
 #define BALLPREVISION_VELOCITY_FACTOR 3.0f
-#define BALLPREVISION_FACTOR_LIMIT 0.15f
+#define BALLPREVISION_FACTOR_LIMIT 0.18f
 
 QString Behaviour_Assistant::name() {
     return "Behaviour_Assistant";
@@ -118,18 +118,19 @@ void Behaviour_Assistant::run(){
         if((WR::Utils::isPointAtLine(_aimPosition, ballProjection, player()->position()) && playerBehindBall && player()->isNearbyPosition(ballProjection, 0.25f)) ||
                 (player()->isNearbyPosition(behindBall, 0.02f) && playerBehindBall) ||
                 (playerBehindBall && player()->distBall() >= 0.16f && player()->isNearbyPosition(loc()->ball(), 0.18f)) ||
-                (ballPlayerInterceptTheirGoal() && playerBehindBall && player()->distBall() >= 0.1f && player()->isNearbyPosition(loc()->ball(), 0.2f))){
+                (posPlayerInterceptTheirGoal(ballProjection) && playerBehindBall && player()->distBall() >= 0.1f && player()->isNearbyPosition(loc()->ball(), 0.2f)) ||
+                loc()->ballVelocity().abs() < BALLPREVISION_MINVELOCITY){
             reduceOffset = true;
             if(ballOffset > 0.04f) ballOffset = 0.04f;
         }
         //if we should make our player get closer to ball
     }else{
         //if our player is too far from ballProjection: stop reducing offset
-        if(player()->distanceTo(loc()->ball()) > 0.5f || (!playerBehindBall || (playerBehindBall && player()->distBall() < 0.032f && !ballPlayerInterceptTheirGoal()))){
+        if(player()->distanceTo(loc()->ball()) > 0.5f || (!playerBehindBall || (playerBehindBall && player()->distBall() < 0.032f && !posPlayerInterceptTheirGoal(ballProjection)))){
             reduceOffset = false;
         }
         //if ballOffset is bigger than 0.035 and our player is very close to ballProjection: go to ball
-        else if(ballOffset > 0.035f && player()->distanceTo(ballProjection) < 0.045f){
+        else if((ballOffset > 0.035f && player()->distanceTo(ballProjection) < 0.045f) || loc()->ballVelocity().abs() < BALLPREVISION_MINVELOCITY || posPlayerInterceptTheirGoal(ballProjection)){
             ballOffset = 0.01f;
         }
         //if our player is no longer very close to ball: increase a little bit ballOffset
@@ -156,7 +157,7 @@ void Behaviour_Assistant::run(){
     //setting skill goTo velocity factor
     _sk_goTo->setMinVelocity(0.7f);
     float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
-    WR::Utils::limitValue(&velocityNeeded, 1.5f, 2.0f);
+    WR::Utils::limitValue(&velocityNeeded, 1.5f, 1.8f);
     if(!isnanf(velocityNeeded)){
         _sk_goTo->setGoToVelocityFactor(velocityNeeded);
     }else{
@@ -186,7 +187,7 @@ void Behaviour_Assistant::run(){
             }
         }
         //SPIN
-        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && ballPlayerInterceptTheirGoal())){
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && posPlayerInterceptTheirGoal(loc()->ball()))){
             bool spinDirection = setSpinDirection();
             if((fabs(player()->position().y()) > fabs(loc()->ball().y()))){
                 _sk_spin->setClockWise(!spinDirection);
@@ -216,7 +217,7 @@ void Behaviour_Assistant::run(){
             }
         }
         //SPIN
-        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && ballPlayerInterceptTheirGoal())){
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && posPlayerInterceptTheirGoal(loc()->ball()))){
             bool spinDirection = setSpinDirection();
             if((fabs(player()->position().y()) > fabs(loc()->ball().y()))){
                 _sk_spin->setClockWise(!spinDirection);
@@ -244,7 +245,7 @@ void Behaviour_Assistant::run(){
             _skill = ROT;
         }
         //SPIN
-        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && ballPlayerInterceptTheirGoal())){
+        if((!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) && loc()->isInsideTheirArea(player()->position()) && player()->isNearbyPosition(loc()->ball(), 0.08f) && posPlayerInterceptTheirGoal(loc()->ball()))){
             bool spinDirection = setSpinDirection();
             if((fabs(player()->position().y()) > fabs(loc()->ball().y()))){
                 _sk_spin->setClockWise(!spinDirection);
@@ -263,8 +264,8 @@ void Behaviour_Assistant::run(){
     }
 }
 
-bool Behaviour_Assistant::ballPlayerInterceptTheirGoal(){
-    Position interceptionPoint = WR::Utils::hasInterceptionSegments(player()->position(), loc()->ball(), loc()->theirGoalLeftPost(), loc()->theirGoalRightPost());
+bool Behaviour_Assistant::posPlayerInterceptTheirGoal(Position pos){
+    Position interceptionPoint = WR::Utils::hasInterceptionSegments(player()->position(), pos, loc()->theirGoalLeftPost(), loc()->theirGoalRightPost());
     if(fabs(interceptionPoint.y()) <= fabs(loc()->theirGoalLeftPost().y())) return true;
     else return false;
 }
