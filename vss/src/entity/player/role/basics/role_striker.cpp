@@ -38,8 +38,8 @@ void Role_Striker::configure(){
 
 void Role_Striker::run(){
     if(!canGoBackToNormalGame){
+        timer.stop();
         if(timer.timesec() > 4){
-            timer.stop();
             canGoBackToNormalGame = true;
         }
         return;

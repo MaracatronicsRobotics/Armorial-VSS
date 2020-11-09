@@ -36,8 +36,8 @@ void Role_Supporter::configure(){
 }
 void Role_Supporter::run(){
     if(!canGoBackToNormalGame){
+        timer.stop();
         if(timer.timesec() > 4){
-            timer.stop();
             canGoBackToNormalGame = true;
         }
         return;

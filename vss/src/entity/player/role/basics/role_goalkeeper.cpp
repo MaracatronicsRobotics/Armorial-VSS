@@ -51,8 +51,8 @@ void Role_Goalkeeper::run(){
     if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
         setBehaviour(BHV_GK);
     }else{
+        timer.stop();
         if(timer.timesec() > 4){
-            timer.stop();
             canGoBackToNormalGame = true;
         }
     }

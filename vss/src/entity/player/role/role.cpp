@@ -92,8 +92,8 @@ void Role::runRole(){
     }
 
     if(!canGoBack){
+        timer.stop();
         if(timer.timesec() > 3){
-            timer.stop();
             canGoBack = true;
         }
     }

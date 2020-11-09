@@ -75,9 +75,9 @@ void Playbook_Supporter::run(int numPlayers) {
 
     // Check if signal has been received
     if(changedAssistBarrier){
+        timer.stop();
         if(timer.timesec() >= 4){
             changedAssistBarrier = false;
-            timer.stop();
         }
     }
 
