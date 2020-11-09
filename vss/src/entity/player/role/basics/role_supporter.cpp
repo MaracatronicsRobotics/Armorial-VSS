@@ -434,7 +434,7 @@ void Role_Supporter::freeBall(Position *pos, Angle *ang, VSSRef::Quadrant quadra
     }
 }
 
-void Role_Supporter::kickOff(Position *pos, Angle *ang){
+void Role_Supporter::kickOff(Position *pos, Angle *ang, bool isFirstKickOff){
     float barrPosOffsetX = 0.25f, assistPosOffsetX = 0.25f;
 
     //update isNormalGame variable (to false if foul is different from KICKOFF, STOP, GAME_ON or GOALKICK - because this role doesn't take this foul)
@@ -457,15 +457,48 @@ void Role_Supporter::kickOff(Position *pos, Angle *ang){
             *ang = Angle(true, 0);
         }
     }else{
-        //if our side is left
+        //find their goalkeeper
+        Position gkPos;
+        quint8 gkid = 100;
+        for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+            if(PlayerBus::theirPlayerAvailable(x)){
+                if(isReallyInsideTheirArea(x)){
+                    gkid = x;
+                    break;
+                }
+            }
+        }
+        if(!PlayerBus::theirPlayerAvailable(gkid)) gkPos = loc()->theirGoal();
+        else gkPos = PlayerBus::theirPlayer(gkid)->position();
+        //if our side is right
         if(loc()->ourSide().isRight()){
-            //assistant near the middle of the field
-            *pos = Position(true, assistPosOffsetX, 0, 0);
-            *ang = Angle(true, Angle::pi);
+            if(weTake && !isFirstKickOff){
+                if(gkPos.y() > 0){
+                    *pos = WR::Utils::threePoints(loc()->fieldCenter(), loc()->fieldLeftBottomCorner(), 0.06f, Angle::pi);
+                    *ang = WR::Utils::getAngle(*pos, loc()->fieldLeftBottomCorner());
+                }else{
+                    *pos = WR::Utils::threePoints(loc()->fieldCenter(), loc()->fieldLeftTopCorner(), 0.06f, Angle::pi);
+                    *ang = WR::Utils::getAngle(*pos, loc()->fieldLeftTopCorner());
+                }
+            }else{
+                //assistant near the middle of the field
+                *pos = Position(true, assistPosOffsetX, 0, 0);
+                *ang = Angle(true, Angle::pi);
+            }
         }else{
-            //assistant near the middle of the field
-            *pos = Position(true, -1*assistPosOffsetX, 0, 0);
-            *ang = Angle(true, 0);
+            if(weTake && !isFirstKickOff){
+                if(gkPos.y() > 0){
+                    *pos = WR::Utils::threePoints(loc()->fieldCenter(), loc()->fieldRightBottomCorner(), 0.06f, Angle::pi);
+                    *ang = WR::Utils::getAngle(*pos, loc()->fieldRightBottomCorner());
+                }else{
+                    *pos = WR::Utils::threePoints(loc()->fieldCenter(), loc()->fieldRightTopCorner(), 0.06f, Angle::pi);
+                    *ang = WR::Utils::getAngle(*pos, loc()->fieldRightTopCorner());
+                }
+            }else{
+                //assistant near the middle of the field
+                *pos = Position(true, -1*assistPosOffsetX, 0, 0);
+                *ang = Angle(true, 0);
+            }
         }
     }
 }
@@ -516,7 +549,9 @@ void Role_Supporter::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, V
         }
         //KICK OFF
         else if(foul == VSSRef::KICKOFF){
-            kickOff(&pos, &ang);
+            bool firstKickOff = false;
+            if(teamColor == VSSRef::NONE) firstKickOff = true;
+            kickOff(&pos, &ang, firstKickOff);
             emit emitPosition(player()->playerId(), pos, ang);
         }
     }

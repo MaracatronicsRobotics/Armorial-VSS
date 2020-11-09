@@ -50,7 +50,7 @@ private:
     void goalKick(Position* pos, Angle* ang);
     void gameOn();
     void freeBall(Position* pos, Angle* ang, VSSRef::Quadrant quadrant);
-    void kickOff(Position* pos, Angle* ang);
+    void kickOff(Position* pos, Angle* ang, bool isFirstKickOff);
     bool isReallyInsideTheirArea(quint8 id);
     void isStuck();
 
