@@ -1,6 +1,6 @@
 #include "constants.h"
 
-int VSSConstants::_threadFrequency = 60; // frequency of threads
+int VSSConstants::_threadFrequency = 300; // frequency of threads
 int VSSConstants::_qtPlayers       = 3;  // num of players
 
 // Referee
