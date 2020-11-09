@@ -162,6 +162,7 @@ void Behaviour_Assistant::run(){
     }else{
         _sk_goTo->setGoToVelocityFactor(2.0f);
     }
+    _sk_goTo->setGoToVelocityFactor(1.5f);
 
     //setting skill rotateTo
     _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
