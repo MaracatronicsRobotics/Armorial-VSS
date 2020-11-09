@@ -75,10 +75,25 @@ void Role_Supporter::run(){
     }
     case(ASSIST_PREDOMINANT):{
         if(canGoBackToNormalGame){
+            isStuck();
             setBehaviour(BHV_ASSISTANT);
         }
         break;
     }
+    }
+}
+
+void Role_Supporter::isStuck(){
+    if(!player()->isNearbyPosition(loc()->ball(), 0.12f) && player()->velocity().abs() <= 0.01f){
+        timerToChangeBhv.stop();
+        if(timerToChangeBhv.timesec() >= 4){
+            std::cout << "TROCAAAA\n";
+            emit sendSignal();
+        }else{
+            std::cout << " " << std::endl;
+        }
+    }else{
+        timerToChangeBhv.start();
     }
 }
 
@@ -459,6 +474,7 @@ void Role_Supporter::kickOff(Position *pos, Angle *ang){
 }
 
 void Role_Supporter::gameOn(){
+    timerToChangeBhv.start();
     if(!isNormalGame){
         canGoBackToNormalGame = false;
         timer.start();
