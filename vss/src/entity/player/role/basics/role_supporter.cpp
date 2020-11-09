@@ -87,10 +87,7 @@ void Role_Supporter::isStuck(){
     if(!player()->isNearbyPosition(loc()->ball(), 0.12f) && player()->velocity().abs() <= 0.01f){
         timerToChangeBhv.stop();
         if(timerToChangeBhv.timesec() >= 4){
-            std::cout << "TROCAAAA\n";
             emit sendSignal();
-        }else{
-            std::cout << " " << std::endl;
         }
     }else{
         timerToChangeBhv.start();

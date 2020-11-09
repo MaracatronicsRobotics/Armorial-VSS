@@ -45,8 +45,8 @@ void Entity::run() {
             long rest = loopTime() - t.timemsec();
             if(rest >= 0)
                 msleep(rest);
-            else
-                if(!(entityType() == Entity::ENT_REFEREE)) std::cout << "[TIMER OVEREXTENDED] " << name().toStdString() << " for " <<  -rest  << " ms.\n";
+            //else
+                //if(!(entityType() == Entity::ENT_REFEREE)) std::cout << "[TIMER OVEREXTENDED] " << name().toStdString() << " for " <<  -rest  << " ms.\n";
         }
     }
     finalization();
