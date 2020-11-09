@@ -145,7 +145,7 @@ void Behaviour_Barrier::run(){
     }
     */
     //Transitions without intercept skill
-    if(player()->distBall() <=0.075f){ //hyperparameter
+    if(player()->distBall() <=0.075f && (player()->distOurGoal() < WR::Utils::distance(loc()->ball(), loc()->ourGoal()))){ //hyperparameter
         //std::cout<<"SPIN\n";
         enableTransition(STATE_SPIN);
     } else {
