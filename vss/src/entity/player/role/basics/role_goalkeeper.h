@@ -50,7 +50,7 @@ private:
     int lastFoul; //it can be FREE_KICK = 0, PENALTY_KICK = 1, GOAL_KICK = 2, FREE_BALL = 3, KICKOFF = 4
     bool isNormalGame, canGoBackToNormalGame;
     bool weTake;
-    long int counter;
+    Timer timer;
 
     // Inherited functions
     void configure();

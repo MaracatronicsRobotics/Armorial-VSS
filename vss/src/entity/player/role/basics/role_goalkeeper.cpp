@@ -44,7 +44,6 @@ void Role_Goalkeeper::configure(){
     canGoBackToNormalGame = true;
     lastFoul = VSSRef::KICKOFF;
     weTake = true;
-    counter = 0;
 }
 
 void Role_Goalkeeper::run(){
@@ -52,11 +51,9 @@ void Role_Goalkeeper::run(){
     if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
         setBehaviour(BHV_GK);
     }else{
-        if(counter >= 300){
-            counter = 0;
+        if(timer.timesec() > 4){
+            timer.stop();
             canGoBackToNormalGame = true;
-        }else{
-            counter++;
         }
     }
 }
@@ -180,6 +177,7 @@ bool Role_Goalkeeper::ourTeamShouldTake(VSSRef::Color teamColor){
 void Role_Goalkeeper::gameOn(){
     if(!isNormalGame){
         canGoBackToNormalGame = false;
+        timer.start();
         if(weTake){
             setBehaviour(BHV_TAKEFOUL);
         }else{

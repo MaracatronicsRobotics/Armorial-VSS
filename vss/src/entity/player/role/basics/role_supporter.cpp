@@ -22,7 +22,6 @@ void Role_Supporter::configure(){
     canGoBackToNormalGame = true;
     lastFoul = VSSRef::KICKOFF;
     weTake = true;
-    counter = 0;
 
     if(_positioning == BARRIER_PREDOMINANT){
         setBehaviour(BHV_BARRIER); //initial behaviour
@@ -37,11 +36,9 @@ void Role_Supporter::configure(){
 }
 void Role_Supporter::run(){
     if(!canGoBackToNormalGame){
-        if(counter >= 300){
-            counter = 0;
+        if(timer.timesec() > 4){
+            timer.stop();
             canGoBackToNormalGame = true;
-        }else{
-            counter++;
         }
         return;
     }
@@ -464,6 +461,7 @@ void Role_Supporter::kickOff(Position *pos, Angle *ang){
 void Role_Supporter::gameOn(){
     if(!isNormalGame){
         canGoBackToNormalGame = false;
+        timer.start();
         if(weTake){
             setBehaviour(BHV_TAKEFOUL);
         }else{

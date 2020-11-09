@@ -37,7 +37,7 @@ private:
     quint8 _assistantId;
     quint8 _barrierId;
     quint8 _goalkeeperId;
-    int timer;
+    Timer timer;
 
     bool changedAssistBarrier;
     bool takeFirstIds;

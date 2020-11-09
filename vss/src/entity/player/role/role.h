@@ -116,7 +116,7 @@ private:
     bool _goBack;
 
     //timer
-    int counter;
+    Timer timer;
     bool canGoBack;
 
 public slots:

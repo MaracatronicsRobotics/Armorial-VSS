@@ -53,8 +53,6 @@ void Playbook_Supporter::configure(int numPlayers) {
         _goalkeeperId = DIST_INVALID_ID;
 
         takeFirstIds = false;
-
-        timer = 0;
         changedAssistBarrier = false;
     }
 
@@ -77,10 +75,9 @@ void Playbook_Supporter::run(int numPlayers) {
 
     // Check if signal has been received
     if(changedAssistBarrier){
-        timer++;
-        if(timer >= 300){
+        if(timer.timesec() >= 4){
             changedAssistBarrier = false;
-            timer = 0;
+            timer.stop();
         }
     }
 
@@ -101,6 +98,7 @@ void Playbook_Supporter::receiveSignal(){
 
     if(!changedAssistBarrier){
         changedAssistBarrier = true;
+        timer.start();
         quint8 assist = _assistantId;
         _assistantId = _barrierId;
         _barrierId = assist;

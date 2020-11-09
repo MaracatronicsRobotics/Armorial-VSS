@@ -76,7 +76,6 @@ void Role::initialize(VSSTeam *ourTeam, VSSTeam *theirTeam, Locations *loc, VSSR
     // Initialize
     _initialized = true;
 
-    counter = 0;
     canGoBack = false;
     _goBack = false;
 }
@@ -93,9 +92,8 @@ void Role::runRole(){
     }
 
     if(!canGoBack){
-        counter++;
-        if(counter >= 200){
-            counter = 0;
+        if(timer.timesec() > 3){
+            timer.stop();
             canGoBack = true;
         }
     }
@@ -119,6 +117,7 @@ void Role::runRole(){
 
         if(_retreated && canGoBack){
             canGoBack = false;
+            timer.start();
             _bh_gb->setStart(true);
         }
         _retreated = _bh_gb->getDone();

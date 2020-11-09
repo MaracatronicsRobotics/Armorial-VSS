@@ -38,11 +38,9 @@ void Role_Striker::configure(){
 
 void Role_Striker::run(){
     if(!canGoBackToNormalGame){
-        if(counter >= 300){
-            counter = 0;
+        if(timer.timesec() > 4){
+            timer.stop();
             canGoBackToNormalGame = true;
-        }else{
-            counter++;
         }
         return;
     }else{
@@ -175,6 +173,7 @@ void Role_Striker::goalKick(Position *pos, Angle *ang){
 void Role_Striker::gameOn(){
     if(!isNormalGame){
         canGoBackToNormalGame = false;
+        timer.start();
         if(weTake){
             setBehaviour(BHV_TAKEFOUL);
         }else{
