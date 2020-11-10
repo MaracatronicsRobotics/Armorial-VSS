@@ -273,7 +273,7 @@ void Role_Supporter::penaltyKick(Position* pos, Angle* ang){
 }
 
 void Role_Supporter::goalKick(Position *pos, Angle *ang){
-    float defenseXabs = (loc()->fieldMaxX() - 0.18f), defenseYabs = 0.3f;
+    float defenseXabs = (loc()->fieldMaxX() - 0.23f), defenseYabs = 0.1f;
     float nearTheMiddleXabs = (loc()->fieldMaxX()/2 - 0.15f);
 
     //update isNormalGame variable (to false if foul is different from KICKOFF, STOP, GAME_ON or GOALKICK - because this role doesn't take this foul)
