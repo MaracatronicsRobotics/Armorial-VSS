@@ -124,7 +124,7 @@ void VSS::setupOurPlayers(){
         NavigationAlgorithm *navAlg = new RRT();
 
         // Create player pointer
-        VSSPlayer *player = new VSSPlayer(playerList.at(i), _ourTeam, _ctr, new Role_Halt(), new PID(4.0, 0.1, 0.0, 8*GEARSystem::Angle::pi, -8*GEARSystem::Angle::pi), navAlg);
+        VSSPlayer *player = new VSSPlayer(playerList.at(i), _ourTeam, _ctr, new Role_Halt(), new PID(4.0, 0.0, 0.0, 8*GEARSystem::Angle::pi, -8*GEARSystem::Angle::pi), navAlg);
 
         // Enable player
         player->enable(true);
