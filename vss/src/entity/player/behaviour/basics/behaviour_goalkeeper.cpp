@@ -23,7 +23,7 @@
 
 #define GOAL_OFFSET 0.01f
 
-#define BALLPREVISION_MINVELOCITY 0.03f
+#define BALLPREVISION_MINVELOCITY 0.01f
 #define BALLPREVISION_VELOCITY_FACTOR 3.0f
 #define BALLPREVISION_FACTOR_LIMIT 0.15f
 
@@ -62,13 +62,11 @@ void Behaviour_Goalkeeper::configure() {
 }
 
 void Behaviour_Goalkeeper::run() {
-    float xPos, distFromBack = 0.07f, marginFromPost = 0.02f;
+    float xPos, distFromBack = 0.07f;
     Position intercept1, intercept2;
     bool isComing = false;
 
-
-    if(abs(loc()->ball().y()) >= 0.35f) marginFromPost = 0.04f;
-
+    //defining interception points (send to skill intercept)
     if(loc()->ourSide().isLeft()){
         if(loc()->ballVelocity().y() <= 0) isComing = true;
         else isComing = false;
@@ -134,6 +132,7 @@ void Behaviour_Goalkeeper::run() {
             intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);*/
         }
     }
+    //limit Y value
     float yLim = 0.31f;
     if(intercept1.y() < -yLim){
         intercept1.setPosition(intercept1.x(), -yLim, intercept1.z());
@@ -150,6 +149,7 @@ void Behaviour_Goalkeeper::run() {
 
     xPos = intercept1.x();
 
+    //ball projection
     Position goalProjection;
     Position projectedBall = loc()->ball();
     goalProjection.setUnknown();
@@ -166,19 +166,19 @@ void Behaviour_Goalkeeper::run() {
         const Position delta(true, factor*velUni.x(), factor*velUni.y(), 0.0);
         Position projectedPos(true, loc()->ball().x()+delta.x(), loc()->ball().y()+delta.y(), 0.0);
         projectedBall = projectedPos;
-
-        goalProjection = WR::Utils::hasInterceptionSegments(loc()->ball(), projectedBall, intercept1, intercept2);
     }else{
-        if(loc()->isInsideOurArea(loc()->ball())){
-            //goalProjection = loc()->ball();
-            goalProjection = WR::Utils::threePoints(loc()->ball(), loc()->ourGoal(), 0.01f, 0);
-        }
+        projectedBall = loc()->ball();
     }
-    //if interception isn't inside our defense area: consider only ball position
-    if(!(abs(goalProjection.y()) < loc()->fieldDefenseLength()/2.0f) || !goalProjection.isValid() || goalProjection.isUnknown()){
-        goalProjection = WR::Utils::projectPointAtSegment(intercept1, intercept2, loc()->ball());
+    float ballY = projectedBall.y();
+    if(loc()->ourSide().isLeft()){
+        WR::Utils::limitValue(&ballY, loc()->ourGoalLeftPost().y(), loc()->ourGoalRightPost().y());
+    }else{
+        WR::Utils::limitValue(&ballY, loc()->ourGoalRightPost().y(), loc()->ourGoalLeftPost().y());
     }
+    Position followBallY(true, intercept1.x(), ballY, 0);
 
+
+    //intercept velocity factor
     float maxDist = WR::Utils::distance(Position(true, loc()->fieldMaxX(), loc()->fieldMaxY(), 0), Position(true, loc()->fieldMinX(), 0, 0));
     float fac;
     if(maxDist < 0.2f) fac = 1.0f;
@@ -186,18 +186,36 @@ void Behaviour_Goalkeeper::run() {
     float velFacIntercept = 2.0f + 2.0f*fac;
 
     //transitions
-    if (player()->distanceTo(goalProjection) < 0.05f && WR::Utils::distance(goalProjection, loc()->ball()) < 0.1f) {
+    if (player()->distBall() <= 0.1f) {
         bool spinDirection = setSpinDirection();
         _sk_spin->setClockWise(spinDirection);
         enableTransition(STATE_SPIN);
-    }else{
-        _sk_goto->setGoToPos(goalProjection);
-        _sk_goto->setGoToVelocityFactor(2.0f);
-        _sk_goto->setMinVelocity(0.7f);
+    }else if(isBallComingToGoal()){
         _sk_intercept->selectVelocityNeeded(false);
         _sk_intercept->setInterceptSegment(intercept1, intercept2);
         _sk_intercept->setVelocityFactor(velFacIntercept);
         enableTransition(STATE_INTERCEPT);
+    }else{
+        _sk_goto->setGoToPos(followBallY);
+        _sk_goto->setGoToVelocityFactor(2.0f);
+        _sk_goto->setMinVelocity(0.7f);
+        enableTransition(STATE_GOTO);
+    }
+}
+
+bool Behaviour_Goalkeeper::isBallComingToGoal(){
+    if(loc()->ourSide().isLeft()){
+        if(loc()->ballVelocity().x() < 0){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        if(loc()->ballVelocity().x() > 0){
+            return true;
+        }else{
+            return false;
+        }
     }
 }
 
@@ -227,13 +245,3 @@ bool Behaviour_Goalkeeper::setSpinDirection() {
         }
     }
 }
-
-
-/*}else if( fabs(loc()->ball().x() - loc()->ourGoal().x()) < 0.1 && (loc()->ball().y() > -0.2f && loc()->ball().y() < 0.2f ) ){
-        _sk_goto->setGoToPos(loc()->ball());
-        _sk_goto->setGoToVelocityFactor(2.0f);
-        _sk_goto->setMinVelocity(0.7f);
-        //_sk_intercept->selectVelocityNeeded(false);
-        //_sk_intercept->setInterceptSegment(intercept1, intercept2);
-        //_sk_intercept->setVelocityFactor(velFacIntercept);
-        enableTransition(STATE_GOTO);*/

@@ -47,40 +47,31 @@ void Role_Goalkeeper::configure(){
     canGoBackToNormalGame = true;
     lastFoul = VSSRef::KICKOFF;
     weTake = true;
+    limitTimer = 4.0f;
 }
 
 void Role_Goalkeeper::run(){
-    //if counter/timer is over or the goalkeeper has got out of our defense area
-    if(flag){
-        setBehaviour(BHV_PUSH);
-        if(!tset){
-            timer.start();
-            tset = 1;
-        }else{
-            timer.stop();
-            if(timer.timesec() > 1){
-                flag = 0;
-            }
-        }
+    if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
+        setBehaviour(BHV_GK);
     }else{
-        if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
-            setBehaviour(BHV_GK);
-        }else{
-            timer.stop();
-            if(timer.timesec() > 4){
-                canGoBackToNormalGame = true;
-            }
+        timer.stop();
+        if(timer.timesec() > limitTimer){
+            canGoBackToNormalGame = true;
         }
     }
+
 }
 
 void Role_Goalkeeper::penaltyKick(Position* pos, Angle* ang){
     //update isNormalGame variable (to false if foul is different from KICKOFF, STOP, GAME_ON, PENALTY)
-    isNormalGame = true;
+    isNormalGame = false;
     //update lastFoul variable (last foul different from GAME_ON, STOP or KICK_OFF)
     lastFoul = VSSRef::PENALTY_KICK;
     //set behaviour doNothing so our player doesn't move from position emmited
     setBehaviour(BHV_DONOTHING);
+    //if it's a penalty against us
+    if(!weTake) flagPenalti = 1;
+    else flagPenalti = 0;
 
     //put our goalkeeper in the middle of the goal
     //if our side is right
@@ -94,8 +85,6 @@ void Role_Goalkeeper::penaltyKick(Position* pos, Angle* ang){
         *ang = Angle(true, 0);
     }
 
-    flag = 1;
-    tset = 0;
 }
 
 void Role_Goalkeeper::goalKick(Position* pos, Angle* ang){
@@ -219,8 +208,15 @@ void Role_Goalkeeper::gameOn(){
         canGoBackToNormalGame = false;
         timer.start();
         if(weTake){
+            limitTimer = 4;
             setBehaviour(BHV_TAKEFOUL);
         }else{
+            //if penalty against us
+            if(flagPenalti){
+                limitTimer = 1;
+                setBehaviour(BHV_PUSH);
+            }
+            limitTimer = 4;
             setBehaviour(BHV_DONOTHING);
         }
     }else{
