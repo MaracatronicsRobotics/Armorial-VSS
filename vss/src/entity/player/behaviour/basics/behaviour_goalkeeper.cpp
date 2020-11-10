@@ -64,34 +64,91 @@ void Behaviour_Goalkeeper::configure() {
 void Behaviour_Goalkeeper::run() {
     float xPos, distFromBack = 0.07f, marginFromPost = 0.02f;
     Position intercept1, intercept2;
+    bool isComing = false;
+
 
     if(abs(loc()->ball().y()) >= 0.35f) marginFromPost = 0.04f;
 
     if(loc()->ourSide().isLeft()){
+        if(loc()->ballVelocity().y() <= 0) isComing = true;
+        else isComing = false;
+
+        Position r1(true, loc()->fieldMinX() + distFromBack, loc()->fieldMinY(), 0);
+        Position r2(true, loc()->fieldMinX() + distFromBack, loc()->fieldMaxY(), 0);
         if(loc()->ball().y() < 0){
-            intercept1 = WR::Utils::threePoints(loc()->ourGoalLeftPost(), loc()->ball(), distFromBack, 0);
-            intercept1.setPosition(intercept1.x(), intercept1.y() - marginFromPost, 0);
-            intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
+            intercept1 = WR::Utils::hasInterceptionSegments(r1, r2, loc()->ourGoalLeftPost(), loc()->ball());
+            if(intercept1.isValid()){
+                //intercept1 = WR::Utils::threePoints(loc()->ourGoalLeftPost(), loc()->ball(), 0, 0);
+                //intercept1.setPosition(intercept1.x() + distFromBack, intercept1.y() - marginFromPost, 0);
+                intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
+            }else{
+                intercept1 = loc()->ourGoalLeftPost();
+                intercept2 = loc()->ourGoalRightPost();
+            }
         }else{
-            intercept1 = WR::Utils::threePoints(loc()->ourGoalRightPost(), loc()->ball(), distFromBack, 0);
-            intercept1.setPosition(intercept1.x(), intercept1.y() + marginFromPost, 0);
-            intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
+            intercept1 = WR::Utils::hasInterceptionSegments(r1, r2, loc()->ourGoalRightPost(), loc()->ball());
+            if(intercept1.isValid()){
+                //intercept1 = WR::Utils::threePoints(loc()->ourGoalLeftPost(), loc()->ball(), 0, 0);
+                //intercept1.setPosition(intercept1.x() + distFromBack, intercept1.y() - marginFromPost, 0);
+                intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
+            }else{
+                intercept1 = loc()->ourGoalLeftPost();
+                intercept2 = loc()->ourGoalRightPost();
+            }
+            /*intercept1 = WR::Utils::threePoints(loc()->ourGoalRightPost(), loc()->ball(), 0, 0);
+            intercept1.setPosition(intercept1.x() + distFromBack, intercept1.y() + marginFromPost, 0);
+            intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);*/
         }
         //xPos = loc()->fieldMinX() + 0.05f;
     }else{
-        if(loc()->ball().y() < 0){
-            intercept1 = WR::Utils::threePoints(loc()->ourGoalRightPost(), loc()->ball(), distFromBack, 0);
-            intercept1.setPosition(intercept1.x(), intercept1.y() - marginFromPost, 0);
-            intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
-        }else{
-            intercept1 = WR::Utils::threePoints(loc()->ourGoalLeftPost(), loc()->ball(), distFromBack, 0);
-            intercept1.setPosition(intercept1.x(), intercept1.y() + marginFromPost, 0);
-            intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
-        }
-        //xPos = loc()->fieldMaxX() - 0.05f;
-    }
-    xPos = intercept1.x();
+        if(loc()->ballVelocity().y() >= 0) isComing = true;
+        else isComing = false;
 
+        Position r1(true, loc()->fieldMaxX() - distFromBack, loc()->fieldMinY(), 0);
+        Position r2(true, loc()->fieldMaxX() - distFromBack, loc()->fieldMaxY(), 0);
+        if(loc()->ball().y() < 0){
+            intercept1 = WR::Utils::hasInterceptionSegments(r1, r2, loc()->ourGoalRightPost(), loc()->ball());
+            if(intercept1.isValid()){
+                //intercept1 = WR::Utils::threePoints(loc()->ourGoalLeftPost(), loc()->ball(), 0, 0);
+                //intercept1.setPosition(intercept1.x() + distFromBack, intercept1.y() - marginFromPost, 0);
+                intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
+            }else{
+                intercept1 = loc()->ourGoalLeftPost();
+                intercept2 = loc()->ourGoalRightPost();
+            }
+            /*intercept1 = WR::Utils::threePoints(loc()->ourGoalRightPost(), loc()->ball(), 0, 0);
+            intercept1.setPosition(intercept1.x() - distFromBack, intercept1.y() - marginFromPost, 0);
+            intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);*/
+        }else{
+            intercept1 = WR::Utils::hasInterceptionSegments(r1, r2, loc()->ourGoalLeftPost(), loc()->ball());
+            if(intercept1.isValid()){
+                //intercept1 = WR::Utils::threePoints(loc()->ourGoalLeftPost(), loc()->ball(), 0, 0);
+                //intercept1.setPosition(intercept1.x() + distFromBack, intercept1.y() - marginFromPost, 0);
+                intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);
+            }else{
+                intercept1 = loc()->ourGoalLeftPost();
+                intercept2 = loc()->ourGoalRightPost();
+            }
+            /*intercept1 = WR::Utils::threePoints(loc()->ourGoalLeftPost(), loc()->ball(), 0, 0);
+            intercept1.setPosition(intercept1.x() - distFromBack, intercept1.y() + marginFromPost, 0);
+            intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);*/
+        }
+    }
+    float yLim = 0.31f;
+    if(intercept1.y() < -yLim){
+        intercept1.setPosition(intercept1.x(), -yLim, intercept1.z());
+        intercept2.setPosition(intercept2.x(), yLim, intercept2.z());
+    }else if(intercept1.y() > yLim){
+        intercept1.setPosition(intercept1.x(), yLim, intercept1.z());
+        intercept2.setPosition(intercept2.x(), -yLim, intercept2.z());
+    }
+
+    if(!isComing && loc()->isInsideTheirField(loc()->ball())){
+        intercept1.setPosition(intercept1.x(), 0.04f, intercept1.z());
+        intercept2.setPosition(intercept2.x(), -0.04f, intercept2.z());
+    }
+
+    xPos = intercept1.x();
 
     Position goalProjection;
     Position projectedBall = loc()->ball();
@@ -122,6 +179,12 @@ void Behaviour_Goalkeeper::run() {
         goalProjection = WR::Utils::projectPointAtSegment(intercept1, intercept2, loc()->ball());
     }
 
+    float maxDist = WR::Utils::distance(Position(true, loc()->fieldMaxX(), loc()->fieldMaxY(), 0), Position(true, loc()->fieldMinX(), 0, 0));
+    float fac;
+    if(maxDist < 0.2f) fac = 1.0f;
+    else fac = 1 - (WR::Utils::distance(loc()->ball(), loc()->ourGoal())/maxDist);
+    float velFacIntercept = 2.0f + 2.0f*fac;
+
     //transitions
     if (player()->distanceTo(goalProjection) < 0.05f && WR::Utils::distance(goalProjection, loc()->ball()) < 0.1f) {
         bool spinDirection = setSpinDirection();
@@ -129,9 +192,12 @@ void Behaviour_Goalkeeper::run() {
         enableTransition(STATE_SPIN);
     }else{
         _sk_goto->setGoToPos(goalProjection);
-        _sk_goto->setGoToVelocityFactor(1.8f);
+        _sk_goto->setGoToVelocityFactor(2.0f);
         _sk_goto->setMinVelocity(0.7f);
-        enableTransition(STATE_GOTO);
+        _sk_intercept->selectVelocityNeeded(false);
+        _sk_intercept->setInterceptSegment(intercept1, intercept2);
+        _sk_intercept->setVelocityFactor(velFacIntercept);
+        enableTransition(STATE_INTERCEPT);
     }
 }
 
