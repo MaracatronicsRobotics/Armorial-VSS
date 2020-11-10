@@ -21,6 +21,8 @@
 
 #include "role_goalkeeper.h"
 
+
+
 QString Role_Goalkeeper::name(){
     return "Role_Goalkeeper";
 }
@@ -29,13 +31,14 @@ Role_Goalkeeper::Role_Goalkeeper() {
     _bh_gk = nullptr;
     _bh_dn = nullptr;
     _bh_tf = nullptr;
+    _bh_pb = nullptr;
 }
 
 void Role_Goalkeeper::initializeBehaviours(){
     usesBehaviour(BHV_GK, _bh_gk = new Behaviour_Goalkeeper());
     usesBehaviour(BHV_DONOTHING, _bh_dn = new Behaviour_DoNothing());
     usesBehaviour(BHV_TAKEFOUL, _bh_tf = new Behaviour_TakeFoul());
-
+    usesBehaviour(BHV_PUSH, _bh_pb = new Behaviour_PushBall());
 }
 
 void Role_Goalkeeper::configure(){
@@ -48,12 +51,25 @@ void Role_Goalkeeper::configure(){
 
 void Role_Goalkeeper::run(){
     //if counter/timer is over or the goalkeeper has got out of our defense area
-    if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
-        setBehaviour(BHV_GK);
+    if(flag){
+        setBehaviour(BHV_PUSH);
+        if(!tset){
+            timer.start();
+            tset = 1;
+        }else{
+            timer.stop();
+            if(timer.timesec() > 1){
+                flag = 0;
+            }
+        }
     }else{
-        timer.stop();
-        if(timer.timesec() > 4){
-            canGoBackToNormalGame = true;
+        if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
+            setBehaviour(BHV_GK);
+        }else{
+            timer.stop();
+            if(timer.timesec() > 4){
+                canGoBackToNormalGame = true;
+            }
         }
     }
 }
@@ -70,13 +86,16 @@ void Role_Goalkeeper::penaltyKick(Position* pos, Angle* ang){
     //if our side is right
     if(loc()->ourSide().isRight()){
         *pos = Position(true, loc()->fieldMaxX() - 0.05f, 0, 0);
-        *ang = Angle(true, float(M_PI_2));
+        *ang = Angle(true, 0);
     }
     //if our side is left
     else{
         *pos = Position(true, loc()->fieldMinX() + 0.05f, 0, 0);
-        *ang = Angle(true, float(M_PI_2));
+        *ang = Angle(true, 0);
     }
+
+    flag = 1;
+    tset = 0;
 }
 
 void Role_Goalkeeper::goalKick(Position* pos, Angle* ang){

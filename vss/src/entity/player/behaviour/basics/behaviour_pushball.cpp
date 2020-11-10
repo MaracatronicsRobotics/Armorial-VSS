@@ -34,7 +34,7 @@ void Behaviour_PushBall::configure(){
     usesSkill(_sk_pushBall = new Skill_PushBall());
 
     //initial skill
-    setInitialSkill(_sk_goTo);
+    setInitialSkill(_sk_pushBall);
 
     //transitions
     addTransition(STATE_ROTATE, _sk_goTo, _sk_rotateTo);
@@ -53,12 +53,19 @@ void Behaviour_PushBall::run(){
     _sk_rotateTo->setDesiredPosition(ball);
 
     //setting skill push
-    _sk_pushBall->setSpeedAndOmega(1.0, 0.0);
+    //_sk_pushBall->setSpeedAndOmega(1.0, 0.0);
 
     //transitions
+    if (player()->isLookingTo(loc()->ball(), Angle::pi / 2)) {
+        _sk_pushBall->setSpeedAndOmega(3.0f, 0.0f);
+    } else {
+        _sk_pushBall->setSpeedAndOmega(-3.0f, 0.0f);
+    }
+    /*
     if(player()->isLookingTo(ball)){
         enableTransition(STATE_PUSH);
     } else if(player()->isNearbyPosition(behindBall, 0.03f)){
         enableTransition(STATE_ROTATE);
     }
+    */
 }

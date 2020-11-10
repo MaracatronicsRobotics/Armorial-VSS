@@ -31,12 +31,14 @@ private:
     Behaviour_Goalkeeper *_bh_gk;
     Behaviour_DoNothing *_bh_dn;
     Behaviour_TakeFoul *_bh_tf;
+    Behaviour_PushBall *_bh_pb;
 
     // Behaviours Enum
     enum{
         BHV_GK,
         BHV_DONOTHING,
-        BHV_TAKEFOUL
+        BHV_TAKEFOUL,
+        BHV_PUSH
     };
 
     //variables and functions
@@ -46,6 +48,9 @@ private:
     void gameOn();
     void freeBall(Position* pos, Angle* ang, VSSRef::Quadrant quadrant);
     void kickOff(Position* pos, Angle* ang);
+
+    bool flag = 0;
+    bool tset = 0;
 
     int lastFoul; //it can be FREE_KICK = 0, PENALTY_KICK = 1, GOAL_KICK = 2, FREE_BALL = 3, KICKOFF = 4
     bool isNormalGame, canGoBackToNormalGame;

@@ -143,7 +143,7 @@ void Behaviour_Goalkeeper::run() {
         intercept2.setPosition(intercept2.x(), -yLim, intercept2.z());
     }
 
-    if(!isComing && loc()->isInsideTheirField(loc()->ball())){
+    if(!isComing && loc()->isInsideTheirField(loc()->ball()) ){
         intercept1.setPosition(intercept1.x(), 0.04f, intercept1.z());
         intercept2.setPosition(intercept2.x(), -0.04f, intercept2.z());
     }
@@ -228,3 +228,12 @@ bool Behaviour_Goalkeeper::setSpinDirection() {
     }
 }
 
+
+/*}else if( fabs(loc()->ball().x() - loc()->ourGoal().x()) < 0.1 && (loc()->ball().y() > -0.2f && loc()->ball().y() < 0.2f ) ){
+        _sk_goto->setGoToPos(loc()->ball());
+        _sk_goto->setGoToVelocityFactor(2.0f);
+        _sk_goto->setMinVelocity(0.7f);
+        //_sk_intercept->selectVelocityNeeded(false);
+        //_sk_intercept->setInterceptSegment(intercept1, intercept2);
+        //_sk_intercept->setVelocityFactor(velFacIntercept);
+        enableTransition(STATE_GOTO);*/
