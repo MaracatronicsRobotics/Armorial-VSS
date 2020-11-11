@@ -84,6 +84,23 @@ void Skill_InterceptBall::run() {
             finalReference.setPosition(_firstLimitationPoint.x(), ballY, 0);
         }
 
+        //left
+        if(loc()->ourSide().isLeft()){
+            if(loc()->ball().x() < loc()->ourGoal().x() + 0.1f){
+                float ballY = loc()->ball().y();
+                WR::Utils::limitValue(&ballY, _firstLimitationPoint.y(), _secondLimitationPoint.y());
+                finalReference.setPosition(_firstLimitationPoint.x(), ballY, 0);
+            }
+        }
+        //right
+        else{
+            if(loc()->ball().x() > loc()->ourGoal().x() - 0.06f){
+                float ballY = loc()->ball().y();
+                WR::Utils::limitValue(&ballY, _firstLimitationPoint.y(), _secondLimitationPoint.y());
+                finalReference.setPosition(_firstLimitationPoint.x(), ballY, 0);
+            }
+        }
+
         _objectivePos = finalReference;
 
     }

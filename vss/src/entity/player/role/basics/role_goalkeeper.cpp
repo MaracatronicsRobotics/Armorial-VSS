@@ -95,36 +95,46 @@ void Role_Goalkeeper::goalKick(Position* pos, Angle* ang){
     //set behaviour doNothing so our player doesn't move from position emmited
     setBehaviour(BHV_DONOTHING);
 
-    //put our goalkeeper in the middle of the goal
-    //if our side is right
-    float distXBall = 0.15f, distFromCorner = 0.1f;
-    if(loc()->ourSide().isRight()){
-        Position ourAreaPostLeft(true, loc()->ourGoal().x(), loc()->ourGoal().y() + 0.2f, 0);
-        Position ourAreaPostRight(true, loc()->ourGoal().x(), loc()->ourGoal().y() - 0.2f, 0);
-        //goalkeeper has y < 0: put it to look down
-        if(player()->position().y() < 0){
-            *pos = WR::Utils::threePoints(Position(true, loc()->fieldMaxX()-distXBall, -0.35f, 0), ourAreaPostRight, distFromCorner, 0);
-            *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMaxX()-distXBall, -0.35f, 0));
+    if(weTake){
+        //put our goalkeeper in the middle of the goal
+        //if our side is right
+        float distXBall = 0.15f, distFromCorner = 0.1f;
+        if(loc()->ourSide().isRight()){
+            Position ourAreaPostLeft(true, loc()->ourGoal().x(), loc()->ourGoal().y() + 0.2f, 0);
+            Position ourAreaPostRight(true, loc()->ourGoal().x(), loc()->ourGoal().y() - 0.2f, 0);
+            //goalkeeper has y < 0: put it to look down
+            if(player()->position().y() < 0){
+                *pos = WR::Utils::threePoints(Position(true, loc()->fieldMaxX()-distXBall, -0.35f, 0), ourAreaPostRight, distFromCorner, 0);
+                *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMaxX()-distXBall, -0.35f, 0));
+            }
+            //goalkeeper has y >= 0: put it to look up
+            else{
+                *pos = WR::Utils::threePoints(Position(true, loc()->fieldMaxX()-distXBall, 0.35f, 0), ourAreaPostLeft, distFromCorner, 0);
+                *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMaxX()-distXBall, 0.35f, 0));
+            }
         }
-        //goalkeeper has y >= 0: put it to look up
+        //if our side is left
         else{
-            *pos = WR::Utils::threePoints(Position(true, loc()->fieldMaxX()-distXBall, 0.35f, 0), ourAreaPostLeft, distFromCorner, 0);
-            *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMaxX()-distXBall, 0.35f, 0));
+            Position ourAreaPostLeft(true, loc()->ourGoal().x(), loc()->ourGoal().y() - 0.2f, 0);
+            Position ourAreaPostRight(true, loc()->ourGoal().x(), loc()->ourGoal().y() + 0.2f, 0);
+            //goalkeeper has y < 0: put it to look down
+            if(player()->position().y() < 0){
+                *pos = WR::Utils::threePoints(Position(true, loc()->fieldMinX()+distXBall, -0.35f, 0), ourAreaPostLeft, distFromCorner, 0);
+                *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMinX()+distXBall, -0.35f, 0));
+            }
+            //goalkeeper has y >= 0: put it to look up
+            else{
+                *pos = WR::Utils::threePoints(Position(true, loc()->fieldMinX()+distXBall, 0.35f, 0), ourAreaPostRight, distFromCorner, 0);
+                *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMinX()+distXBall, 0.35f, 0));
+            }
         }
-    }
-    //if our side is left
-    else{
-        Position ourAreaPostLeft(true, loc()->ourGoal().x(), loc()->ourGoal().y() - 0.2f, 0);
-        Position ourAreaPostRight(true, loc()->ourGoal().x(), loc()->ourGoal().y() + 0.2f, 0);
-        //goalkeeper has y < 0: put it to look down
-        if(player()->position().y() < 0){
-            *pos = WR::Utils::threePoints(Position(true, loc()->fieldMinX()+distXBall, -0.35f, 0), ourAreaPostLeft, distFromCorner, 0);
-            *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMinX()+distXBall, -0.35f, 0));
-        }
-        //goalkeeper has y >= 0: put it to look up
-        else{
-            *pos = WR::Utils::threePoints(Position(true, loc()->fieldMinX()+distXBall, 0.35f, 0), ourAreaPostRight, distFromCorner, 0);
-            *ang = WR::Utils::getAngle(*pos, Position(true, loc()->fieldMinX()+distXBall, 0.35f, 0));
+    }else{
+        if(loc()->ourSide().isLeft()){
+            *pos = Position(true, loc()->fieldMinX() + 0.07f, 0, 0);
+            *ang = Angle(true, float(M_PI_2));
+        }else{
+            *pos = Position(true, loc()->fieldMaxX() - 0.07f, 0, 0);
+            *ang = Angle(true, float(M_PI_2));
         }
     }
 }

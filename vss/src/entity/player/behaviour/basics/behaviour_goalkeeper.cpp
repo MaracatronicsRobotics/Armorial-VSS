@@ -181,8 +181,8 @@ void Behaviour_Goalkeeper::run() {
     //intercept velocity factor
     float maxDist = WR::Utils::distance(Position(true, loc()->fieldMaxX(), loc()->fieldMaxY(), 0), Position(true, loc()->fieldMinX(), 0, 0));
     float fac;
-    if(maxDist < 0.2f) fac = 1.0f;
-    else fac = 1 - (WR::Utils::distance(loc()->ball(), loc()->ourGoal())/maxDist);
+    fac = 1 - (WR::Utils::distance(loc()->ball(), loc()->ourGoal())/maxDist);
+    if(WR::Utils::distance(loc()->ball(), loc()->ourGoal()) < 0.2f) fac = 1.0f;
     float velFacIntercept = 2.0f + 2.0f*fac;
 
     //transitions
