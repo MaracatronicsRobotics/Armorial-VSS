@@ -1,5 +1,5 @@
 // QCoreApplication from Qt
-#include <QApplication>
+#include <QCoreApplication>
 
 // ExitHandler and InstanceChecker
 #include <src/exithandler.h>
@@ -47,7 +47,7 @@ bool validateEnableGUI(const QString &input, bool *valid) {
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
     app.setApplicationName("Maracatronics-VSS");
     app.setApplicationVersion("0.0.1");
 
