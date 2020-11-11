@@ -126,7 +126,7 @@ void Behaviour_Assistant::run(){
         //if we should make our player get closer to ball
     }else{
         //if our player is too far from ballProjection: stop reducing offset
-        if(player()->distanceTo(loc()->ball()) > 0.5f || (!playerBehindBall || (playerBehindBall && player()->distBall() < 0.032f && !posPlayerInterceptTheirGoal(ballProjection)))){
+        if(player()->distanceTo(loc()->ball()) > 0.5f || (!playerBehindBall)){
             reduceOffset = false;
         }
         //if ballOffset is bigger than 0.035 and our player is very close to ballProjection: go to ball
@@ -134,9 +134,9 @@ void Behaviour_Assistant::run(){
             ballOffset = 0.01f;
         }
         //if our player is no longer very close to ball: increase a little bit ballOffset
-        else if(player()->distanceTo(ballProjection) > 0.065f && ballOffset < 0.035f){
+        /*else if(player()->distanceTo(ballProjection) > 0.065f && ballOffset < 0.035f){
             ballOffset = 0.04f;
-        }
+        }*/
     }
 
     bool shouldGoToBall = canGoToBall();
