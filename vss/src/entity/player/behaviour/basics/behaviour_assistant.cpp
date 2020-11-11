@@ -154,16 +154,22 @@ void Behaviour_Assistant::run(){
     behindBall = projectPosOutsideGoalArea(behindBall, avoidOurArea, avoidTheirArea);
     _sk_goTo->setGoToPos(behindBall);
 
+
+    //velocity factor
+    float maxDist = WR::Utils::distance(Position(true, loc()->fieldMaxX(), loc()->fieldMaxY(), 0), Position(true, loc()->fieldMinX(), 0, 0));
+    float fac;
+    if(maxDist < 0.2f) fac = 1.0f;
+    else fac = 1 - (WR::Utils::distance(loc()->ball(), loc()->ourGoal())/maxDist);
+    float velFacGo = 1.0f + 2.0f*fac;
     //setting skill goTo velocity factor
     _sk_goTo->setMinVelocity(0.7f);
-    float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
-    WR::Utils::limitValue(&velocityNeeded, 1.5f, 1.8f);
-    if(!isnanf(velocityNeeded)){
-        _sk_goTo->setGoToVelocityFactor(velocityNeeded);
+    //float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
+    //WR::Utils::limitValue(&velocityNeeded, 1.5f, 1.8f);
+    if(!isnanf(velFacGo)){
+        _sk_goTo->setGoToVelocityFactor(velFacGo);
     }else{
-        _sk_goTo->setGoToVelocityFactor(2.0f);
+        _sk_goTo->setGoToVelocityFactor(1.0f);
     }
-    _sk_goTo->setGoToVelocityFactor(1.5f);
 
     //setting skill rotateTo
     _sk_rotateTo->setDesiredPosition(loc()->theirGoal());
@@ -199,7 +205,7 @@ void Behaviour_Assistant::run(){
         }
     }else if(_skill == ROT){
         //std::cout << "ROTATE" << std::endl;
-        if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) || !localIsLookingTo(loc()->ball(), 0.4f)){
+        if(localIsLookingTo(loc()->theirGoal(), errorAngleToTheirGoal) || localIsLookingTo(loc()->ball(), 0.4f)){
             //PUSH
             if(localIsLookingTo(loc()->ball(), 0.6f) && playerBehindBall && player()->isNearbyPosition(loc()->ball(), 0.1f) && localIsLookingTo(loc()->theirGoal(), 1.2f*errorAngleToTheirGoal)){
                 if(!player()->isLookingTo(loc()->theirGoal(), errorAngleToTheirGoal)){
