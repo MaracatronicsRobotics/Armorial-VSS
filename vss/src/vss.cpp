@@ -70,8 +70,10 @@ bool VSS::start(){
     _coach->setReferee(_ref);
 
     // Setup GUI
-    _gui = new VSSGui(_ourTeam, _opTeam, _enableGUI);
-    _world->addEntity(_gui, 3);
+    if(_enableGUI){
+        _gui = new VSSGui(_ourTeam, _opTeam, _enableGUI);
+        _world->addEntity(_gui, 3);
+    }
 
     // Start world
     _world->start();
