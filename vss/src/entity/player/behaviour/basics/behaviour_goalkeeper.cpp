@@ -134,7 +134,6 @@ void Behaviour_Goalkeeper::run() {
 
     //checking if interception Y is in the middle of our goal
     if(abs(intercept1.y()) < abs(loc()->ourGoalLeftPost().y())){
-        std::cout << "limita na TRAVE" << std::endl;
         intercept1 = Position(true, intercept1.x(), loc()->ourGoalLeftPost().y(), 0);
         intercept2 = Position(true, intercept2.x(), loc()->ourGoalRightPost().y(), 0);
     }
