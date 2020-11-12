@@ -69,15 +69,6 @@ void Skill_InterceptBall::run() {
             float objPosY = finalReference.y();
             WR::Utils::limitValue(&objPosY, _firstLimitationPoint.y(), _secondLimitationPoint.y());
             finalReference.setPosition(finalReference.x(), objPosY, 0);
-            //projecting a point in front
-            //finalReference = WR::Utils::threePoints(player()->position(), finalReference, 0.04f, Angle::pi);
-            /*float adiction = powf(WR::Utils::distance(finalReference,inicialReference), 2.0) / player()->distanceTo(finalReference);
-
-            if (finalReference.y() < player()->position().y()) {
-                finalReference = Position(true, finalReference.x(), finalReference.y() - adiction, 0.0f);
-            } else {
-                finalReference = Position(true, finalReference.x(), finalReference.y() + adiction, 0.0f);
-            }*/
         }else{
             float ballY = loc()->ball().y();
             WR::Utils::limitValue(&ballY, _firstLimitationPoint.y(), _secondLimitationPoint.y());
@@ -86,7 +77,7 @@ void Skill_InterceptBall::run() {
 
         //left
         if(loc()->ourSide().isLeft()){
-            if(loc()->ball().x() < loc()->ourGoal().x() + 0.1f){
+            if(loc()->ball().x() < loc()->ourGoalLeftPost().x() + 0.1f){
                 float ballY = loc()->ball().y();
                 WR::Utils::limitValue(&ballY, _firstLimitationPoint.y(), _secondLimitationPoint.y());
                 finalReference.setPosition(_firstLimitationPoint.x(), ballY, 0);
@@ -94,7 +85,7 @@ void Skill_InterceptBall::run() {
         }
         //right
         else{
-            if(loc()->ball().x() > loc()->ourGoal().x() - 0.06f){
+            if(loc()->ball().x() > loc()->ourGoalRightPost().x() - 0.1f){
                 float ballY = loc()->ball().y();
                 WR::Utils::limitValue(&ballY, _firstLimitationPoint.y(), _secondLimitationPoint.y());
                 finalReference.setPosition(_firstLimitationPoint.x(), ballY, 0);

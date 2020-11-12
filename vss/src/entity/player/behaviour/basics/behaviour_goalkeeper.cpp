@@ -97,7 +97,6 @@ void Behaviour_Goalkeeper::run() {
             intercept1.setPosition(intercept1.x() + distFromBack, intercept1.y() + marginFromPost, 0);
             intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);*/
         }
-        //xPos = loc()->fieldMinX() + 0.05f;
     }else{
         if(loc()->ballVelocity().y() >= 0) isComing = true;
         else isComing = false;
@@ -132,6 +131,14 @@ void Behaviour_Goalkeeper::run() {
             intercept2.setPosition(intercept1.x(), -1*intercept1.y(), 0);*/
         }
     }
+
+    //checking if interception Y is in the middle of our goal
+    if(abs(intercept1.y()) < abs(loc()->ourGoalLeftPost().y())){
+        std::cout << "limita na TRAVE" << std::endl;
+        intercept1 = Position(true, intercept1.x(), loc()->ourGoalLeftPost().y(), 0);
+        intercept2 = Position(true, intercept2.x(), loc()->ourGoalRightPost().y(), 0);
+    }
+
     //limit Y value
     float yLim = 0.31f;
     if(intercept1.y() < -yLim){
@@ -150,25 +157,7 @@ void Behaviour_Goalkeeper::run() {
     xPos = intercept1.x();
 
     //ball projection
-    Position goalProjection;
     Position projectedBall = loc()->ball();
-    goalProjection.setUnknown();
-    //considering ball velocity to define player position
-    if(loc()->ballVelocity().abs() > BALLPREVISION_MINVELOCITY){
-        //calc unitary vector of velocity
-        const Position velUni(true, loc()->ballVelocity().x()/loc()->ballVelocity().abs(), loc()->ballVelocity().y()/loc()->ballVelocity().abs(), 0.0);
-
-        //calc velocity factor
-        float factor = BALLPREVISION_VELOCITY_FACTOR*loc()->ballVelocity().abs();
-        WR::Utils::limitValue(&factor, 0.0f, BALLPREVISION_FACTOR_LIMIT);
-
-        //calc projected position
-        const Position delta(true, factor*velUni.x(), factor*velUni.y(), 0.0);
-        Position projectedPos(true, loc()->ball().x()+delta.x(), loc()->ball().y()+delta.y(), 0.0);
-        projectedBall = projectedPos;
-    }else{
-        projectedBall = loc()->ball();
-    }
     float ballY = projectedBall.y();
     if(loc()->ourSide().isLeft()){
         WR::Utils::limitValue(&ballY, loc()->ourGoalLeftPost().y(), loc()->ourGoalRightPost().y());
