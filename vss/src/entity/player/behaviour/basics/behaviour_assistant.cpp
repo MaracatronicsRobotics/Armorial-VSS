@@ -1,7 +1,7 @@
 #include "behaviour_assistant.h"
 
 #define BALLPREVISION_MINVELOCITY 0.02f
-#define BALLPREVISION_VELOCITY_FACTOR 3.0f
+#define BALLPREVISION_VELOCITY_FACTOR 3.25f
 #define BALLPREVISION_FACTOR_LIMIT 0.18f
 
 QString Behaviour_Assistant::name() {
@@ -110,14 +110,14 @@ void Behaviour_Assistant::run(){
         float distBallProjFactor = (player()->distanceTo(ballProjection)/WR::Utils::distance(Position(true,loc()->fieldMinX(), 0.0f, 0.0f), Position(true, loc()->fieldMaxX(), loc()->fieldMinY(), 0.0f)));
         ballOffset = 0.1f+distBallProjFactor * 0.7f;
         /*
-             * if (our player is on the line ball->theirGoal and it's behind ball's X and it's near the ball (0.25f))
-             * or (our player is near 'behindBall' position (last position he was going to) and it's behind ball's X)
-             * or (our player is near ballProjection position and it's behind ball's X)
+             * if (our player is on the line projectedball->theirGoal and it's behind ball and it's near the ball (0.25f))
+             * or (our player is near 'behindBall' position (last position he was going to) and it's behind ball)
+             * or (the line player->ball intercepts their goal line and we're behind ball and we're at least 0.1m far from ball and we are near ball (0.2f) - maybe erase the distance &&
+             * or (our player is near ballProjection position and it's behind ball's X) - not here
              * reduce offset and get closer to ball!
             */
         if((WR::Utils::isPointAtLine(_aimPosition, ballProjection, player()->position()) && playerBehindBall && player()->isNearbyPosition(ballProjection, 0.25f)) ||
                 (player()->isNearbyPosition(behindBall, 0.02f) && playerBehindBall) ||
-                (playerBehindBall && player()->distBall() >= 0.16f && player()->isNearbyPosition(loc()->ball(), 0.18f)) ||
                 (posPlayerInterceptTheirGoal(ballProjection) && playerBehindBall && player()->distBall() >= 0.1f && player()->isNearbyPosition(loc()->ball(), 0.2f)) ||
                 loc()->ballVelocity().abs() < BALLPREVISION_MINVELOCITY){
             reduceOffset = true;
@@ -138,6 +138,8 @@ void Behaviour_Assistant::run(){
             ballOffset = 0.04f;
         }*/
     }
+    float distFacVelBall = loc()->ballVelocity().abs()/2.0f;
+    if(playerBehindBall && player()->distBall() >= (0.12f + distFacVelBall*0.12f)) ballOffset = 0;
 
     bool shouldGoToBall = canGoToBall();
     //if there's an ally closer to the ball or better positioned: keep some distance from ball
@@ -156,19 +158,17 @@ void Behaviour_Assistant::run(){
 
 
     //velocity factor
-    float maxDist = WR::Utils::distance(Position(true, loc()->fieldMaxX(), loc()->fieldMaxY(), 0), Position(true, loc()->fieldMinX(), 0, 0));
+    float maxDist = WR::Utils::distance(Position(true, loc()->fieldMaxX(), loc()->fieldMaxY(), 0), Position(true, loc()->fieldMinX(), loc()->fieldMinY(), 0));
     float fac;
     if(maxDist < 0.2f) fac = 1.0f;
-    else fac = 1 - (WR::Utils::distance(loc()->ball(), loc()->ourGoal())/maxDist);
-    float velFacGo = 1.0f + 2.0f*fac;
+    else fac = (WR::Utils::distance(loc()->ball(), player()->position())/maxDist);
+    float velFacGo = 1.5f + 2.0f*fac;
     //setting skill goTo velocity factor
     _sk_goTo->setMinVelocity(0.7f);
-    //float velocityNeeded = (loc()->ballVelocity().abs() * player()->distanceTo(behindBall)) / (WR::Utils::distance(loc()->ball(), ballProjection));
-    //WR::Utils::limitValue(&velocityNeeded, 1.5f, 1.8f);
     if(!isnanf(velFacGo)){
         _sk_goTo->setGoToVelocityFactor(velFacGo);
     }else{
-        _sk_goTo->setGoToVelocityFactor(1.0f);
+        _sk_goTo->setGoToVelocityFactor(1.5f);
     }
 
     //setting skill rotateTo
