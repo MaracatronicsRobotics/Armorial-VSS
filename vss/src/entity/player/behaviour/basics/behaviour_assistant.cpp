@@ -162,7 +162,7 @@ void Behaviour_Assistant::run(){
     float fac;
     if(maxDist < 0.2f) fac = 1.0f;
     else fac = (WR::Utils::distance(loc()->ball(), player()->position())/maxDist);
-    float velFacGo = 1.5f + 2.0f*fac;
+    float velFacGo = 1.5f + 1.8f*fac;
     //setting skill goTo velocity factor
     _sk_goTo->setMinVelocity(0.7f);
     if(!isnanf(velFacGo)){
