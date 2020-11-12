@@ -50,10 +50,10 @@ void Role_Supporter::run(){
             _getOut = false;
         }
         timerGetOut.stop();
-        if (timerGetOut.timesec() > 3) {
-            std::cout << "CHEGUEI PORRA\n";
+        if (timerGetOut.timesec() > 0.5) {
+            //std::cout << "CHEGUEI PORRA\n";
             if (_distToGK < 0.084f) {
-                std::cout << "VAI MIZÉRIA\n";
+                //std::cout << "VAI MIZÉRIA\n";
                 emit refuted(player()->playerId());
             }
             _getOut = false;

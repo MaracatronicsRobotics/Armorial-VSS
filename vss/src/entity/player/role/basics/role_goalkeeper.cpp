@@ -54,7 +54,7 @@ void Role_Goalkeeper::configure(){
 void Role_Goalkeeper::run(){
     if (_backUp) {
         timerGetOut.stop();
-        if (timerGetOut.timesec() > 1) {
+        if (timerGetOut.timesec() > 0.5) {
             _backUp = false;
         }
     } else isGKStucked();
