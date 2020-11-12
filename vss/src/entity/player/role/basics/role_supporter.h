@@ -61,6 +61,7 @@ private:
     bool isNormalGame, canGoBackToNormalGame;
     bool weTake;
     bool _getOut;
+    quint8 goalkeeperId;
     Timer timer, timerToChangeBhv, timerGetOut;
 
 public:

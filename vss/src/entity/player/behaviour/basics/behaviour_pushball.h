@@ -46,12 +46,14 @@ private:
 
     // Parameters
     Position _aimPosition;
+    bool _isInverted;
 
 public:
     Behaviour_PushBall();
     QString name();
 
     void setAimPosition(Position aimPosition) { _aimPosition = aimPosition; }
+    void setIsInverted(bool isInv){_isInverted = isInv;}
 };
 
 #endif // BEHAVIOUR_PUSHBALL_H

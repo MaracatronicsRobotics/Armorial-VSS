@@ -41,6 +41,7 @@ void Behaviour_PushBall::configure(){
     addTransition(STATE_PUSH, _sk_rotateTo, _sk_pushBall);
 
     _aimPosition = Position(true, 0.0, 0.0, 0.0);
+    _isInverted = false;
 }
 
 void Behaviour_PushBall::run(){
@@ -59,9 +60,11 @@ void Behaviour_PushBall::run(){
 
     //transitions
     if (player()->isLookingTo(_aimPosition, Angle::pi / 2)) {
-        _sk_pushBall->setSpeedAndOmega(3.0f, 0.0f);
+        if(!_isInverted) _sk_pushBall->setSpeedAndOmega(3.0f, 0.0f);
+        else _sk_pushBall->setSpeedAndOmega(-3.0f, 0.0f);
     } else {
-        _sk_pushBall->setSpeedAndOmega(-3.0f, 0.0f);
+        if(!_isInverted) _sk_pushBall->setSpeedAndOmega(-3.0f, 0.0f);
+        else _sk_pushBall->setSpeedAndOmega(3.0f, 0.0f);
     }
     /*
     if(player()->isLookingTo(ball)){

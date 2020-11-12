@@ -25,6 +25,7 @@ void Role_Supporter::configure(){
     lastFoul = VSSRef::KICKOFF;
     weTake = true;
     _getOut = false;
+    _distToGK = 100;
 
     if(_positioning == BARRIER_PREDOMINANT){
         setBehaviour(BHV_BARRIER); //initial behaviour
@@ -40,6 +41,14 @@ void Role_Supporter::configure(){
 void Role_Supporter::run(){
 
     if (_getOut) {
+        if(PlayerBus::ourPlayerAvailable(goalkeeperId)){
+            _distToGK = player()->distanceTo(PlayerBus::ourPlayer(goalkeeperId)->position());
+            _bh_pb->setAimPosition(PlayerBus::ourPlayer(goalkeeperId)->position());
+            _bh_pb->setIsInverted(true);
+            setBehaviour(BHV_PUSH);
+        }else{
+            _getOut = false;
+        }
         timerGetOut.stop();
         if (timerGetOut.timesec() > 3) {
             std::cout << "CHEGUEI PORRA\n";
@@ -79,7 +88,7 @@ void Role_Supporter::run(){
             break;
         }
         case(BARRIER_PREDOMINANT):{
-            std::cout << "BARREIRA: SE FUDEU, OTÁRIO";
+            //std::cout << "BARREIRA: SE FUDEU, OTÁRIO\n";
             setBehaviour(BHV_BARRIER);
             if((!EnemyNear(0.2f) && player()->isNearbyPosition(loc()->ball(), 0.15f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f) && !BySideOfGoal() && (player()->distOurGoal() < WR::Utils::distance(loc()->ball(), loc()->ourGoal())))
                     || (!EnemyNear(player()->distBall() + 0.1f) && player()->distBall() < distAllyToBall())){
@@ -573,14 +582,10 @@ void Role_Supporter::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, V
 void Role_Supporter::gettingOut(quint8 playerId, quint8 GK_ID) {
     if (isInitialized()) {
         if (playerId == player()->playerId()) {
-            if (PlayerBus::ourPlayerAvailable(GK_ID)) {
-                _bh_pb->setAimPosition(PlayerBus::ourPlayer(GK_ID)->position());
-                _distToGK = player()->distanceTo(PlayerBus::ourPlayer(GK_ID)->position());
-            }
+            goalkeeperId = GK_ID;
             if (!_getOut) {
                 timerGetOut.start();
                 _getOut = true;
-                setBehaviour(BHV_PUSH);
             }
         } else return;
     }
