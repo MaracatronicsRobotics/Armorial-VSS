@@ -38,15 +38,13 @@ int Playbook_Supporter::maxNumPlayer() {
 }
 
 void Playbook_Supporter::configure(int numPlayers) {
+    usesRole(_rl_goalkeeper = new Role_Goalkeeper());
     for(int i = 0; i < numPlayers; i++) {
         Role_Supporter *rl_supporter = new Role_Supporter();
-        Role_Goalkeeper *rl_goalkeeper = new Role_Goalkeeper();
 
         usesRole(rl_supporter);
-        usesRole(rl_goalkeeper);
 
         _rl_supporter.push_back(rl_supporter);
-        _rl_goalkeeper.push_back(rl_goalkeeper);
 
         _assistantId = DIST_INVALID_ID;
         _barrierId = DIST_INVALID_ID;
@@ -59,6 +57,8 @@ void Playbook_Supporter::configure(int numPlayers) {
     // Connect every supporter with this playbook
     for(int i = 0; i < numPlayers; i++){
         connect(_rl_supporter.at(i), SIGNAL(sendSignal()), this, SLOT(receiveSignal()), Qt::DirectConnection);
+        connect(_rl_supporter.at(i), SIGNAL(refuted(quint8)), _rl_goalkeeper, SLOT(backUp(quint8)), Qt::DirectConnection);
+        connect(_rl_goalkeeper, SIGNAL(getOut(quint8, quint8)), _rl_supporter.at(i), SLOT(gettingOut(quint8, quint8)), Qt::DirectConnection);
     }
 
 }
@@ -90,7 +90,7 @@ void Playbook_Supporter::run(int numPlayers) {
     setPlayerRole(_barrierId, _rl_supporter.at(_barrierId));
 
     // Setting GK
-    setPlayerRole(_goalkeeperId, _rl_goalkeeper.at(_goalkeeperId));
+    setPlayerRole(_goalkeeperId, _rl_goalkeeper);
 }
 
 void Playbook_Supporter::receiveSignal(){

@@ -19,6 +19,7 @@ private:
     Behaviour_Assistant *_bh_as;
     Behaviour_Barrier *_bh_br;
     Behaviour_DoNothing *_bh_dn;
+    Behaviour_PushBall *_bh_pb;
     Behaviour_TakeFoul *_bh_tf;
 
     // Behaviours ids!
@@ -26,6 +27,7 @@ private:
         BHV_ASSISTANT,
         BHV_BARRIER,
         BHV_DONOTHING,
+        BHV_PUSH,
         BHV_TAKEFOUL
     };
 
@@ -55,9 +57,11 @@ private:
     void isStuck();
 
     int lastFoul; //it can be FREE_KICK = 0, PENALTY_KICK = 1, GOAL_KICK = 2, FREE_BALL = 3, KICKOFF = 4
+    float _distToGK;
     bool isNormalGame, canGoBackToNormalGame;
     bool weTake;
-    Timer timer, timerToChangeBhv;
+    bool _getOut;
+    Timer timer, timerToChangeBhv, timerGetOut;
 
 public:
     Role_Supporter();
@@ -66,9 +70,11 @@ public:
     void setPositioning(int positioning);
 
 signals:
+    void refuted(quint8 playerId);
     void sendSignal();
 
 public slots:
+    void gettingOut(quint8 playerId, quint8 GK_ID);
     void receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor);
 };
 

@@ -30,7 +30,7 @@ class Playbook_Supporter : public Playbook {
 private:
     // Roles
     QList<Role_Supporter*> _rl_supporter;
-    QList<Role_Goalkeeper*> _rl_goalkeeper;
+    Role_Goalkeeper *_rl_goalkeeper;
     void configure(int numPlayers);
     void run(int numPlayers);
     int maxNumPlayer();

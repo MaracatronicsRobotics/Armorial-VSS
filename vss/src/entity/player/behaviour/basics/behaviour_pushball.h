@@ -44,9 +44,14 @@ private:
     Skill_GoTo *_sk_goTo;
     Skill_PushBall *_sk_pushBall;
 
+    // Parameters
+    Position _aimPosition;
+
 public:
     Behaviour_PushBall();
     QString name();
+
+    void setAimPosition(Position aimPosition) { _aimPosition = aimPosition; }
 };
 
 #endif // BEHAVIOUR_PUSHBALL_H

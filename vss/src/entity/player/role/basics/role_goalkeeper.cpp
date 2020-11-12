@@ -47,11 +47,19 @@ void Role_Goalkeeper::configure(){
     canGoBackToNormalGame = true;
     lastFoul = VSSRef::KICKOFF;
     weTake = true;
+    _backUp = false;
     limitTimer = 4.0f;
 }
 
 void Role_Goalkeeper::run(){
-    if(canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)){
+    if (_backUp) {
+        timerGetOut.stop();
+        if (timerGetOut.timesec() > 1) {
+            _backUp = false;
+        }
+    } else isGKStucked();
+
+    if((canGoBackToNormalGame || abs(player()->position().x()) <= (loc()->fieldMaxX() - loc()->fieldDefenseWidth() - 0.1f)) && !_backUp){
         setBehaviour(BHV_GK);
     }else{
         timer.stop();
@@ -59,7 +67,6 @@ void Role_Goalkeeper::run(){
             canGoBackToNormalGame = true;
         }
     }
-
 }
 
 void Role_Goalkeeper::penaltyKick(Position* pos, Angle* ang){
@@ -224,6 +231,7 @@ void Role_Goalkeeper::gameOn(){
             //if penalty against us
             if(flagPenalti){
                 limitTimer = 1;
+                _bh_pb->setAimPosition(loc()->ball());
                 setBehaviour(BHV_PUSH);
             }
             limitTimer = 4;
@@ -231,6 +239,19 @@ void Role_Goalkeeper::gameOn(){
         }
     }else{
         canGoBackToNormalGame = true;
+    }
+}
+
+void Role_Goalkeeper::isGKStucked(){
+    for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+        if(PlayerBus::ourPlayerAvailable(x)){
+            if(PlayerBus::ourPlayer(x)->playerId() != player()->playerId()){
+                // 0.084 é a distância de um robô aoutro quando este último está com ceucentro apontado para o lado do outro
+                if(player()->distanceTo(PlayerBus::ourPlayer(x)->position()) < 0.084f && player()->distBall() > 0.75f){
+                    emit getOut(x, player()->playerId());
+                }
+            }
+        }
     }
 }
 
@@ -268,5 +289,17 @@ void Role_Goalkeeper::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, 
             kickOff(&pos, &ang);
             emit emitPosition(player()->playerId(), pos, ang);
         }
+    }
+}
+
+void Role_Goalkeeper::backUp(quint8 playerId) {
+    if (!_backUp) {
+        timerGetOut.start();
+        _backUp = true;
+        if (PlayerBus::ourPlayerAvailable(playerId)) {
+            Position aim = PlayerBus::ourPlayer(playerId)->position();
+            _bh_pb->setAimPosition(aim);
+        }
+        setBehaviour(BHV_PUSH);
     }
 }

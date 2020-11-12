@@ -8,6 +8,7 @@ Role_Supporter::Role_Supporter()
     _bh_br = nullptr;
     _bh_as = nullptr;
     _bh_dn = nullptr;
+    _bh_pb = nullptr;
     _bh_tf = nullptr;
 
 }
@@ -15,6 +16,7 @@ void Role_Supporter::initializeBehaviours(){
     usesBehaviour(BHV_ASSISTANT, _bh_as = new Behaviour_Assistant());
     usesBehaviour(BHV_BARRIER , _bh_br = new Behaviour_Barrier());
     usesBehaviour(BHV_DONOTHING, _bh_dn = new Behaviour_DoNothing());
+    usesBehaviour(BHV_PUSH, _bh_pb = new Behaviour_PushBall);
     usesBehaviour(BHV_TAKEFOUL, _bh_tf = new Behaviour_TakeFoul());
 }
 void Role_Supporter::configure(){
@@ -22,6 +24,7 @@ void Role_Supporter::configure(){
     canGoBackToNormalGame = true;
     lastFoul = VSSRef::KICKOFF;
     weTake = true;
+    _getOut = false;
 
     if(_positioning == BARRIER_PREDOMINANT){
         setBehaviour(BHV_BARRIER); //initial behaviour
@@ -35,6 +38,19 @@ void Role_Supporter::configure(){
     }
 }
 void Role_Supporter::run(){
+
+    if (_getOut) {
+        timerGetOut.stop();
+        if (timerGetOut.timesec() > 3) {
+            std::cout << "CHEGUEI PORRA\n";
+            if (_distToGK < 0.084f) {
+                std::cout << "VAI MIZÉRIA\n";
+                emit refuted(player()->playerId());
+            }
+            _getOut = false;
+        }
+    }
+
     if(!canGoBackToNormalGame){
         timer.stop();
         if(timer.timesec() > 4){
@@ -43,9 +59,9 @@ void Role_Supporter::run(){
         return;
     }
 
-    switch(_positioning){
-    case(FREE):{
-        if(canGoBackToNormalGame){
+    if (canGoBackToNormalGame && !_getOut) {
+        switch(_positioning){
+        case(FREE):{
             float enemyInOurFieldFactor = 0;
             if(EnemyNear(0.2f)) enemyInOurFieldFactor = 0.75f;
             float distBallFactor = 1.0f - loc()->distBallOurGoal()/WR::Utils::distance(loc()->fieldLeftTopCorner(), Position(true, loc()->fieldMaxX(), 0.0f, 0.0f));
@@ -60,26 +76,23 @@ void Role_Supporter::run(){
                 setBehaviour(BHV_ASSISTANT);
                 _bhv = BHV_ASSISTANT;
             }
+            break;
         }
-        break;
-    }
-    case(BARRIER_PREDOMINANT):{
-        if(canGoBackToNormalGame){
+        case(BARRIER_PREDOMINANT):{
+            std::cout << "BARREIRA: SE FUDEU, OTÁRIO";
             setBehaviour(BHV_BARRIER);
             if((!EnemyNear(0.2f) && player()->isNearbyPosition(loc()->ball(), 0.15f) && player()->isNearbyPosition(loc()->ourGoal(), 0.4f) && !BySideOfGoal() && (player()->distOurGoal() < WR::Utils::distance(loc()->ball(), loc()->ourGoal())))
                     || (!EnemyNear(player()->distBall() + 0.1f) && player()->distBall() < distAllyToBall())){
                 emit sendSignal();
             }
+            break;
         }
-        break;
-    }
-    case(ASSIST_PREDOMINANT):{
-        if(canGoBackToNormalGame){
+        case(ASSIST_PREDOMINANT):{
             isStuck();
             setBehaviour(BHV_ASSISTANT);
+            break;
         }
-        break;
-    }
+        }
     }
 }
 
@@ -554,5 +567,21 @@ void Role_Supporter::receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, V
             kickOff(&pos, &ang, firstKickOff);
             emit emitPosition(player()->playerId(), pos, ang);
         }
+    }
+}
+
+void Role_Supporter::gettingOut(quint8 playerId, quint8 GK_ID) {
+    if (isInitialized()) {
+        if (playerId == player()->playerId()) {
+            if (PlayerBus::ourPlayerAvailable(GK_ID)) {
+                _bh_pb->setAimPosition(PlayerBus::ourPlayer(GK_ID)->position());
+                _distToGK = player()->distanceTo(PlayerBus::ourPlayer(GK_ID)->position());
+            }
+            if (!_getOut) {
+                timerGetOut.start();
+                _getOut = true;
+                setBehaviour(BHV_PUSH);
+            }
+        } else return;
     }
 }

@@ -26,6 +26,7 @@
 #include <src/entity/player/role/role.h>
 
 class Role_Goalkeeper : public Role {
+    Q_OBJECT
 private:
     // Behaviours
     Behaviour_Goalkeeper *_bh_gk;
@@ -48,13 +49,16 @@ private:
     void gameOn();
     void freeBall(Position* pos, Angle* ang, VSSRef::Quadrant quadrant);
     void kickOff(Position* pos, Angle* ang);
+    void isGKStucked();
 
     bool flagPenalti = 0;
 
     int lastFoul; //it can be FREE_KICK = 0, PENALTY_KICK = 1, GOAL_KICK = 2, FREE_BALL = 3, KICKOFF = 4
     bool isNormalGame, canGoBackToNormalGame;
     bool weTake;
+    bool _backUp;
     Timer timer;
+    Timer timerGetOut;
     float limitTimer;
 
     // Inherited functions
@@ -66,7 +70,11 @@ public:
     void initializeBehaviours();
     QString name();
 
+signals:
+    void getOut(quint8 playerId, quint8 GK_ID);
+
 public slots:
+    void backUp(quint8 playerId);
     void receiveFoul(VSSRef::Foul foul, VSSRef::Quadrant quadrant, VSSRef::Color teamColor);
 };
 
