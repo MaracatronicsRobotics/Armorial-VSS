@@ -62,7 +62,7 @@ void Role_Supporter::run(){
 
     if(!canGoBackToNormalGame){
         timer.stop();
-        if(timer.timesec() > 4){
+        if(timer.timesec() > 1){
             canGoBackToNormalGame = true;
         }
         return;
@@ -193,7 +193,7 @@ bool Role_Supporter::isReallyInsideTheirArea(quint8 id){
 }
 
 void Role_Supporter::penaltyKick(Position* pos, Angle* ang){
-    float defenseXabs = (loc()->fieldMaxX() - 0.18f), defenseYabs = 0.165f;
+    float defenseXabs = (loc()->fieldMaxX() - 0.18f), defenseYabs = loc()->fieldMaxY() - 0.25f;
     float takeXabs = (loc()->fieldMaxX()/2 - 0.2f), takeYabs = 0;
     float nearMiddleXabs = 0.2f;
     float midmidGoal = fabs(loc()->theirGoalLeftMidPost().y());
@@ -307,27 +307,47 @@ void Role_Supporter::goalKick(Position *pos, Angle *ang){
 
     //if we are charging the goal kick foul
     if(weTake){
+        //find their goalkeeper
+        Position gkPos;
+        quint8 gkid = 100;
+        for(quint8 x = 0; x < VSSConstants::qtPlayers(); x++){
+            if(PlayerBus::theirPlayerAvailable(x)){
+                if(isReallyInsideTheirArea(x)){
+                    gkid = x;
+                    break;
+                }
+            }
+        }
+        if(!PlayerBus::theirPlayerAvailable(gkid)) gkPos = loc()->theirGoal();
+        else gkPos = PlayerBus::theirPlayer(gkid)->position();
+
         if(_positioning == BARRIER_PREDOMINANT){
             //if our side is right
             if(loc()->ourSide().isRight()){
-                //barrier always on the left side of our goal
-                *pos = Position(true, defenseXabs, defenseYabs, 0);
-                *ang = Angle(true, 0);
+                *pos = Position(true, defenseXabs, 0, 0);
+                *ang = Angle(true, float(M_PI_2));
             }else{
-                //barrier always on the left side of our goal
-                *pos = Position(true, -1*defenseXabs, -1*defenseYabs, 0);
-                *ang = Angle(true, Angle::pi);
+                *pos = Position(true, -1*defenseXabs, 0, 0);
+                *ang = Angle(true, float(M_PI_2));
             }
         }else{
-            //if our side is left
+            //if our side is right
             if(loc()->ourSide().isRight()){
-                //player not playing as barrier always on the right side of our goal
-                *pos = Position(true, defenseXabs, -1*defenseYabs, 0);
-                *ang = Angle(true, 0);
+                if(gkPos.y() < 0){
+                    *pos = Position(true, -0.2f, loc()->fieldMinY() + 0.45f, 0);
+                    *ang = Angle(true, 0);
+                }else{
+                    *pos = Position(true, -0.2f, loc()->fieldMaxY() - 0.45f, 0);
+                    *ang = Angle(true, 0);
+                }
             }else{
-                //player not playing as barrier always on the right side of our goal
-                *pos = Position(true, -1*defenseXabs, defenseYabs, 0);
-                *ang = Angle(true, Angle::pi);
+                if(gkPos.y() < 0){
+                    *pos = Position(true, 0.2f, loc()->fieldMinY() + 0.45f, 0);
+                    *ang = Angle(true, 0);
+                }else{
+                    *pos = Position(true, 0.2f, loc()->fieldMaxY() - 0.45f, 0);
+                    *ang = Angle(true, 0);
+                }
             }
         }
     }
