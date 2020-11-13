@@ -139,7 +139,9 @@ void Behaviour_Assistant::run(){
         }*/
     }
     float distFacVelBall = loc()->ballVelocity().abs()/2.0f;
-    if(playerBehindBall && player()->distBall() >= (0.12f + distFacVelBall*0.12f)) ballOffset = 0;
+    if(playerBehindBall && player()->distBall() >= (0.12f + distFacVelBall*0.1f) && player()->distBall() < 0.3f){
+        ballOffset = 0;
+    }
 
     bool shouldGoToBall = canGoToBall();
     //if there's an ally closer to the ball or better positioned: keep some distance from ball
