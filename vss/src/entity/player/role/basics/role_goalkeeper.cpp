@@ -48,7 +48,7 @@ void Role_Goalkeeper::configure(){
     lastFoul = VSSRef::KICKOFF;
     weTake = true;
     _backUp = false;
-    limitTimer = 4.0f;
+    limitTimer = 2.0f;
 }
 
 void Role_Goalkeeper::run(){
@@ -225,7 +225,7 @@ void Role_Goalkeeper::gameOn(){
         canGoBackToNormalGame = false;
         timer.start();
         if(weTake){
-            limitTimer = 4;
+            limitTimer = 2;
             setBehaviour(BHV_TAKEFOUL);
         }else{
             //if penalty against us
@@ -234,7 +234,7 @@ void Role_Goalkeeper::gameOn(){
                 _bh_pb->setAimPosition(loc()->ball());
                 setBehaviour(BHV_PUSH);
             }
-            limitTimer = 4;
+            limitTimer = 2;
             setBehaviour(BHV_DONOTHING);
         }
     }else{
