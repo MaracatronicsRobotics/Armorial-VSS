@@ -108,7 +108,7 @@ void Role_Supporter::run(){
 void Role_Supporter::isStuck(){
     if(!player()->isNearbyPosition(loc()->ball(), 0.12f) && player()->velocity().abs() <= 0.01f){
         timerToChangeBhv.stop();
-        if(timerToChangeBhv.timesec() >= 4){
+        if(timerToChangeBhv.timesec() >= 2){
             emit sendSignal();
         }
     }else{
