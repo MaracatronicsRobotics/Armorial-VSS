@@ -226,27 +226,31 @@ void Role_Supporter::penaltyKick(Position* pos, Angle* ang){
         if(_positioning == ASSIST_PREDOMINANT){
             //if our side is right
             if(loc()->ourSide().isRight()){
-                Position ourPos;
+                Position ourPos, fon;
                 if(gkPos.y()>0){
                     ourPos = WR::Utils::threePoints(penaltyLeftMark, loc()->theirGoalLeftMidPost(), 0.1f, Angle::pi);
-                    *pos = ourPos;
+                    fon = Position(true, -0.3f, 0.22f, 0.0);
+                    *pos = Position(true, -0.35f, 0.22f, 0.0);
                 }else{
                     ourPos = WR::Utils::threePoints(penaltyLeftMark, loc()->theirGoalRightMidPost(), 0.1f, Angle::pi);
-                    *pos = ourPos;
+                    fon = Position(true, -0.3f, -0.22f, 0.0);
+                    *pos = Position(true, -0.35f, -0.22f, 0.0);
                 }
-                *ang = WR::Utils::getAngle(ourPos, penaltyLeftMark);
+                *ang = WR::Utils::getAngle(fon, penaltyLeftMark);
             }
             //if our side is left
             else{
-                Position ourPos;
+                Position ourPos, fon;
                 if(gkPos.y()>0){
                     ourPos = WR::Utils::threePoints(penaltyRightMark, loc()->theirGoalRightMidPost(), 0.1f, Angle::pi);
-                    *pos = ourPos;
+                    fon = Position(true, 0.3f, 0.22f, 0.0);
+                    *pos = Position(true, 0.35f, 0.22f, 0.0);
                 }else{
                     ourPos = WR::Utils::threePoints(penaltyRightMark, loc()->theirGoalLeftMidPost(), 0.1f, Angle::pi);
-                    *pos = ourPos;
+                    fon = Position(true, 0.3f, -0.22f, 0.0);
+                    *pos = Position(true, 0.35f, -0.22f, 0.0);
                 }
-                *ang = WR::Utils::getAngle(ourPos, penaltyRightMark);
+                *ang = WR::Utils::getAngle(fon, penaltyRightMark);
             }
         }
         //if this player isn't playing as assistant: put it in our field in front of our goal
@@ -551,6 +555,8 @@ void Role_Supporter::gameOn(){
         canGoBackToNormalGame = false;
         timer.start();
         if(weTake){
+            if (_positioning == ASSIST_PREDOMINANT) _bh_tf->isPK(true);
+            else _bh_tf->isPK(false);
             setBehaviour(BHV_TAKEFOUL);
         }else{
             setBehaviour(BHV_DONOTHING);

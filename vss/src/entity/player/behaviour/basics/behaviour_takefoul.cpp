@@ -15,6 +15,7 @@ void Behaviour_TakeFoul::configure(){
     usesSkill(_sk_goTo = new Skill_GoTo());
     usesSkill(_sk_rotateTo = new Skill_RotateTo());
     usesSkill(_sk_pushBall = new Skill_PushBall());
+    usesSkill(_sk_spin = new Skill_Spin());
 
     //initial skill
     setInitialSkill(_sk_pushBall);
@@ -27,13 +28,27 @@ void Behaviour_TakeFoul::configure(){
     addTransition(STATE_PUSH, _sk_goTo, _sk_pushBall);
     addTransition(STATE_GOTOPOS, _sk_rotateTo, _sk_goTo);
     addTransition(STATE_GOTOPOS, _sk_pushBall, _sk_goTo);
+
+    addTransition(STATE_SPIN, _sk_pushBall, _sk_spin);
+    addTransition(STATE_PUSH, _sk_spin, _sk_pushBall);
+
+    _isPK = false;
 }
 
 void Behaviour_TakeFoul::run(){
-
-    if(player()->isLookingTo(loc()->ball(), float(M_PI_2))) _sk_pushBall->setSpeedAndOmega(2.0, 0.0);
-    else _sk_pushBall->setSpeedAndOmega(-2.0, 0.0);
-
+    if (_isPK) {
+        if(player()->distBall() < 0.062f) {
+            enableTransition(STATE_SPIN);
+        } else {
+            if(player()->isLookingTo(loc()->ball(), float(M_PI_2))) _sk_pushBall->setSpeedAndOmega(2.0, 0.0);
+            else _sk_pushBall->setSpeedAndOmega(-2.0, 0.0);
+            enableTransition(STATE_PUSH);
+        }
+    } else {
+        if(player()->isLookingTo(loc()->ball(), float(M_PI_2))) _sk_pushBall->setSpeedAndOmega(2.0, 0.0);
+        else _sk_pushBall->setSpeedAndOmega(-2.0, 0.0);
+        enableTransition(STATE_PUSH);
+    }
 }
 
 bool Behaviour_TakeFoul::localIsLookingTo(const Position &pos, float error){
@@ -45,3 +60,6 @@ bool Behaviour_TakeFoul::localIsLookingTo(const Position &pos, float error){
     return (dif <= error);
 }
 
+bool Behaviour_TakeFoul::setSpinDirection() {
+
+}

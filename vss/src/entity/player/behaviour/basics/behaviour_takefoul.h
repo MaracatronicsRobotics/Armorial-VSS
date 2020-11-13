@@ -13,6 +13,7 @@ private:
 
     int _skill;
     bool localIsLookingTo(const Position &pos, float error);
+    bool setSpinDirection();
 
     //Skills
     enum{
@@ -25,17 +26,24 @@ private:
     enum{
         STATE_GOTOPOS,
         STATE_ROTATE,
-        STATE_PUSH
+        STATE_PUSH,
+        STATE_SPIN
     };
 
     //Skills
     Skill_RotateTo *_sk_rotateTo;
     Skill_GoTo *_sk_goTo;
     Skill_PushBall *_sk_pushBall;
+    Skill_Spin *_sk_spin;
+
+    // Parameters
+    bool _isPK;
 
 public:
     Behaviour_TakeFoul();
     QString name();
+
+    void isPK(bool isPK) { _isPK = isPK; }
 };
 
 
